@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
 
 <meta charset="UTF-8">
@@ -51,6 +52,12 @@ animation:beat 1.3s infinite;
 100%{transform:scale(1);}
 }
 
+canvas{
+position:absolute;
+top:0;
+left:0;
+}
+
 /* palabras */
 
 .word{
@@ -58,7 +65,7 @@ position:absolute;
 color:#ff9ac7;
 font-size:clamp(10px,2vw,18px);
 white-space:nowrap;
-text-shadow:0 0 10px white,0 0 20px #ff9ac7;
+text-shadow:0 0 10px white,0 0 20px #ff6ec7;
 opacity:0;
 animation:fade 1s forwards;
 }
@@ -67,7 +74,7 @@ animation:fade 1s forwards;
 to{opacity:1;}
 }
 
-/* corazones centrales */
+/* corazones centro */
 
 #centerHearts{
 position:absolute;
@@ -93,24 +100,20 @@ from{transform:translate(-50%,-50%) rotate(0deg);}
 to{transform:translate(-50%,-50%) rotate(360deg);}
 }
 
-/* partículas */
+/* corazones flotantes */
 
-.particle{
+.floatHeart{
 position:absolute;
-width:4px;
-height:4px;
-background:pink;
-border-radius:50%;
-opacity:0.8;
-animation:float 3s linear infinite;
+font-size:20px;
+animation:floatUp 2s ease-out forwards;
 }
 
-@keyframes float{
-from{
+@keyframes floatUp{
+0%{
 transform:translateY(0);
 opacity:1;
 }
-to{
+100%{
 transform:translateY(-120px);
 opacity:0;
 }
@@ -123,6 +126,8 @@ opacity:0;
 <body>
 
 <div id="container">
+
+<canvas id="heartLine"></canvas>
 
 <div id="centerHearts">
 <span class="blue">💙</span>
@@ -147,52 +152,123 @@ document.body.appendChild(star);
 
 }
 
-/* corazón con texto */
+/* dibujar corazón */
 
+const canvas=document.getElementById("heartLine");
+const ctx=canvas.getContext("2d");
 const container=document.getElementById("container");
+
+canvas.width=container.offsetWidth;
+canvas.height=container.offsetHeight;
+
 const size=container.offsetWidth/2;
 
-function heart(t){
+let t=0;
 
-let x=16*Math.pow(Math.sin(t),3);
-let y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
+function draw(){
 
-return{x:x,y:y};
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ctx.strokeStyle="#ff6ec7";
+ctx.lineWidth=3;
+ctx.beginPath();
+
+for(let i=0;i<t;i+=0.02){
+
+let x=16*Math.pow(Math.sin(i),3);
+let y=13*Math.cos(i)-5*Math.cos(2*i)-2*Math.cos(3*i)-Math.cos(4*i);
+
+let px=size+x*(size/18);
+let py=size-y*(size/18);
+
+if(i===0) ctx.moveTo(px,py);
+else ctx.lineTo(px,py);
 
 }
 
+ctx.stroke();
+
+t+=0.05;
+
+if(t<Math.PI*2){
+
+requestAnimationFrame(draw);
+
+}else{
+
+createWords();
+heartExplosion();
+
+}
+
+}
+
+draw();
+
+/* palabras */
+
+function createWords(){
+
 for(let i=0;i<170;i++){
 
-let t=Math.PI*2*i/170;
-let pos=heart(t);
+let angle=Math.PI*2*i/170;
+
+let x=16*Math.pow(Math.sin(angle),3);
+let y=13*Math.cos(angle)-5*Math.cos(2*angle)-2*Math.cos(3*angle)-Math.cos(4*angle);
 
 let span=document.createElement("span");
+
 span.className="word";
 span.innerText="I love you Dani";
 
-span.style.left=size+pos.x*(size/18)+"px";
-span.style.top=size-pos.y*(size/18)+"px";
-span.style.animationDelay=(i*0.03)+"s";
+span.style.left=size+x*(size/18)+"px";
+span.style.top=size-y*(size/18)+"px";
+span.style.animationDelay=(i*0.02)+"s";
 
 container.appendChild(span);
 
 }
 
-/* partículas */
+}
 
-setInterval(()=>{
+/* explosión de corazones */
 
-let p=document.createElement("div");
-p.className="particle";
+function heartExplosion(){
 
-p.style.left=(window.innerWidth/2)+"px";
-p.style.top=(window.innerHeight/2)+"px";
+for(let i=0;i<60;i++){
 
-document.body.appendChild(p);
+let h=document.createElement("div");
+h.className="floatHeart";
+h.innerHTML="💗";
 
-setTimeout(()=>p.remove(),3000);
+h.style.left=(window.innerWidth/2+(Math.random()*200-100))+"px";
+h.style.top=(window.innerHeight/2+(Math.random()*200-100))+"px";
 
-},200);
+document.body.appendChild(h);
+
+setTimeout(()=>h.remove(),2000);
+
+}
+
+}
+
+/* corazones al tocar */
+
+document.addEventListener("click",function(e){
+
+let heart=document.createElement("div");
+
+heart.className="floatHeart";
+heart.innerHTML="💗";
+
+heart.style.left=e.clientX+"px";
+heart.style.top=e.clientY+"px";
+
+document.body.appendChild(heart);
+
+setTimeout(()=>heart.remove(),2000);
+
+});
 
 </script>
 
