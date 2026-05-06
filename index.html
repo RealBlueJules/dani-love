@@ -2,275 +2,269 @@
 <html lang="es">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dani ❤️</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            background: black;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
 
-<title>Dani ❤️</title>
+        /* estrellas */
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            opacity: 0.8;
+            animation: twinkle 2s infinite alternate;
+        }
 
-<style>
+        @keyframes twinkle {
+            from { opacity: 0.2; }
+            to { opacity: 1; }
+        }
 
-body{
-margin:0;
-background:black;
-overflow:hidden;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-font-family:Arial;
-}
+        /* contenedor del corazón */
+        #container {
+            position: relative;
+            width: min(70vw, 450px);
+            height: min(70vw, 450px);
+            animation: beat 1.3s infinite;
+            z-index: 5;
+        }
 
-/* estrellas */
+        @keyframes beat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.07); }
+            100% { transform: scale(1); }
+        }
 
-.star{
-position:absolute;
-width:2px;
-height:2px;
-background:white;
-opacity:0.8;
-animation:twinkle 2s infinite alternate;
-}
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
 
-@keyframes twinkle{
-from{opacity:0.2;}
-to{opacity:1;}
-}
+        /* palabras */
+        .word {
+            position: absolute;
+            color: #ff9ac7;
+            font-size: clamp(10px, 2vw, 16px);
+            white-space: nowrap;
+            text-shadow: 0 0 10px white, 0 0 20px #ff6ec7;
+            opacity: 0;
+            animation: fade 1s forwards;
+        }
 
-/* contenedor */
+        @keyframes fade {
+            to { opacity: 1; }
+        }
 
-#container{
-position:relative;
-width:min(90vw,600px);
-height:min(90vw,600px);
-animation:beat 1.3s infinite;
-}
+        /* corazones centro */
+        #centerHearts {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(30px, 6vw, 60px);
+            animation: spin 6s linear infinite;
+        }
 
-@keyframes beat{
-0%{transform:scale(1);}
-50%{transform:scale(1.07);}
-100%{transform:scale(1);}
-}
+        .blue {
+            color: #4da6ff;
+            text-shadow: 0 0 20px #4da6ff;
+        }
 
-canvas{
-position:absolute;
-top:0;
-left:0;
-}
+        .pink {
+            color: #ff6ec7;
+            text-shadow: 0 0 20px #ff6ec7;
+        }
 
-/* palabras */
+        @keyframes spin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
 
-.word{
-position:absolute;
-color:#ff9ac7;
-font-size:clamp(10px,2vw,18px);
-white-space:nowrap;
-text-shadow:0 0 10px white,0 0 20px #ff6ec7;
-opacity:0;
-animation:fade 1s forwards;
-}
+        /* corazones flotantes */
+        .floatHeart {
+            position: absolute;
+            font-size: 20px;
+            animation: floatUp 2s ease-out forwards;
+            pointer-events: none;
+        }
 
-@keyframes fade{
-to{opacity:1;}
-}
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-120px); opacity: 0; }
+        }
 
-/* corazones centro */
+        /* CONTADOR */
+        #countdown-container {
+            position: absolute;
+            top: 5%;
+            color: white;
+            text-align: center;
+            font-size: clamp(16px, 4vw, 22px);
+            text-shadow: 0 0 15px #ff6ec7;
+            z-index: 10;
+        }
 
-#centerHearts{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-font-size:clamp(40px,8vw,70px);
-animation:spin 6s linear infinite;
-}
+        /* VIDEO */
+        #video-container {
+            position: absolute;
+            bottom: 5%;
+            z-index: 10;
+            border: 2px solid #ff6ec7;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 15px #ff6ec7;
+            width: 250px; /* Ajusta este tamaño si quieres el video más grande */
+        }
 
-.blue{
-color:#4da6ff;
-text-shadow:0 0 20px #4da6ff;
-}
-
-.pink{
-color:#ff6ec7;
-text-shadow:0 0 20px #ff6ec7;
-}
-
-@keyframes spin{
-from{transform:translate(-50%,-50%) rotate(0deg);}
-to{transform:translate(-50%,-50%) rotate(360deg);}
-}
-
-/* corazones flotantes */
-
-.floatHeart{
-position:absolute;
-font-size:20px;
-animation:floatUp 2s ease-out forwards;
-}
-
-@keyframes floatUp{
-0%{
-transform:translateY(0);
-opacity:1;
-}
-100%{
-transform:translateY(-120px);
-opacity:0;
-}
-}
-
-</style>
-
+        video {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
 
 <body>
 
-<div id="container">
+    <div id="countdown-container">
+        <div id="countdown-text">Faltan <strong id="days-left" style="color: #4da6ff;"></strong> días para nuestro día 9 💖</div>
+    </div>
 
-<canvas id="heartLine"></canvas>
+    <div id="container">
+        <canvas id="heartLine"></canvas>
+        <div id="centerHearts">
+            <span class="blue">💙</span>
+            <span class="pink">💗</span>
+        </div>
+    </div>
 
-<div id="centerHearts">
-<span class="blue">💙</span>
-<span class="pink">💗</span>
-</div>
+    <div id="video-container">
+        <video controls>
+            <source src="TU_VIDEO.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+        </video>
+    </div>
 
-</div>
+    <script>
+        /* --- LÓGICA DEL CONTADOR --- */
+        function updateCountdown() {
+            const today = new Date();
+            const currentDay = today.getDate();
+            const countdownText = document.getElementById("countdown-text");
+            const daysLeftElement = document.getElementById("days-left");
 
-<script>
+            if (currentDay === 9) {
+                countdownText.innerHTML = "¡Feliz día 9, mi amor! 🎉💖";
+            } else {
+                let targetDate = new Date(today.getFullYear(), today.getMonth(), 9);
+                if (currentDay > 9) {
+                    targetDate.setMonth(targetDate.getMonth() + 1);
+                }
+                const diffTime = targetDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                daysLeftElement.innerText = diffDays;
+            }
+        }
+        updateCountdown();
 
-/* estrellas */
+        /* estrellas */
+        for(let i=0; i<100; i++){
+            let star = document.createElement("div");
+            star.className = "star";
+            star.style.left = Math.random()*100+"vw";
+            star.style.top = Math.random()*100+"vh";
+            document.body.appendChild(star);
+        }
 
-for(let i=0;i<120;i++){
+        /* dibujar corazón */
+        const canvas = document.getElementById("heartLine");
+        const ctx = canvas.getContext("2d");
+        const container = document.getElementById("container");
+        canvas.width = container.offsetWidth;
+        canvas.height = container.offsetHeight;
 
-let star=document.createElement("div");
-star.className="star";
+        const size = container.offsetWidth/2;
+        let t = 0;
 
-star.style.left=Math.random()*100+"vw";
-star.style.top=Math.random()*100+"vh";
+        function draw(){
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = "#ff6ec7";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
 
-document.body.appendChild(star);
+            for(let i=0; i<t; i+=0.02){
+                let x = 16*Math.pow(Math.sin(i), 3);
+                let y = 13*Math.cos(i)-5*Math.cos(2*i)-2*Math.cos(3*i)-Math.cos(4*i);
+                let px = size + x*(size/18);
+                let py = size - y*(size/18);
+                if(i===0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            t += 0.05;
 
-}
+            if(t < Math.PI*2){
+                requestAnimationFrame(draw);
+            } else {
+                createWords();
+                heartExplosion();
+            }
+        }
+        draw();
 
-/* dibujar corazón */
+        function createWords(){
+            for(let i=0; i<170; i++){
+                let angle = Math.PI*2*i/170;
+                let x = 16*Math.pow(Math.sin(angle), 3);
+                let y = 13*Math.cos(angle)-5*Math.cos(2*angle)-2*Math.cos(3*angle)-Math.cos(4*angle);
 
-const canvas=document.getElementById("heartLine");
-const ctx=canvas.getContext("2d");
-const container=document.getElementById("container");
+                let span = document.createElement("span");
+                span.className = "word";
+                span.innerText = "I love you Dani";
+                span.style.left = size+x*(size/18)+"px";
+                span.style.top = size-y*(size/18)+"px";
+                span.style.animationDelay = (i*0.02)+"s";
+                container.appendChild(span);
+            }
+        }
 
-canvas.width=container.offsetWidth;
-canvas.height=container.offsetHeight;
+        function heartExplosion(){
+            for(let i=0; i<40; i++){
+                let h = document.createElement("div");
+                h.className = "floatHeart";
+                h.innerHTML = "💗";
+                h.style.left = (window.innerWidth/2+(Math.random()*150-75))+"px";
+                h.style.top = (window.innerHeight/2+(Math.random()*150-75))+"px";
+                document.body.appendChild(h);
+                setTimeout(()=>h.remove(), 2000);
+            }
+        }
 
-const size=container.offsetWidth/2;
-
-let t=0;
-
-function draw(){
-
-ctx.clearRect(0,0,canvas.width,canvas.height);
-
-ctx.strokeStyle="#ff6ec7";
-ctx.lineWidth=3;
-ctx.beginPath();
-
-for(let i=0;i<t;i+=0.02){
-
-let x=16*Math.pow(Math.sin(i),3);
-let y=13*Math.cos(i)-5*Math.cos(2*i)-2*Math.cos(3*i)-Math.cos(4*i);
-
-let px=size+x*(size/18);
-let py=size-y*(size/18);
-
-if(i===0) ctx.moveTo(px,py);
-else ctx.lineTo(px,py);
-
-}
-
-ctx.stroke();
-
-t+=0.05;
-
-if(t<Math.PI*2){
-
-requestAnimationFrame(draw);
-
-}else{
-
-createWords();
-heartExplosion();
-
-}
-
-}
-
-draw();
-
-/* palabras */
-
-function createWords(){
-
-for(let i=0;i<170;i++){
-
-let angle=Math.PI*2*i/170;
-
-let x=16*Math.pow(Math.sin(angle),3);
-let y=13*Math.cos(angle)-5*Math.cos(2*angle)-2*Math.cos(3*angle)-Math.cos(4*angle);
-
-let span=document.createElement("span");
-
-span.className="word";
-span.innerText="I love you Dani";
-
-span.style.left=size+x*(size/18)+"px";
-span.style.top=size-y*(size/18)+"px";
-span.style.animationDelay=(i*0.02)+"s";
-
-container.appendChild(span);
-
-}
-
-}
-
-/* explosión de corazones */
-
-function heartExplosion(){
-
-for(let i=0;i<60;i++){
-
-let h=document.createElement("div");
-h.className="floatHeart";
-h.innerHTML="💗";
-
-h.style.left=(window.innerWidth/2+(Math.random()*200-100))+"px";
-h.style.top=(window.innerHeight/2+(Math.random()*200-100))+"px";
-
-document.body.appendChild(h);
-
-setTimeout(()=>h.remove(),2000);
-
-}
-
-}
-
-/* corazones al tocar */
-
-document.addEventListener("click",function(e){
-
-let heart=document.createElement("div");
-
-heart.className="floatHeart";
-heart.innerHTML="💗";
-
-heart.style.left=e.clientX+"px";
-heart.style.top=e.clientY+"px";
-
-document.body.appendChild(heart);
-
-setTimeout(()=>heart.remove(),2000);
-
-});
-
-</script>
-
+        document.addEventListener("click", function(e){
+            if (e.target.tagName.toLowerCase() === 'video') return;
+            let heart = document.createElement("div");
+            heart.className = "floatHeart";
+            heart.innerHTML = "💗";
+            heart.style.left = e.clientX+"px";
+            heart.style.top = e.clientY+"px";
+            document.body.appendChild(heart);
+            setTimeout(()=>heart.remove(), 2000);
+        });
+    </script>
 </body>
 </html>
