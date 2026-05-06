@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dani ❤️</title>
+    <title>Para Dani ❤️</title>
 
     <style>
         body {
@@ -17,6 +17,92 @@
             align-items: center;
             height: 100vh;
             font-family: 'Arial', sans-serif;
+        }
+
+        /* --- PANTALLA DE BLOQUEO --- */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ff9ac7;
+            transition: all 1s ease;
+        }
+
+        /* Animación de desbloqueo exitoso */
+        .unlocked {
+            transform: scale(1.5);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #login-screen h2 {
+            text-shadow: 0 0 15px #ff6ec7;
+            margin-bottom: 20px;
+            font-size: clamp(20px, 5vw, 30px);
+            text-align: center;
+        }
+
+        #password-input {
+            padding: 12px;
+            font-size: 18px;
+            border: 2px solid #ff6ec7;
+            border-radius: 10px;
+            background: transparent;
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            outline: none;
+            box-shadow: 0 0 10px #ff6ec7;
+            transition: 0.3s;
+        }
+
+        /* Animación de error (sacudida) */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .error {
+            animation: shake 0.4s ease-in-out;
+            border-color: #ff3b3b !important;
+            box-shadow: 0 0 15px #ff3b3b !important;
+        }
+
+        #error-msg {
+            color: #ff3b3b;
+            font-size: 14px;
+            min-height: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px #ff3b3b;
+        }
+
+        #login-btn {
+            padding: 10px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background: #ff6ec7;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 15px #ff6ec7;
+            transition: 0.3s;
+        }
+
+        #login-btn:hover {
+            background: #ff9ac7;
+            transform: scale(1.05);
         }
 
         /* estrellas */
@@ -49,11 +135,7 @@
             100% { transform: scale(1); }
         }
 
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
+        canvas { position: absolute; top: 0; left: 0; }
 
         /* palabras */
         .word {
@@ -66,29 +148,19 @@
             animation: fade 1s forwards;
         }
 
-        @keyframes fade {
-            to { opacity: 1; }
-        }
+        @keyframes fade { to { opacity: 1; } }
 
         /* corazones centro */
         #centerHearts {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             font-size: clamp(30px, 6vw, 60px);
             animation: spin 6s linear infinite;
         }
 
-        .blue {
-            color: #4da6ff;
-            text-shadow: 0 0 20px #4da6ff;
-        }
-
-        .pink {
-            color: #ff6ec7;
-            text-shadow: 0 0 20px #ff6ec7;
-        }
+        .blue { color: #4da6ff; text-shadow: 0 0 20px #4da6ff; }
+        .pink { color: #ff6ec7; text-shadow: 0 0 20px #ff6ec7; }
 
         @keyframes spin {
             from { transform: translate(-50%, -50%) rotate(0deg); }
@@ -97,8 +169,7 @@
 
         /* corazones flotantes */
         .floatHeart {
-            position: absolute;
-            font-size: 20px;
+            position: absolute; font-size: 20px;
             animation: floatUp 2s ease-out forwards;
             pointer-events: none;
         }
@@ -110,37 +181,32 @@
 
         /* CONTADOR */
         #countdown-container {
-            position: absolute;
-            top: 5%;
-            color: white;
-            text-align: center;
-            font-size: clamp(16px, 4vw, 22px);
-            text-shadow: 0 0 15px #ff6ec7;
-            z-index: 10;
+            position: absolute; top: 5%; color: white; text-align: center;
+            font-size: clamp(16px, 4vw, 22px); text-shadow: 0 0 15px #ff6ec7; z-index: 10;
         }
 
-        /* VIDEO */
+        /* CONTENEDOR DEL GIF */
         #video-container {
-            position: absolute;
-            bottom: 5%;
-            z-index: 10;
-            border: 2px solid #ff6ec7;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 0 15px #ff6ec7;
-            width: 250px; /* Ajusta este tamaño si quieres el video más grande */
+            position: absolute; bottom: 5%; z-index: 10;
+            border: 2px solid #ff6ec7; border-radius: 12px;
+            overflow: hidden; box-shadow: 0 0 15px #ff6ec7; width: 250px;
         }
 
-        video {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
+        img.gif-media { display: block; width: 100%; height: auto; }
     </style>
 </head>
 
 <body>
 
+    <!-- PANTALLA DE BLOQUEO -->
+    <div id="login-screen">
+        <h2>Ingresa la clave secreta 💖</h2>
+        <input type="password" id="password-input" placeholder="Contraseña">
+        <div id="error-msg">Clave incorrecta 💔 Intenta de nuevo.</div>
+        <button id="login-btn" onclick="checkPassword()">Entrar</button>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
     <div id="countdown-container">
         <div id="countdown-text">Faltan <strong id="days-left" style="color: #4da6ff;"></strong> días para nuestro día 9 💖</div>
     </div>
@@ -153,14 +219,48 @@
         </div>
     </div>
 
+    <!-- GIF -->
     <div id="video-container">
-        <video controls>
-            <source src="IMG_3850.mov"type="video/mp4">
-            Tu navegador no soporta el video.
-        </video>
+        <img src="IMG_3850.gif" alt="Nuestro recuerdo" class="gif-media">
     </div>
 
     <script>
+        /* --- LÓGICA DE LA CONTRASEÑA Y ANIMACIONES --- */
+        const passwordInput = document.getElementById("password-input");
+        const errorMsg = document.getElementById("error-msg");
+
+        function checkPassword() {
+            const inputVal = passwordInput.value;
+            const secretCode = "Dani0122"; 
+
+            if (inputVal === secretCode) {
+                const loginScreen = document.getElementById("login-screen");
+                loginScreen.classList.add("unlocked");
+                
+                setTimeout(() => {
+                    loginScreen.style.display = "none";
+                }, 1000); 
+            } else {
+                passwordInput.classList.add("error");
+                errorMsg.style.opacity = "1";
+
+                setTimeout(() => {
+                    passwordInput.classList.remove("error");
+                }, 400);
+            }
+        }
+
+        passwordInput.addEventListener("input", function() {
+            errorMsg.style.opacity = "0";
+        });
+
+        passwordInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                checkPassword();
+            }
+        });
+
         /* --- LÓGICA DEL CONTADOR --- */
         function updateCountdown() {
             const today = new Date();
@@ -256,7 +356,11 @@
         }
 
         document.addEventListener("click", function(e){
-            if (e.target.tagName.toLowerCase() === 'video') return;
+            if (e.target.tagName.toLowerCase() === 'img' || 
+                e.target.id === 'login-screen' || 
+                e.target.tagName.toLowerCase() === 'input' || 
+                e.target.tagName.toLowerCase() === 'button') return;
+                
             let heart = document.createElement("div");
             heart.className = "floatHeart";
             heart.innerHTML = "💗";
