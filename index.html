@@ -4,7 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Para Dani ❤️</title>
+    
+    <!-- Etiquetas para la vista previa al enviar el link (WhatsApp, Facebook, etc.) -->
+    <meta property="og:title" content="Para Dani ❤️">
+    <meta property="og:description" content="Sorpresa...">
+    <!-- Al no poner og:image, no cargará ninguna imagen por defecto -->
+
+    <title>Para Dani 💙</title>
 
     <style>
         body {
@@ -36,7 +42,6 @@
             transition: all 1s ease;
         }
 
-        /* Animación de desbloqueo exitoso */
         .unlocked {
             transform: scale(1.5);
             opacity: 0;
@@ -64,7 +69,6 @@
             transition: 0.3s;
         }
 
-        /* Animación de error (sacudida) */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             20%, 60% { transform: translateX(-10px); }
@@ -120,7 +124,7 @@
             to { opacity: 1; }
         }
 
-        /* contenedor del corazón (Ajustado para que no tape el GIF) */
+        /* contenedor del corazón */
         #container {
             position: relative;
             width: min(50vw, 280px);
@@ -142,7 +146,7 @@
         .word {
             position: absolute;
             color: #ff9ac7;
-            font-size: clamp(8px, 1.5vw, 12px); /* Un poco más pequeñas para que quepan en el corazón reducido */
+            font-size: clamp(8px, 1.5vw, 12px); 
             white-space: nowrap;
             text-shadow: 0 0 10px white, 0 0 20px #ff6ec7;
             opacity: 0;
@@ -156,7 +160,7 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: clamp(20px, 4vw, 40px); /* Ajustado proporcional al nuevo corazón */
+            font-size: clamp(20px, 4vw, 40px); 
             animation: spin 6s linear infinite;
         }
 
@@ -186,11 +190,12 @@
             font-size: clamp(16px, 4vw, 22px); text-shadow: 0 0 15px #ff6ec7; z-index: 10;
         }
 
-        /* CONTENEDOR DEL GIF */
+        /* CONTENEDOR DEL GIF (Oculto al inicio) */
         #video-container {
             position: absolute; bottom: 5%; z-index: 10;
             border: 2px solid #ff6ec7; border-radius: 12px;
             overflow: hidden; box-shadow: 0 0 15px #ff6ec7; width: 250px;
+            display: none; /* Lo ocultamos al principio */
         }
 
         img.gif-media { display: block; width: 100%; height: auto; }
@@ -201,7 +206,7 @@
 
     <!-- PANTALLA DE BLOQUEO -->
     <div id="login-screen">
-        <h2>Ingresa la clave secreta 💖</h2>
+        <h2>Ingresa la clave secreta 🤨💖</h2>
         <input type="password" id="password-input" placeholder="Contraseña">
         <div id="error-msg">Clave incorrecta 💔 Intenta de nuevo.</div>
         <button id="login-btn" onclick="checkPassword()">Entrar</button>
@@ -209,7 +214,7 @@
 
     <!-- CONTENIDO PRINCIPAL -->
     <div id="countdown-container">
-        <div id="countdown-text">Faltan <strong id="days-left" style="color: #4da6ff;"></strong> días para nuestro día 9 💖</div>
+        <div id="countdown-text">Faltan <strong id="days-left" style="color: #4da6ff;"></strong> días para el día 🧛🏻 💖</div>
     </div>
 
     <div id="container">
@@ -220,9 +225,9 @@
         </div>
     </div>
 
-    <!-- GIF -->
+    <!-- GIF (El src se carga después de poner la clave) -->
     <div id="video-container">
-        <img src="IMG_3850.gif" alt="Nuestro recuerdo" class="gif-media">
+        <img id="secret-gif" data-src="IMG_3850.gif" alt="Nuestro recuerdo" class="gif-media">
     </div>
 
     <script>
@@ -238,6 +243,11 @@
                 const loginScreen = document.getElementById("login-screen");
                 loginScreen.classList.add("unlocked");
                 
+                // Aparecemos y cargamos el GIF de forma segura
+                const secretGif = document.getElementById("secret-gif");
+                secretGif.src = secretGif.getAttribute("data-src");
+                document.getElementById("video-container").style.display = "block";
+
                 setTimeout(() => {
                     loginScreen.style.display = "none";
                 }, 1000); 
