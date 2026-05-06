@@ -120,11 +120,12 @@
             to { opacity: 1; }
         }
 
-        /* contenedor del corazón */
+        /* contenedor del corazón (Ajustado para que no tape el GIF) */
         #container {
             position: relative;
-            width: min(70vw, 450px);
-            height: min(70vw, 450px);
+            width: min(50vw, 280px);
+            height: min(50vw, 280px);
+            margin-top: -20vh; 
             animation: beat 1.3s infinite;
             z-index: 5;
         }
@@ -141,7 +142,7 @@
         .word {
             position: absolute;
             color: #ff9ac7;
-            font-size: clamp(10px, 2vw, 16px);
+            font-size: clamp(8px, 1.5vw, 12px); /* Un poco más pequeñas para que quepan en el corazón reducido */
             white-space: nowrap;
             text-shadow: 0 0 10px white, 0 0 20px #ff6ec7;
             opacity: 0;
@@ -155,7 +156,7 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: clamp(30px, 6vw, 60px);
+            font-size: clamp(20px, 4vw, 40px); /* Ajustado proporcional al nuevo corazón */
             animation: spin 6s linear infinite;
         }
 
