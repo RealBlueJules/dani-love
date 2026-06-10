@@ -545,7 +545,11 @@
 
             // Dibujar Conejo
             ctxG.font = '30px Arial';
-            ctxG.fillText('🐇', 30, rabbitY + 30);
+            ctxG.save();
+ctxG.translate(60, rabbitY + 30);
+ctxG.scale(-1, 1);
+ctxG.fillText('🐇', 0, 0);
+ctxG.restore();
 
             // Generar obstáculos
             if(Math.random() < 0.015) {
@@ -559,7 +563,7 @@
             for(let i=0; i<obstacles.length; i++) {
                 let obs = obstacles[i];
                 obs.x -= gameSpeed;
-                ctxG.fillText('🌵', obs.x, obs.y + 30);
+                ctxG.fillText('🛁', obs.x, obs.y + 30);
 
                 // Colisión simple
                 if(obs.x < 55 && obs.x > 10 && rabbitY > 70) {
