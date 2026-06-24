@@ -507,7 +507,16 @@
             document.body.appendChild(heart);
             setTimeout(()=>heart.remove(), 2000);
         });
+ // Ajustar tamaño de canvas para móviles
+        if(window.innerWidth < 650) {
+            canvasG.width = window.innerWidth - 40;
+        }
 
+        // Abrir juego al hacer clic en el GIF
+        document.getElementById("video-container").addEventListener("click", () => {
+            document.getElementById('game-modal').style.display = 'flex';
+            resetGame();
+        });
         /* --- LÓGICA DEL MINIJUEGO DEL CONEJO --- */
      // ==========================================
 // 1. CONFIGURACIÓN DEL CANVAS
