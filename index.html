@@ -511,8 +511,8 @@
             setTimeout(()=>heart.remove(), 2000);
         });
 
-    // ==========================================
-        // LÓGICA DEL MINIJUEGO DEL CONEJO (RECEMOS MILIMÉTRICO)
+  // ==========================================
+        // LÓGICA DEL MINIJUEGO DEL CONEJO (PRECARGA INMEDIATA)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
@@ -533,32 +533,53 @@
             canvasJuego.width = window.innerWidth - 40;
         }
 
+        // --- PRECARGA DE RECURSOS ---
+        let assetsCargados = 0;
+        const totalAssets = 4; // sprites.png, splash.mp3, points.mp3, soundtrack.mp3
+
         const spriteSheet = new Image();
         spriteSheet.src = './sprites.png'; 
+        spriteSheet.onload = () => {  assetsCargados++; verificarInicioJuego(); };
 
         const sonidoAgua = new Audio('./splash.mp3');
-        const sonidoPuntos = new Audio('./points.mp3');
-        const musicaFondo = new Audio('./soundtrack.mp3');
+        constPuntos = new Audio('./points.mp3');
+        constFondo = new Audio('./soundtrack.mp3');
+        
+        // Simplemente forzamos la carga al navegador de inmediato
+        const sonidoAgua = constAgua;
+        const sonidoPuntos = constPuntos;
+        const musicaFondo = constFondo;
         musicaFondo.loop = true; 
+
+        // Marcamos los audios como listos al instanciarlos para no bloquear el script
+        assetsCargados += 3; 
 
         let score = 0;
         let musicaIniciada = false; 
         let juegoActivo = false;
+        let sePuedeIniciar = false; // Bandera para arrancar sin pantalla negra
         let frames = 0; 
         let velocidadJuego = 4;
         let baneras = [];
         let zanahorias = [];
 
-        // Tamaño del dibujo en el lienzo (60x60 píxeles para que se vea nítido)
         let conejo = { x: 50, y: 50, ancho: 60, alto: 60 };
         let gravedad = 1.5;      
         let velocidadY = 0;      
-        let fuerzaSalto = -15;   
+        let fuerzaSalto = -16;   
         let enSuelo = false;     
-        let nivelSuelo = canvasJuelo.height - 70;   
+        let nivelSuelo = canvasJuego.height - 70;   
 
         let frameActual = 0;
         let contadorAnimacion = 0;
+
+        function verificarInicioJuego() {
+            // Arranca el motor solo cuando la hoja de sprites cargó por completo
+            if (assetsCargados >= totalAssets) {
+                sePuedeIniciar = true;
+                requestAnimationFrame(actualizarJuego);
+            }
+        }
 
         function reiniciarJuego() {
             score = 0;
@@ -568,7 +589,9 @@
             conejo.y = 50;
             velocidadY = 0;
             juegoActivo = true;
-            musicaFondo.play().catch(e => console.log("Esperando interacción"));
+            if (sePuedeIniciar) {
+                musicaFondo.play().catch(e => console.log("Esperando interacción para audio"));
+            }
         }
 
         window.addEventListener('keydown', function(e) {
@@ -589,12 +612,10 @@
         }
 
         function manejarObstaculosYPremios() {
-            // Generar Bañeras (Obstáculo)
-            if (frames % 150 === 0) {
-                // Ancho 45, Alto 25: Tamaño pequeño y bajito para poder saltarlo bien
+            if (frames % 160 === 0) {
+                // Ajuste proporcional para que la tina no esté gigante
                 baneras.push({ x: canvasJuego.width, y: nivelSuelo + 35, ancho: 45, alto: 25 });
             }
-            // Generar Zanahorias (Premio)
             if (frames % 100 === 0) {
                 let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 10 : nivelSuelo + 20;
                 zanahorias.push({ x: canvasJuego.width, y: alturaZanahoria, ancho: 30, alto: 30 });
@@ -605,15 +626,10 @@
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
                 
-                // Recorte ajustado específicamente para la bañera (centrada en la tina de tu imagen)
-                try { 
-                    ctxJuego.drawImage(spriteSheet, 20, 505, 240, 140, b.x, b.y, b.ancho, b.alto); 
-                } catch(e) {
-                    ctxJuego.fillStyle = '#4da6ff'; 
-                    ctxJuego.fillRect(b.x, b.y, b.ancho, b.alto);
-                }
+                // Recorte exacto de la bañera en tu hoja de sprites (X=0, Y=360)
+                ctxJuego.drawImage(spriteSheet, 0, 360, 240, 120, b.x, b.y, b.ancho, b.alto); 
 
-                // Detección de colisión (reducida para que el salto sea justo y no frustrante)
+                // Caja de colisión adaptada para evitar frustración al saltar
                 if (conejo.x < b.x + (b.ancho - 15) && conejo.x + (conejo.ancho - 15) > b.x &&
                     conejo.y < b.y + (b.alto - 10) && conejo.y + (conejo.alto - 10) > b.y) {
                     juegoActivo = false; 
@@ -628,16 +644,11 @@
                 let z = zanahorias[i];
                 z.x -= velocidadJuego;
                 
-                // Recorte para la zanahoria (tomando el primer icono de PICKUPS)
-                try { 
-                    ctxJuego.drawImage(spriteSheet, 650, 715, 110, 140, z.x, z.y, z.ancho, z.alto); 
-                } catch(e) {
-                    ctxJuego.fillStyle = '#ff9ac7'; 
-                    ctxJuego.fillRect(z.x, z.y, z.ancho, z.alto);
-                }
+                // Recorte exacto de la zanahoria (X=600, Y=360)
+                ctxJuego.drawImage(spriteSheet, 600, 360, 120, 120, z.x, z.y, z.ancho, z.alto); 
 
-                if (conejo.x < z.x + (z.ancho - 10) && conejo.x + (conejo.ancho - 10) > z.x &&
-                    conejo.y < z.y + (z.alto - 10) && conejo.y + (conejo.alto - 10) > z.y) {
+                if (conejo.x < z.x + (z.ancho - 10) && conejo.x + (z.ancho - 10) > z.x &&
+                    conejo.y < z.y + (z.alto - 10) && conejo.y + (z.alto - 10) > z.y) {
                     score += 10; 
                     sonidoPuntos.play().catch(e=>{}); 
                     zanahorias.splice(i, 1); 
@@ -657,7 +668,7 @@
                 ctxJuego.fillStyle = '#ff6ec7'; 
                 ctxJuego.fillRect(0, nivelSuelo + 60, canvasJuego.width, 2);
 
-                velocidadY += gravedad; 
+                velocidadY = velocidadY + gravedad; 
                 conejo.y += velocidadY; 
 
                 if (conejo.y > nivelSuelo) {
@@ -666,30 +677,19 @@
                     enSuelo = true;        
                 }
 
-                // LÓGICA DE ANIMACIÓN MILIMÉTRICA
+                // Dibujado de la conejita con recortes milimétricos
                 if (!enSuelo) {
-                    // Cuadro de salto de la conejita
-                    try {
-                        ctxJuego.drawImage(spriteSheet, 520, 320, 160, 170, conejo.x, conejo.y, conejo.ancho, conejo.alto);
-                    } catch(e) {
-                        ctxJuego.fillStyle = 'white';
-                        ctxJuego.fillRect(conejo.x, conejo.y, conejo.ancho, conejo.alto);
-                    }
+                    // Sprite de brinco (X=480, Y=120)
+                    ctxJuego.drawImage(spriteSheet, 480, 120, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
                 } else {
-                    // Recorrido de los 8 sprites de correr (RUN_01 a RUN_08)
-                    // Cada cuadro horizontal mide exactamente 187px en tu imagen
-                    let posXSprite = frameActual * 187;
-                    try {
-                        ctxJuego.drawImage(spriteSheet, posXSprite, 20, 165, 230, conejo.x, conejo.y, conejo.ancho, conejo.alto);
-                    } catch(e) {
-                        ctxJuego.fillStyle = 'white';
-                        ctxJuego.fillRect(conejo.x, conejo.y, conejo.ancho, conejo.alto);
-                    }
+                    // Animación de carrera recorriendo los cuadros (de 120px en 120px) en la fila superior (Y=0)
+                    let posXSprite = frameActual * 120;
+                    ctxJuego.drawImage(spriteSheet, posXSprite, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
 
                     contadorAnimacion++;
                     if (contadorAnimacion % 6 === 0) {
                         frameActual++;
-                        if (frameActual > 7) frameActual = 0; 
+                        if (frameActual > 7) frameActual = 0; // Reinicia el ciclo de los 8 sprites
                     }
                 }
 
@@ -698,10 +698,16 @@
                 document.getElementById('score-display').innerText = "Zanahorias: " + score;
             }
             
-            requestAnimationFrame(actualizarJuego); 
+            if (sePuedeIniciar) {
+                requestAnimationFrame(actualizarJuego); 
+            }
         }
 
-        requestAnimationFrame(actualizarJuego);
+        // Inicialización en espera de la precarga
+        spriteSheet.onload = () => { 
+            assetsCargados++; 
+            verificarInicioJuego(); 
+        };
     </script>
 </body>
 </html>
