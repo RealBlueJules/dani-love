@@ -504,8 +504,8 @@
             setTimeout(()=>heart.remove(), 2000);
         });
 
-        // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (SPRITES UNIFICADOS 120x120)
+       // ==========================================
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (COORDENADAS CUADRÍCULA KAWAII)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
@@ -603,11 +603,11 @@
 
         function manejarObstaculosYPremios() {
             if (frames % 160 === 0) {
-                // Bañera: Genera obstáculo de colisión con medidas (45x25)
+                // Bañera: Obstáculo colisión (45x25)
                 baneras.push({ x: canvasJuego.width, y: nivelSuelo + 35, ancho: 45, alto: 25 });
             }
             if (frames % 100 === 0) {
-                // Zanahoria: Genera ítem de colisión central (30x30)
+                // Zanahoria: Ítem colisión central (30x30)
                 let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 10 : nivelSuelo + 20;
                 zanahorias.push({ x: canvasJuego.width, y: alturaZanahoria, ancho: 30, alto: 30 });
             }
@@ -617,11 +617,11 @@
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
                 
-                // Recorte exacto de la bañera en la cuadrícula (X=0, Y=360, Cuadro de 120x120)
+                // Recorte exacto de la bañera en la nueva cuadrícula (X=0, Y=360, Cuadro de 120x120)
                 ctxJuego.drawImage(spriteSheet, 0, 360, 120, 120, b.x, b.y, b.ancho, b.alto); 
 
-                // Hitbox estable: ajustada para que el salto sea lógico y no frustrante
-                if (conejo.x < b.x + (b.ancho - 15) && conejo.x + (conejo.ancho - 25) > b.x &&
+                // Hitbox estable: ajustada para el tamaño de la tina
+                if (conejo.x < b.x + (b.ancho - 10) && conejo.x + (b.ancho - 20) > b.x &&
                     conejo.y < b.y + (b.alto - 5) && conejo.y + (conejo.alto - 5) > b.y) {
                     juegoActivo = false; 
                     sonidoAgua.play().catch(e => {}); 
@@ -635,7 +635,7 @@
                 let z = zanahorias[i];
                 z.x -= velocidadJuego;
                 
-                // Recorte exacto de la zanahoria en la cuadrícula (X=0, Y=480, Cuadro de 120x120)
+                // Recorte exacto de la zanahoria en la nueva cuadrícula (X=0, Y=480, Cuadro de 120x120)
                 ctxJuego.drawImage(spriteSheet, 0, 480, 120, 120, z.x, z.y, z.ancho, z.alto); 
 
                 // Hitbox de recolección de zanahoria
@@ -671,17 +671,17 @@
 
                 // Animación y dibujado de la conejita kawaii
                 if (!enSuelo) {
-                    // Cuadro de salto / brinco nativo en cuadrícula (X=480, Y=0)
+                    // Cuadro de salto / brinco referenciado en la cuadrícula (X=480, Y=0, Cuadro de 120x120)
                     ctxJuego.drawImage(spriteSheet, 480, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
                 } else {
-                    // Recorrido de los 8 fotogramas de carrera (de 120px en 120px, fila Y=0)
+                    // Recorrido de los fotogramas de carrera (de 120px en 120px, fila Y=0)
                     let posXSprite = frameActual * 120;
                     ctxJuego.drawImage(spriteSheet, posXSprite, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
 
                     contadorAnimacion++;
                     if (contadorAnimacion % 6 === 0) {
                         frameActual++;
-                        if (frameActual > 7) frameActual = 0; // Bucle de 8 sprites
+                        if (frameActual > 7) frameActual = 0; // Bucle de 8 fotogramas (RUN_01 a RUN_08)
                     }
                 }
 
