@@ -700,6 +700,16 @@
             assetsCargados++; 
             verificarInicioJuego(); 
         };
+        let debugX = 0;
+let debugY = 0;
+
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') debugX += 5;
+    if (e.key === 'ArrowLeft') debugX -= 5;
+    if (e.key === 'ArrowUp') debugY -= 5;
+    if (e.key === 'ArrowDown') debugY += 5;
+    if (e.key === 'Enter') console.log(`Coordenadas fijadas: X=${debugX}, Y=${debugY}`);
+});
     </script>
 </body>
 </html>
