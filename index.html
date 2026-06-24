@@ -505,7 +505,7 @@
         });
 
         // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (RECORTES Y COLISIONES CORREGIDAS)
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (SPRITES UNIFICADOS 120x120)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
@@ -553,7 +553,7 @@
         let baneras = [];
         let zanahorias = [];
 
-        // Tamaño del sprite en pantalla (60x60 píxeles para que se vea bien en el canvas)
+        // Dimensiones lógicas para renderizar en el canvas (60x60)
         let conejo = { x: 50, y: 50, ancho: 60, alto: 60 };
         let gravedad = 1.5;      
         let velocidadY = 0;      
@@ -603,23 +603,24 @@
 
         function manejarObstaculosYPremios() {
             if (frames % 160 === 0) {
-                // Bañera: Ancho 45, Alto 25
+                // Bañera: Genera obstáculo de colisión con medidas (45x25)
                 baneras.push({ x: canvasJuego.width, y: nivelSuelo + 35, ancho: 45, alto: 25 });
             }
             if (frames % 100 === 0) {
+                // Zanahoria: Genera ítem de colisión central (30x30)
                 let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 10 : nivelSuelo + 20;
                 zanahorias.push({ x: canvasJuego.width, y: alturaZanahoria, ancho: 30, alto: 30 });
             }
 
-            // Mover y verificar colisión de las Bañeras
+            // Mover y dibujar Bañeras
             for (let i = 0; i < baneras.length; i++) {
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
                 
-                // Recorte milimétrico de la tina/bañera desde tu hoja de sprites
-                ctxJuego.drawImage(spriteSheet, 480, 240, 240, 120, b.x, b.y, b.ancho, b.alto); 
+                // Recorte exacto de la bañera en la cuadrícula (X=0, Y=360, Cuadro de 120x120)
+                ctxJuego.drawImage(spriteSheet, 0, 360, 120, 120, b.x, b.y, b.ancho, b.alto); 
 
-                // COLISIÓN MILIMÉTRICA: Redujimos el área de choque para que el salto sea exacto al ras de la tina
+                // Hitbox estable: ajustada para que el salto sea lógico y no frustrante
                 if (conejo.x < b.x + (b.ancho - 15) && conejo.x + (conejo.ancho - 25) > b.x &&
                     conejo.y < b.y + (b.alto - 5) && conejo.y + (conejo.alto - 5) > b.y) {
                     juegoActivo = false; 
@@ -634,11 +635,11 @@
                 let z = zanahorias[i];
                 z.x -= velocidadJuego;
                 
-                // Recorte milimétrico de la zanahoria
-                ctxJuego.drawImage(spriteSheet, 600, 360, 120, 120, z.x, z.y, z.ancho, z.alto); 
+                // Recorte exacto de la zanahoria en la cuadrícula (X=0, Y=480, Cuadro de 120x120)
+                ctxJuego.drawImage(spriteSheet, 0, 480, 120, 120, z.x, z.y, z.ancho, z.alto); 
 
-                // Colisión de la zanahoria
-                if (conejo.x < z.x + (z.ancho - 15) && conejo.x + (conejo.ancho - 15) > z.x &&
+                // Hitbox de recolección de zanahoria
+                if (conejo.x < z.x + (z.ancho - 15) && conejo.x + (z.ancho - 15) > z.x &&
                     conejo.y < z.y + (z.alto - 15) && conejo.y + (conejo.alto - 15) > z.y) {
                     score += 10; 
                     sonidoPuntos.play().catch(e => {}); 
@@ -659,7 +660,7 @@
                 ctxJuego.fillStyle = '#ff6ec7'; 
                 ctxJuego.fillRect(0, nivelSuelo + 60, canvasJuego.width, 2);
 
-                velocidadY = velocidadY + gravedad; 
+                velocidadY += gravedad; 
                 conejo.y += velocidadY; 
 
                 if (conejo.y > nivelSuelo) {
@@ -668,19 +669,19 @@
                     enSuelo = true;        
                 }
 
-                // Animación y dibujo de la conejita con recortes exactos
+                // Animación y dibujado de la conejita kawaii
                 if (!enSuelo) {
-                    // Sprite de salto en la hoja de sprites
-                    ctxJuego.drawImage(spriteSheet, 480, 120, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
+                    // Cuadro de salto / brinco nativo en cuadrícula (X=480, Y=0)
+                    ctxJuego.drawImage(spriteSheet, 480, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
                 } else {
-                    // Cuadros de la animación corriendo (de 120px en 120px)
+                    // Recorrido de los 8 fotogramas de carrera (de 120px en 120px, fila Y=0)
                     let posXSprite = frameActual * 120;
                     ctxJuego.drawImage(spriteSheet, posXSprite, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
 
                     contadorAnimacion++;
                     if (contadorAnimacion % 6 === 0) {
                         frameActual++;
-                        if (frameActual > 7) frameActual = 0; 
+                        if (frameActual > 7) frameActual = 0; // Bucle de 8 sprites
                     }
                 }
 
@@ -693,6 +694,12 @@
                 requestAnimationFrame(actualizarJuego); 
             }
         }
+
+        // Arranque del motor tras precarga
+        spriteSheet.onload = () => { 
+            assetsCargados++; 
+            verificarInicioJuego(); 
+        };
     </script>
 </body>
 </html>
