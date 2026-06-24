@@ -511,30 +511,28 @@
             setTimeout(()=>heart.remove(), 2000);
         });
 
-        // ==========================================
+       // ==========================================
         // LÓGICA DEL MINIJUEGO DEL CONEJO
         // ==========================================
 
         // Abrir juego al hacer clic en el GIF
         document.getElementById("video-container").addEventListener("click", () => {
             document.getElementById('game-modal').style.display = 'flex';
+            reiniciarJuego(); // Esto asegura que empiece desde cero cada vez que abre
         });
 
-        // Función para cerrar el juego
         function closeGame() {
             document.getElementById('game-modal').style.display = 'none';
+            juegoActivo = false; // Pausar todo en el fondo
         }
 
-        // 1. CONFIGURACIÓN DEL CANVAS (Usamos variables nuevas para no chocar)
         const canvasJuego = document.getElementById('gameCanvas');
         const ctxJuego = canvasJuego.getContext('2d');
 
-        // Ajustar tamaño de canvas del juego para móviles
         if(window.innerWidth < 650) {
             canvasJuego.width = window.innerWidth - 40;
         }
 
-        // 2. CARGAR RECURSOS (ASSETS)
         const spriteSheet = new Image();
         spriteSheet.src = 'assets/sprites.png'; 
 
@@ -543,87 +541,151 @@
         const musicaFondo = new Audio('assets/soundtrack.mp3');
         musicaFondo.loop = true; 
 
-        // 3. VARIABLES DEL JUEGO Y FÍSICA
+        // Variables del juego
         let score = 0;
         let musicaIniciada = false; 
+        let juegoActivo = false;
+        let frames = 0; // Para contar el tiempo y saber cuándo sacar obstáculos
+        let velocidadJuego = 4;
+        let baneras = [];
+        let zanahorias = [];
 
-        let conejo = { 
-            x: 50, 
-            y: 50, // Lo puse más arriba para que caiga al iniciar
-            ancho: 100, 
-            alto: 100 
-        };
-
+        // Ajustamos el tamaño del conejo para que las colisiones sean más precisas
+        let conejo = { x: 50, y: 50, ancho: 50, alto: 50 };
         let gravedad = 1.5;      
         let velocidadY = 0;      
-        let fuerzaSalto = -20;   
+        let fuerzaSalto = -16;   
         let enSuelo = false;     
-        let nivelSuelo = canvasJuego.height - 100; // Se ajusta al tamaño de tu canvas    
+        // Nivel del suelo ajustado a la altura de tu canvas (150px)
+        let nivelSuelo = canvasJuego.height - 60;   
+
+        function reiniciarJuego() {
+            score = 0;
+            frames = 0;
+            baneras = [];
+            zanahorias = [];
+            conejo.y = 50;
+            velocidadY = 0;
+            juegoActivo = true;
+            // Arrancamos la música si no ha empezado
+            if (!musicaIniciada) {
+                musicaFondo.play().catch(e => console.log("Esperando clic para música"));
+                musicaIniciada = true;
+            }
+        }
 
         // 4. CONTROLES
         window.addEventListener('keydown', function(e) {
-            // Prevenir que el espacio haga scroll en la página si el modal está abierto
             if (e.code === 'Space' && document.getElementById('game-modal').style.display === 'flex') {
                 e.preventDefault(); 
-                if (enSuelo) saltar();
+                if (enSuelo && juegoActivo) saltar();
             }
         });
 
         canvasJuego.addEventListener('touchstart', function(e) {
-            e.preventDefault(); // Prevenir clics dobles en celular
-            if (enSuelo) saltar();
+            e.preventDefault(); 
+            if (enSuelo && juegoActivo) saltar();
         });
 
         function saltar() {
-            if (!musicaIniciada) {
-                musicaFondo.play();
-                musicaIniciada = true;
-            }
             velocidadY = fuerzaSalto;
             enSuelo = false;
         }
 
-        // 5. FUNCIONES DE DIBUJO
+        // 5. LÓGICA DE DIBUJO Y OBSTÁCULOS
         function dibujarConejita() {
-            let recorteX = 0;   
-            let recorteY = 0;   
-            let recorteAncho = 100; 
-            let recorteAlto = 100;  
-
-            ctxJuego.drawImage(
-                spriteSheet, 
-                recorteX, recorteY, recorteAncho, recorteAlto, 
-                conejo.x, conejo.y, conejo.ancho, conejo.alto  
-            );
+            // Suponemos que la conejita es el primer dibujo en tu Sprite Sheet
+            ctxJuego.drawImage(spriteSheet, 0, 0, 100, 100, conejo.x, conejo.y, conejo.ancho, conejo.alto);
         }
 
-        function dibujarMarcador() {
-            document.getElementById('score-display').innerText = "Zanahorias: " + score;
+        function manejarObstaculosYPremios() {
+            // Cada 120 frames (aprox 2 segundos), creamos una bañera
+            if (frames % 120 === 0) {
+                baneras.push({ x: canvasJuego.width, y: nivelSuelo + 20, ancho: 40, alto: 40 });
+            }
+            
+            // Cada 90 frames, creamos una zanahoria
+            if (frames % 90 === 0) {
+                // A veces la zanahoria sale alta (para obligar a saltar) y a veces baja
+                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 40 : nivelSuelo + 10;
+                zanahorias.push({ x: canvasJuego.width, y: alturaZanahoria, ancho: 30, alto: 30 });
+            }
+
+            // Mover y verificar colisiones de las BAÑERAS
+            for (let i = 0; i < baneras.length; i++) {
+                let b = baneras[i];
+                b.x -= velocidadJuego; // Se mueven hacia la izquierda
+                
+                // Dibujamos la bañera (asumiendo que es el segundo dibujo en el sprite sheet)
+                ctxJuego.drawImage(spriteSheet, 100, 0, 100, 100, b.x, b.y, b.ancho, b.alto);
+
+                // COLISIÓN: Si el conejo choca con la bañera
+                if (conejo.x < b.x + b.ancho && conejo.x + conejo.ancho > b.x &&
+                    conejo.y < b.y + b.alto && conejo.y + conejo.alto > b.y) {
+                    
+                    juegoActivo = false; // Detenemos el juego
+                    sonidoAgua.play(); // Suena el splash!
+                    alert("¡Te caíste en la bañera! 💦 Recogiste " + score + " zanahorias.");
+                    reiniciarJuego();
+                }
+            }
+
+            // Mover y verificar colisiones de las ZANAHORIAS
+            for (let i = 0; i < zanahorias.length; i++) {
+                let z = zanahorias[i];
+                z.x -= velocidadJuego;
+                
+                // Dibujamos la zanahoria (asumiendo que es el tercer dibujo en el sprite sheet)
+                ctxJuego.drawImage(spriteSheet, 200, 0, 100, 100, z.x, z.y, z.ancho, z.alto);
+
+                // COLISIÓN: Si el conejo toca la zanahoria
+                if (conejo.x < z.x + z.ancho && conejo.x + conejo.ancho > z.x &&
+                    conejo.y < z.y + z.alto && conejo.y + conejo.alto > z.y) {
+                    
+                    score += 10; // Sumamos 10 puntos
+                    sonidoPuntos.play(); // Suena el clin! de puntos
+                    zanahorias.splice(i, 1); // Desaparecemos la zanahoria de la pantalla
+                    i--;
+                }
+            }
         }
 
         // 6. CICLO PRINCIPAL DEL JUEGO (GAME LOOP)
         function actualizarJuego() {
-            // Si el modal está oculto, pausamos el dibujo para ahorrar batería
-            if (document.getElementById('game-modal').style.display === 'flex') {
+            // Solo corremos la lógica si el modal está abierto y el juego está activo
+            if (document.getElementById('game-modal').style.display === 'flex' && juegoActivo) {
                 ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
+                frames++; // Aumentamos el reloj del juego
 
+                // Dibujar un fondo simple temporal (Cielo y Pasto)
+                ctxJuego.fillStyle = '#111'; // Fondo oscuro para que combine con tu web
+                ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
+                ctxJuego.fillStyle = '#ff6ec7'; // Línea de piso rosa neón
+                ctxJuego.fillRect(0, nivelSuelo + 50, canvasJuego.width, 2);
+
+                // FÍSICA
                 velocidadY += gravedad; 
                 conejo.y += velocidadY; 
 
+                // Detener en el suelo
                 if (conejo.y > nivelSuelo) {
                     conejo.y = nivelSuelo; 
                     velocidadY = 0;        
                     enSuelo = true;        
                 }
 
+                // DIBUJAR TODO
                 dibujarConejita();
-                dibujarMarcador();
+                manejarObstaculosYPremios();
+                
+                // Actualizar el texto del marcador HTML
+                document.getElementById('score-display').innerText = "Zanahorias: " + score;
             }
-
-            requestAnimationFrame(actualizarJuego);
+            
+            requestAnimationFrame(actualizarJuego); // Repetir infinitamente
         }
 
-        // 7. INICIAR EL JUEGO
+        // 7. ARRANQUE INICIAL
         spriteSheet.onload = function() {
             actualizarJuego();
         };
