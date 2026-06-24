@@ -362,8 +362,9 @@
         const errorMsg = document.getElementById("error-msg");
 
         function checkPassword() {
-            const inputVal = passwordInput.value;
-            const secretCode = "Dani0122"; 
+            // Convertimos a minúsculas y quitamos espacios para evitar errores de tipeo
+            const inputVal = passwordInput.value.trim().toLowerCase();
+            const secretCode = "dani0122"; 
 
             if (inputVal === secretCode) {
                 const loginScreen = document.getElementById("login-screen");
@@ -405,19 +406,20 @@
             }
         }
         updateCountdown();
+
+        /* --- LÓGICA DEL CALENDARIO --- */
         document.getElementById("toggle-calendar-btn").addEventListener("click", () => {
-    const cal = document.getElementById("calendar-container");
+            const cal = document.getElementById("calendar-container");
 
-    if(cal.style.display === "none" || cal.style.display === ""){
-        cal.style.display = "block";
-        document.getElementById("toggle-calendar-btn").innerText = "Ocultar 🌸";
-    } else {
-        cal.style.display = "none";
-        document.getElementById("toggle-calendar-btn").innerText = "Mostrar 🌸";
-    }
-});
+            if(cal.style.display === "none" || cal.style.display === ""){
+                cal.style.display = "block";
+                document.getElementById("toggle-calendar-btn").innerText = "Ocultar 🌸";
+            } else {
+                cal.style.display = "none";
+                document.getElementById("toggle-calendar-btn").innerText = "Mostrar 🌸";
+            }
+        });
         
-
         /* --- FONDO ESTRELLADO --- */
         for(let i=0; i<100; i++){
             let star = document.createElement("div");
@@ -428,30 +430,31 @@
         }
 
         /* --- DIBUJAR CORAZÓN --- */
-        const canvas = document.getElementById("heartLine");
-        const ctx = canvas.getContext("2d");
+        // Usamos canvasCorazon para no chocar con el canvas del juego
+        const canvasCorazon = document.getElementById("heartLine");
+        const ctxCorazon = canvasCorazon.getContext("2d");
         const container = document.getElementById("container");
-        canvas.width = container.offsetWidth;
-        canvas.height = container.offsetHeight;
+        canvasCorazon.width = container.offsetWidth;
+        canvasCorazon.height = container.offsetHeight;
 
         const size = container.offsetWidth/2;
         let t = 0;
 
         function draw(){
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = "#ff6ec7";
-            ctx.lineWidth = 3;
-            ctx.beginPath();
+            ctxCorazon.clearRect(0, 0, canvasCorazon.width, canvasCorazon.height);
+            ctxCorazon.strokeStyle = "#ff6ec7";
+            ctxCorazon.lineWidth = 3;
+            ctxCorazon.beginPath();
 
             for(let i=0; i<t; i+=0.02){
                 let x = 16*Math.pow(Math.sin(i), 3);
                 let y = 13*Math.cos(i)-5*Math.cos(2*i)-2*Math.cos(3*i)-Math.cos(4*i);
                 let px = size + x*(size/18);
                 let py = size - y*(size/18);
-                if(i===0) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
+                if(i===0) ctxCorazon.moveTo(px, py);
+                else ctxCorazon.lineTo(px, py);
             }
-            ctx.stroke();
+            ctxCorazon.stroke();
             t += 0.05;
 
             if(t < Math.PI*2){
@@ -507,144 +510,123 @@
             document.body.appendChild(heart);
             setTimeout(()=>heart.remove(), 2000);
         });
- // Ajustar tamaño de canvas para móviles
-        if(window.innerWidth < 650) {
-            canvasG.width = window.innerWidth - 40;
-        }
+
+        // ==========================================
+        // LÓGICA DEL MINIJUEGO DEL CONEJO
+        // ==========================================
 
         // Abrir juego al hacer clic en el GIF
         document.getElementById("video-container").addEventListener("click", () => {
             document.getElementById('game-modal').style.display = 'flex';
-            resetGame();
         });
-        /* --- LÓGICA DEL MINIJUEGO DEL CONEJO --- */
-     // ==========================================
-// 1. CONFIGURACIÓN DEL CANVAS
-// ==========================================
-const canvas = document.getElementById('juegoCanvas');
-const ctx = canvas.getContext('2d');
 
-// ==========================================
-// 2. CARGAR RECURSOS (ASSETS)
-// ==========================================
-// Gráficos
-const spriteSheet = new Image();
-spriteSheet.src = 'assets/sprites.png'; 
+        // Función para cerrar el juego
+        function closeGame() {
+            document.getElementById('game-modal').style.display = 'none';
+        }
 
-// Efectos de Sonido y Música
-const sonidoAgua = new Audio('assets/splash.mp3');
-const sonidoPuntos = new Audio('assets/points.mp3');
+        // 1. CONFIGURACIÓN DEL CANVAS (Usamos variables nuevas para no chocar)
+        const canvasJuego = document.getElementById('gameCanvas');
+        const ctxJuego = canvasJuego.getContext('2d');
 
-const musicaFondo = new Audio('assets/soundtrack.mp3');
-musicaFondo.loop = true; // La música se repite infinitamente
+        // Ajustar tamaño de canvas del juego para móviles
+        if(window.innerWidth < 650) {
+            canvasJuego.width = window.innerWidth - 40;
+        }
 
-// ==========================================
-// 3. VARIABLES DEL JUEGO Y FÍSICA
-// ==========================================
-let score = 0;
-let musicaIniciada = false; // Control para saber si el soundtrack ya empezó
+        // 2. CARGAR RECURSOS (ASSETS)
+        const spriteSheet = new Image();
+        spriteSheet.src = 'assets/sprites.png'; 
 
-// Propiedades de la conejita
-let conejo = { 
-    x: 50, 
-    y: 200, 
-    ancho: 100, 
-    alto: 100 
-};
+        const sonidoAgua = new Audio('assets/splash.mp3');
+        const sonidoPuntos = new Audio('assets/points.mp3');
+        const musicaFondo = new Audio('assets/soundtrack.mp3');
+        musicaFondo.loop = true; 
 
-// Física
-let gravedad = 1.5;      
-let velocidadY = 0;      
-let fuerzaSalto = -20;   
-let enSuelo = false;     
-let nivelSuelo = 300;    
+        // 3. VARIABLES DEL JUEGO Y FÍSICA
+        let score = 0;
+        let musicaIniciada = false; 
 
-// ==========================================
-// 4. CONTROLES (TECLADO Y PANTALLA)
-// ==========================================
-window.addEventListener('keydown', function(e) {
-    if (e.code === 'Space' && enSuelo) {
-        saltar();
-    }
-});
+        let conejo = { 
+            x: 50, 
+            y: 50, // Lo puse más arriba para que caiga al iniciar
+            ancho: 100, 
+            alto: 100 
+        };
 
-window.addEventListener('touchstart', function() {
-    if (enSuelo) {
-        saltar();
-    }
-});
+        let gravedad = 1.5;      
+        let velocidadY = 0;      
+        let fuerzaSalto = -20;   
+        let enSuelo = false;     
+        let nivelSuelo = canvasJuego.height - 100; // Se ajusta al tamaño de tu canvas    
 
-function saltar() {
-    // Iniciar la música de fondo en el primer salto si no ha empezado
-    if (!musicaIniciada) {
-        musicaFondo.play();
-        musicaIniciada = true;
-    }
+        // 4. CONTROLES
+        window.addEventListener('keydown', function(e) {
+            // Prevenir que el espacio haga scroll en la página si el modal está abierto
+            if (e.code === 'Space' && document.getElementById('game-modal').style.display === 'flex') {
+                e.preventDefault(); 
+                if (enSuelo) saltar();
+            }
+        });
 
-    velocidadY = fuerzaSalto;
-    enSuelo = false;
-}
+        canvasJuego.addEventListener('touchstart', function(e) {
+            e.preventDefault(); // Prevenir clics dobles en celular
+            if (enSuelo) saltar();
+        });
 
-// ==========================================
-// 5. FUNCIONES DE DIBUJO
-// ==========================================
-function dibujarConejita() {
-    // Coordenadas de recorte (se ajustarán luego para la animación)
-    let recorteX = 0;   
-    let recorteY = 0;   
-    let recorteAncho = 100; 
-    let recorteAlto = 100;  
+        function saltar() {
+            if (!musicaIniciada) {
+                musicaFondo.play();
+                musicaIniciada = true;
+            }
+            velocidadY = fuerzaSalto;
+            enSuelo = false;
+        }
 
-    ctx.drawImage(
-        spriteSheet, 
-        recorteX, recorteY, recorteAncho, recorteAlto, 
-        conejo.x, conejo.y, conejo.ancho, conejo.alto  
-    );
-}
+        // 5. FUNCIONES DE DIBUJO
+        function dibujarConejita() {
+            let recorteX = 0;   
+            let recorteY = 0;   
+            let recorteAncho = 100; 
+            let recorteAlto = 100;  
 
-function dibujarMarcador() {
-    ctx.fillStyle = "black";
-    ctx.font = "20px Arial";
-    // Muestra las zanahorias recolectadas
-    ctx.fillText("Zanahorias: " + score, 20, 40); 
-}
+            ctxJuego.drawImage(
+                spriteSheet, 
+                recorteX, recorteY, recorteAncho, recorteAlto, 
+                conejo.x, conejo.y, conejo.ancho, conejo.alto  
+            );
+        }
 
-// ==========================================
-// 6. CICLO PRINCIPAL DEL JUEGO (GAME LOOP)
-// ==========================================
-function actualizarJuego() {
-    // Limpiar pantalla en cada cuadro
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function dibujarMarcador() {
+            document.getElementById('score-display').innerText = "Zanahorias: " + score;
+        }
 
-    // --- FÍSICA ---
-    velocidadY += gravedad; 
-    conejo.y += velocidadY; 
+        // 6. CICLO PRINCIPAL DEL JUEGO (GAME LOOP)
+        function actualizarJuego() {
+            // Si el modal está oculto, pausamos el dibujo para ahorrar batería
+            if (document.getElementById('game-modal').style.display === 'flex') {
+                ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
 
-    // Chocar con el suelo
-    if (conejo.y > nivelSuelo) {
-        conejo.y = nivelSuelo; 
-        velocidadY = 0;        
-        enSuelo = true;        
-    }
+                velocidadY += gravedad; 
+                conejo.y += velocidadY; 
 
-    // --- DIBUJAR ---
-    dibujarConejita();
-    dibujarMarcador();
+                if (conejo.y > nivelSuelo) {
+                    conejo.y = nivelSuelo; 
+                    velocidadY = 0;        
+                    enSuelo = true;        
+                }
 
-    // Nota: Aquí agregaremos más adelante la lógica para que 
-    // suene sonidoPuntos.play() cuando toques una zanahoria.
+                dibujarConejita();
+                dibujarMarcador();
+            }
 
-    // Repetir el ciclo a 60 FPS
-    requestAnimationFrame(actualizarJuego);
-}
+            requestAnimationFrame(actualizarJuego);
+        }
 
-// ==========================================
-// 7. INICIAR EL JUEGO
-// ==========================================
-spriteSheet.onload = function() {
-    // Nos aseguramos de que la imagen principal cargue antes de arrancar
-    actualizarJuego();
-};
+        // 7. INICIAR EL JUEGO
+        spriteSheet.onload = function() {
+            actualizarJuego();
+        };
     </script>
 </body>
 </html>
