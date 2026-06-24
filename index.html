@@ -532,13 +532,14 @@
             canvasJuego.width = window.innerWidth - 40;
         }
 
+     // --- CARGA DE ASSETS CORREGIDA ---
         const spriteSheet = new Image();
-        spriteSheet.src = 'assets/sprites.png'; // Revisa que el nombre en GitHub sea idéntico
+        spriteSheet.src = './assets/sprites.png'; 
 
-        const sonidoAgua = new Audio('assets/splash.mp3');
-        const sonidoPuntos = new Audio('assets/points.mp3');
-        const musicaFondo = new Audio('assets/soundtrack.mp3');
-        musicaFondo.loop = true; 
+        const sonidoAgua = new Audio('./assets/splash.mp3');
+        const sonidoPuntos = new Audio('./assets/points.mp3');
+        const musicaFondo = new Audio('./assets/soundtrack.mp3');
+        musicaFondo.loop = true;
 
         let score = 0;
         let musicaIniciada = false; 
