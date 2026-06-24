@@ -505,7 +505,7 @@
         });
 
         // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (RECORTES Y COLISIONES CORREGIDAS)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
@@ -542,7 +542,6 @@
         const musicaFondo = new Audio('./soundtrack.mp3');
         musicaFondo.loop = true; 
 
-        // Marcamos los audios como cargados de inmediato
         assetsCargados += 3;
 
         let score = 0;
@@ -554,6 +553,7 @@
         let baneras = [];
         let zanahorias = [];
 
+        // Tamaño del sprite en pantalla (60x60 píxeles para que se vea bien en el canvas)
         let conejo = { x: 50, y: 50, ancho: 60, alto: 60 };
         let gravedad = 1.5;      
         let velocidadY = 0;      
@@ -603,6 +603,7 @@
 
         function manejarObstaculosYPremios() {
             if (frames % 160 === 0) {
+                // Bañera: Ancho 45, Alto 25
                 baneras.push({ x: canvasJuego.width, y: nivelSuelo + 35, ancho: 45, alto: 25 });
             }
             if (frames % 100 === 0) {
@@ -610,14 +611,17 @@
                 zanahorias.push({ x: canvasJuego.width, y: alturaZanahoria, ancho: 30, alto: 30 });
             }
 
+            // Mover y verificar colisión de las Bañeras
             for (let i = 0; i < baneras.length; i++) {
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
                 
-                ctxJuego.drawImage(spriteSheet, 0, 360, 240, 120, b.x, b.y, b.ancho, b.alto); 
+                // Recorte milimétrico de la tina/bañera desde tu hoja de sprites
+                ctxJuego.drawImage(spriteSheet, 480, 240, 240, 120, b.x, b.y, b.ancho, b.alto); 
 
-                if (conejo.x < b.x + (b.ancho - 15) && conejo.x + (b.ancho - 15) > b.x &&
-                    conejo.y < b.y + (b.alto - 10) && conejo.y + (b.alto - 10) > b.y) {
+                // COLISIÓN MILIMÉTRICA: Redujimos el área de choque para que el salto sea exacto al ras de la tina
+                if (conejo.x < b.x + (b.ancho - 15) && conejo.x + (conejo.ancho - 25) > b.x &&
+                    conejo.y < b.y + (b.alto - 5) && conejo.y + (conejo.alto - 5) > b.y) {
                     juegoActivo = false; 
                     sonidoAgua.play().catch(e => {}); 
                     alert("¡Te caíste en la bañera! 💦 Recogiste " + score + " zanahorias.");
@@ -625,14 +629,17 @@
                 }
             }
 
+            // Mover y dibujar Zanahorias
             for (let i = 0; i < zanahorias.length; i++) {
                 let z = zanahorias[i];
                 z.x -= velocidadJuego;
                 
+                // Recorte milimétrico de la zanahoria
                 ctxJuego.drawImage(spriteSheet, 600, 360, 120, 120, z.x, z.y, z.ancho, z.alto); 
 
-                if (conejo.x < z.x + (z.ancho - 10) && conejo.x + (z.ancho - 10) > z.x &&
-                    conejo.y < z.y + (z.alto - 10) && conejo.y + (z.alto - 10) > z.y) {
+                // Colisión de la zanahoria
+                if (conejo.x < z.x + (z.ancho - 15) && conejo.x + (conejo.ancho - 15) > z.x &&
+                    conejo.y < z.y + (z.alto - 15) && conejo.y + (conejo.alto - 15) > z.y) {
                     score += 10; 
                     sonidoPuntos.play().catch(e => {}); 
                     zanahorias.splice(i, 1); 
@@ -652,7 +659,7 @@
                 ctxJuego.fillStyle = '#ff6ec7'; 
                 ctxJuego.fillRect(0, nivelSuelo + 60, canvasJuego.width, 2);
 
-                velocidadY += gravedad; 
+                velocidadY = velocidadY + gravedad; 
                 conejo.y += velocidadY; 
 
                 if (conejo.y > nivelSuelo) {
@@ -661,9 +668,12 @@
                     enSuelo = true;        
                 }
 
+                // Animación y dibujo de la conejita con recortes exactos
                 if (!enSuelo) {
+                    // Sprite de salto en la hoja de sprites
                     ctxJuego.drawImage(spriteSheet, 480, 120, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
                 } else {
+                    // Cuadros de la animación corriendo (de 120px en 120px)
                     let posXSprite = frameActual * 120;
                     ctxJuego.drawImage(spriteSheet, posXSprite, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
 
