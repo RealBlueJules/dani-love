@@ -232,20 +232,20 @@
             text-shadow: 0 0 5px #ff9ac7;
             font-size: 16px;
         }
-#toggle-calendar-btn{
-    padding:10px 15px;
-    border:none;
-    border-radius:10px;
-    background:#4da6ff;
-    color:white;
-    cursor:pointer;
-    font-weight:bold;
-    box-shadow:0 0 10px #4da6ff;
-}
+        #toggle-calendar-btn{
+            padding:10px 15px;
+            border:none;
+            border-radius:10px;
+            background:#4da6ff;
+            color:white;
+            cursor:pointer;
+            font-weight:bold;
+            box-shadow:0 0 10px #4da6ff;
+        }
 
-#calendar-container{
-    display:none;
-}
+        #calendar-container{
+            display:none;
+        }
         .cal-row { display: flex; justify-content: space-between; margin-bottom: 5px; gap: 15px; }
         .cal-days { font-weight: bold; }
         .inf { color: #4da6ff; }
@@ -311,7 +311,6 @@
 
 <body>
 
-    <!-- PANTALLA DE BLOQUEO -->
     <div id="login-screen">
         <h2>Ingresa la clave secreta 🤨💖</h2>
         <input type="password" id="password-input" placeholder="Contraseña">
@@ -319,7 +318,6 @@
         <button id="login-btn" onclick="checkPassword()">Entrar</button>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <div id="countdown-container">
         <div id="countdown-text">Faltan <strong id="days-left" style="color: #4da6ff;"></strong> días para el día 🧛🏻 💖</div>
     </div>
@@ -332,7 +330,6 @@
         </div>
     </div>
 
-    <!-- CONTENEDOR INFERIOR (GIF + CALENDARIO) -->
     <div id="content-wrapper">
         <div id="video-container" title="¡Haz clic para jugar!">
             <img id="secret-gif" data-src="IMG_3850.gif" alt="Nuestro recuerdo" class="gif-media">
@@ -348,7 +345,6 @@
         </div>
     </div>
 
-    <!-- MODAL DEL JUEGO DEL CONEJO -->
     <div id="game-modal">
         <button id="close-game" onclick="closeGame()">X</button>
         <div id="score-display">Puntos: 0</div>
@@ -362,7 +358,6 @@
         const errorMsg = document.getElementById("error-msg");
 
         function checkPassword() {
-            // Convertimos a minúsculas y quitamos espacios para evitar errores de tipeo
             const inputVal = passwordInput.value.trim().toLowerCase();
             const secretCode = "dani0122"; 
 
@@ -370,7 +365,6 @@
                 const loginScreen = document.getElementById("login-screen");
                 loginScreen.classList.add("unlocked");
                 
-                // Aparecemos el contenedor del GIF y el calendario
                 const secretGif = document.getElementById("secret-gif");
                 secretGif.src = secretGif.getAttribute("data-src");
                 document.getElementById("content-wrapper").style.display = "flex";
@@ -430,7 +424,6 @@
         }
 
         /* --- DIBUJAR CORAZÓN --- */
-        // Usamos canvasCorazon para no chocar con el canvas del juego
         const canvasCorazon = document.getElementById("heartLine");
         const ctxCorazon = canvasCorazon.getContext("2d");
         const container = document.getElementById("container");
@@ -511,8 +504,8 @@
             setTimeout(()=>heart.remove(), 2000);
         });
 
-  // ==========================================
-        // LÓGICA DEL MINIJUEGO DEL CONEJO (PRECARGA INMEDIATA)
+        // ==========================================
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
@@ -535,29 +528,27 @@
 
         // --- PRECARGA DE RECURSOS ---
         let assetsCargados = 0;
-        const totalAssets = 4; // sprites.png, splash.mp3, points.mp3, soundtrack.mp3
+        const totalAssets = 4;
 
         const spriteSheet = new Image();
         spriteSheet.src = './sprites.png'; 
-        spriteSheet.onload = () => {  assetsCargados++; verificarInicioJuego(); };
+        spriteSheet.onload = () => { 
+            assetsCargados++; 
+            verificarInicioJuego(); 
+        };
 
         const sonidoAgua = new Audio('./splash.mp3');
-        constPuntos = new Audio('./points.mp3');
-        constFondo = new Audio('./soundtrack.mp3');
-        
-        // Simplemente forzamos la carga al navegador de inmediato
-        const sonidoAgua = constAgua;
-        const sonidoPuntos = constPuntos;
-        const musicaFondo = constFondo;
+        const sonidoPuntos = new Audio('./points.mp3');
+        const musicaFondo = new Audio('./soundtrack.mp3');
         musicaFondo.loop = true; 
 
-        // Marcamos los audios como listos al instanciarlos para no bloquear el script
-        assetsCargados += 3; 
+        // Marcamos los audios como cargados de inmediato
+        assetsCargados += 3;
 
         let score = 0;
         let musicaIniciada = false; 
         let juegoActivo = false;
-        let sePuedeIniciar = false; // Bandera para arrancar sin pantalla negra
+        let sePuedeIniciar = false;
         let frames = 0; 
         let velocidadJuego = 4;
         let baneras = [];
@@ -574,7 +565,6 @@
         let contadorAnimacion = 0;
 
         function verificarInicioJuego() {
-            // Arranca el motor solo cuando la hoja de sprites cargó por completo
             if (assetsCargados >= totalAssets) {
                 sePuedeIniciar = true;
                 requestAnimationFrame(actualizarJuego);
@@ -590,7 +580,7 @@
             velocidadY = 0;
             juegoActivo = true;
             if (sePuedeIniciar) {
-                musicaFondo.play().catch(e => console.log("Esperando interacción para audio"));
+                musicaFondo.play().catch(e => console.log("Esperando interacción de usuario para audio"));
             }
         }
 
@@ -613,7 +603,6 @@
 
         function manejarObstaculosYPremios() {
             if (frames % 160 === 0) {
-                // Ajuste proporcional para que la tina no esté gigante
                 baneras.push({ x: canvasJuego.width, y: nivelSuelo + 35, ancho: 45, alto: 25 });
             }
             if (frames % 100 === 0) {
@@ -621,36 +610,31 @@
                 zanahorias.push({ x: canvasJuego.width, y: alturaZanahoria, ancho: 30, alto: 30 });
             }
 
-            // Mover y dibujar Bañeras
             for (let i = 0; i < baneras.length; i++) {
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
                 
-                // Recorte exacto de la bañera en tu hoja de sprites (X=0, Y=360)
                 ctxJuego.drawImage(spriteSheet, 0, 360, 240, 120, b.x, b.y, b.ancho, b.alto); 
 
-                // Caja de colisión adaptada para evitar frustración al saltar
-                if (conejo.x < b.x + (b.ancho - 15) && conejo.x + (conejo.ancho - 15) > b.x &&
-                    conejo.y < b.y + (b.alto - 10) && conejo.y + (conejo.alto - 10) > b.y) {
+                if (conejo.x < b.x + (b.ancho - 15) && conejo.x + (b.ancho - 15) > b.x &&
+                    conejo.y < b.y + (b.alto - 10) && conejo.y + (b.alto - 10) > b.y) {
                     juegoActivo = false; 
-                    sonidoAgua.play().catch(e=>{}); 
+                    sonidoAgua.play().catch(e => {}); 
                     alert("¡Te caíste en la bañera! 💦 Recogiste " + score + " zanahorias.");
                     reiniciarJuego();
                 }
             }
 
-            // Mover y dibujar Zanahorias
             for (let i = 0; i < zanahorias.length; i++) {
                 let z = zanahorias[i];
                 z.x -= velocidadJuego;
                 
-                // Recorte exacto de la zanahoria (X=600, Y=360)
                 ctxJuego.drawImage(spriteSheet, 600, 360, 120, 120, z.x, z.y, z.ancho, z.alto); 
 
                 if (conejo.x < z.x + (z.ancho - 10) && conejo.x + (z.ancho - 10) > z.x &&
                     conejo.y < z.y + (z.alto - 10) && conejo.y + (z.alto - 10) > z.y) {
                     score += 10; 
-                    sonidoPuntos.play().catch(e=>{}); 
+                    sonidoPuntos.play().catch(e => {}); 
                     zanahorias.splice(i, 1); 
                     i--;
                 }
@@ -668,7 +652,7 @@
                 ctxJuego.fillStyle = '#ff6ec7'; 
                 ctxJuego.fillRect(0, nivelSuelo + 60, canvasJuego.width, 2);
 
-                velocidadY = velocidadY + gravedad; 
+                velocidadY += gravedad; 
                 conejo.y += velocidadY; 
 
                 if (conejo.y > nivelSuelo) {
@@ -677,19 +661,16 @@
                     enSuelo = true;        
                 }
 
-                // Dibujado de la conejita con recortes milimétricos
                 if (!enSuelo) {
-                    // Sprite de brinco (X=480, Y=120)
                     ctxJuego.drawImage(spriteSheet, 480, 120, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
                 } else {
-                    // Animación de carrera recorriendo los cuadros (de 120px en 120px) en la fila superior (Y=0)
                     let posXSprite = frameActual * 120;
                     ctxJuego.drawImage(spriteSheet, posXSprite, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
 
                     contadorAnimacion++;
                     if (contadorAnimacion % 6 === 0) {
                         frameActual++;
-                        if (frameActual > 7) frameActual = 0; // Reinicia el ciclo de los 8 sprites
+                        if (frameActual > 7) frameActual = 0; 
                     }
                 }
 
@@ -702,12 +683,6 @@
                 requestAnimationFrame(actualizarJuego); 
             }
         }
-
-        // Inicialización en espera de la precarga
-        spriteSheet.onload = () => { 
-            assetsCargados++; 
-            verificarInicioJuego(); 
-        };
     </script>
 </body>
 </html>
