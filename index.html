@@ -509,124 +509,133 @@
         });
 
         /* --- LÓGICA DEL MINIJUEGO DEL CONEJO --- */
-        const canvasG = document.getElementById('gameCanvas');
-        const ctxG = canvasG.getContext('2d');
-        
-        let gameInterval;
-        let isJumping = false;
-        let gameOver = false;
-        let rabbitY = 100;
-        let velocityY = 0;
-        let gravity = 0.6;
-        let obstacles = [];
-        let score = 0;
-        let gameSpeed = 5;
+     // ==========================================
+// 1. CONFIGURACIÓN DEL CANVAS
+// ==========================================
+const canvas = document.getElementById('juegoCanvas');
+const ctx = canvas.getContext('2d');
 
-        // Ajustar tamaño de canvas para móviles
-        if(window.innerWidth < 650) {
-            canvasG.width = window.innerWidth - 40;
-        }
+// ==========================================
+// 2. CARGAR RECURSOS (ASSETS)
+// ==========================================
+// Gráficos
+const spriteSheet = new Image();
+spriteSheet.src = 'assets/sprites.png'; 
 
-        // Abrir juego al hacer clic en el GIF
-        document.getElementById("video-container").addEventListener("click", () => {
-            document.getElementById('game-modal').style.display = 'flex';
-            resetGame();
-        });
+// Efectos de Sonido y Música
+const sonidoAgua = new Audio('assets/splash.mp3');
+const sonidoPuntos = new Audio('assets/points.mp3');
 
-        function closeGame() {
-            document.getElementById('game-modal').style.display = 'none';
-            clearInterval(gameInterval);
-        }
+const musicaFondo = new Audio('assets/soundtrack.mp3');
+musicaFondo.loop = true; // La música se repite infinitamente
 
-        function resetGame() {
-            rabbitY = 100;
-            velocityY = 0;
-            obstacles = [];
-            score = 0;
-            gameSpeed = 5;
-            gameOver = false;
-            isJumping = false;
-            if(gameInterval) clearInterval(gameInterval);
-            gameInterval = setInterval(updateGame, 20);
-        }
+// ==========================================
+// 3. VARIABLES DEL JUEGO Y FÍSICA
+// ==========================================
+let score = 0;
+let musicaIniciada = false; // Control para saber si el soundtrack ya empezó
 
-        function updateGame() {
-            if(gameOver) return;
+// Propiedades de la conejita
+let conejo = { 
+    x: 50, 
+    y: 200, 
+    ancho: 100, 
+    alto: 100 
+};
 
-            ctxG.clearRect(0,0, canvasG.width, canvasG.height);
-            
-            // Suelo
-            ctxG.strokeStyle = "#4da6ff";
-            ctxG.lineWidth = 2;
-            ctxG.beginPath();
-            ctxG.moveTo(0, 130);
-            ctxG.lineTo(canvasG.width, 130);
-            ctxG.stroke();
+// Física
+let gravedad = 1.5;      
+let velocidadY = 0;      
+let fuerzaSalto = -20;   
+let enSuelo = false;     
+let nivelSuelo = 300;    
 
-            // Gravedad del conejo
-            velocityY += gravity;
-            rabbitY += velocityY;
-            if(rabbitY > 100) { rabbitY = 100; isJumping = false; velocityY = 0; }
+// ==========================================
+// 4. CONTROLES (TECLADO Y PANTALLA)
+// ==========================================
+window.addEventListener('keydown', function(e) {
+    if (e.code === 'Space' && enSuelo) {
+        saltar();
+    }
+});
 
-            // Dibujar Conejo
-            ctxG.font = '30px Arial';
-            ctxG.save();
-ctxG.translate(60, rabbitY + 30);
-ctxG.scale(-1, 1);
-ctxG.fillText('🐇', 0, 0);
-ctxG.restore();
+window.addEventListener('touchstart', function() {
+    if (enSuelo) {
+        saltar();
+    }
+});
 
-            // Generar obstáculos
-            if(Math.random() < 0.015) {
-                // Evitar que salgan muy pegados
-                if(obstacles.length === 0 || obstacles[obstacles.length-1].x < canvasG.width - 200) {
-                    obstacles.push({x: canvasG.width, y: 100});
-                }
-            }
+function saltar() {
+    // Iniciar la música de fondo en el primer salto si no ha empezado
+    if (!musicaIniciada) {
+        musicaFondo.play();
+        musicaIniciada = true;
+    }
 
-            // Mover y dibujar obstáculos
-            for(let i=0; i<obstacles.length; i++) {
-                let obs = obstacles[i];
-                obs.x -= gameSpeed;
-                ctxG.fillText('🛁', obs.x, obs.y + 30);
+    velocidadY = fuerzaSalto;
+    enSuelo = false;
+}
 
-                // Colisión simple
-                if(obs.x < 55 && obs.x > 10 && rabbitY > 70) {
-                    gameOver = true;
-                    ctxG.fillStyle = '#ff3b3b';
-                    ctxG.font = '24px Arial';
-                    ctxG.textAlign = 'center';
-                    ctxG.fillText('¡Auch! Toca para reiniciar', canvasG.width/2, 60);
-                    ctxG.textAlign = 'left';
-                    clearInterval(gameInterval);
-                }
-            }
-            
-            // Limpiar obstáculos que ya pasaron
-            obstacles = obstacles.filter(o => o.x > -30);
-            
-            score++;
-            if(score % 500 === 0) gameSpeed += 0.5; // Aumentar dificultad
-            document.getElementById('score-display').innerText = 'Puntos: ' + Math.floor(score/10);
-        }
+// ==========================================
+// 5. FUNCIONES DE DIBUJO
+// ==========================================
+function dibujarConejita() {
+    // Coordenadas de recorte (se ajustarán luego para la animación)
+    let recorteX = 0;   
+    let recorteY = 0;   
+    let recorteAncho = 100; 
+    let recorteAlto = 100;  
 
-        function jumpAction() {
-            if(gameOver) {
-                resetGame();
-            } else if(!isJumping) {
-                velocityY = -10;
-                isJumping = true;
-            }
-        }
+    ctx.drawImage(
+        spriteSheet, 
+        recorteX, recorteY, recorteAncho, recorteAlto, 
+        conejo.x, conejo.y, conejo.ancho, conejo.alto  
+    );
+}
 
-        // Controles del juego
-        document.addEventListener('keydown', (e) => {
-            if((e.code === 'Space' || e.code === 'ArrowUp') && document.getElementById('game-modal').style.display === 'flex') {
-                jumpAction();
-            }
-        });
-        
-        canvasG.addEventListener('click', jumpAction);
+function dibujarMarcador() {
+    ctx.fillStyle = "black";
+    ctx.font = "20px Arial";
+    // Muestra las zanahorias recolectadas
+    ctx.fillText("Zanahorias: " + score, 20, 40); 
+}
+
+// ==========================================
+// 6. CICLO PRINCIPAL DEL JUEGO (GAME LOOP)
+// ==========================================
+function actualizarJuego() {
+    // Limpiar pantalla en cada cuadro
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // --- FÍSICA ---
+    velocidadY += gravedad; 
+    conejo.y += velocidadY; 
+
+    // Chocar con el suelo
+    if (conejo.y > nivelSuelo) {
+        conejo.y = nivelSuelo; 
+        velocidadY = 0;        
+        enSuelo = true;        
+    }
+
+    // --- DIBUJAR ---
+    dibujarConejita();
+    dibujarMarcador();
+
+    // Nota: Aquí agregaremos más adelante la lógica para que 
+    // suene sonidoPuntos.play() cuando toques una zanahoria.
+
+    // Repetir el ciclo a 60 FPS
+    requestAnimationFrame(actualizarJuego);
+}
+
+// ==========================================
+// 7. INICIAR EL JUEGO
+// ==========================================
+spriteSheet.onload = function() {
+    // Nos aseguramos de que la imagen principal cargue antes de arrancar
+    actualizarJuego();
+};
     </script>
 </body>
 </html>
