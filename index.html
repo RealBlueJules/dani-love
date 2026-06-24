@@ -504,17 +504,18 @@
             setTimeout(()=>heart.remove(), 2000);
         });
 
-       // ==========================================
-        // CALIBRADOR VISUAL DE SPRITES (EN VIVO)
+      // ==========================================
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (COORDENADAS CALIBRADAS)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
             document.getElementById('game-modal').style.display = 'flex';
-            iniciarCalibracion();
+            reiniciarJuego();
         });
 
         function closeGame() {
             document.getElementById('game-modal').style.display = 'none';
+            juegoActivo = false;
             musicaFondo.pause(); 
         }
 
@@ -525,6 +526,7 @@
             canvasJuego.width = window.innerWidth - 40;
         }
 
+        // --- CARGA DE ASSETS ---
         const spriteSheet = new Image();
         spriteSheet.src = './sprites.png'; 
 
@@ -533,50 +535,171 @@
         const musicaFondo = new Audio('./soundtrack.mp3');
         musicaFondo.loop = true; 
 
-        // --- CONTROLES DE CALIBRACIÓN ---
-        // Cambia estos 4 valores usando tu teclado, guarda en GitHub y refresca
-        let sourceX = 0;   // Coordenada horizontal de inicio (X) en la imagen PNG
-        let sourceY = 0;   // Coordenada vertical de inicio (Y) en la imagen PNG
-        let sourceWidth = 120;  // Ancho del recuadro a recortar
-        let sourceHeight = 120; // Alto del recuadro a recortar
+        let score = 0;
+        let musicaIniciada = false; 
+        let juegoActivo = false;
+        let frames = 0; 
+        let velocidadJuego = 4;
+        let baneras = [];
+        let zanahorias = [];
 
-        function iniciarCalibracion() {
-            // Limpiamos pantalla y dibujamos el elemento a calibrar de forma estática
-            ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
-            
-            ctxJuego.fillStyle = '#22232a'; 
-            ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
+        // Dimensiones lógicas para renderizar en el canvas
+        let conejo = { x: 50, y: 50, ancho: 60, alto: 60 };
+        let gravedad = 1.5;      
+        let velocidadY = 0;      
+        let fuerzaSalto = -16;   
+        let enSuelo = false;     
+        let nivelSuelo = canvasJuego.height - 70;   
 
-            // DIBUJO DE PRUEBA: Cambia sourceX y sourceY arriba para centrar tu elemento
-            try {
-                // Dibuja el elemento estático en el centro del canvas (X:200, Y:30) con medidas (60x60)
-                ctxJuego.drawImage(spriteSheet, sourceX, sourceY, sourceWidth, sourceHeight, 200, 30, 60, 60);
-            } catch(e) {
-                ctxJuego.fillStyle = 'white';
-                ctxJuego.fillRect(200, 30, 60, 60);
-            }
+        let frameActual = 0;
+        let contadorAnimacion = 0;
 
-            ctxJuego.fillStyle = '#ff6ec7'; 
-            ctxJuego.fillRect(0, 130, canvasJuego.width, 2);
-            
-            musicaFondo.play().catch(e => {});
+        // Desplazamiento base calibrado para evitar márgenes vacíos
+        const calX = 35;
+        const calY = 155;
+
+        function reiniciarJuego() {
+            score = 0;
+            frames = 0;
+            baneras = [];
+            zanahorias = [];
+            conejo.y = 50;
+            velocidadY = 0;
+            juegoActivo = true;
+            musicaFondo.play().catch(e => console.log("Esperando interacción de usuario para audio"));
         }
 
-        // --- DETECCIÓN DE TECLADO PARA CALIBRAR RÁPIDO (OPCIONAL) ---
         window.addEventListener('keydown', function(e) {
-            if (document.getElementById('game-modal').style.display === 'flex') {
-                if (e.key === 'ArrowRight') sourceX += 5;
-                if (e.key === 'ArrowLeft') sourceX -= 5;
-                if (e.key === 'ArrowUp') sourceY -= 5;
-                if (e.key === 'ArrowDown') sourceY += 5;
-                if (e.key === 'Enter') console.log(`Valores exactos -> X: ${sourceX}, Y: ${sourceY}`);
-                
-                // Redibujamos en tiempo real con el movimiento de flechas
-                iniciarCalibracion();
-                ctxJuego.fillStyle = 'yellow';
-                ctxJuego.fillText(`X: ${sourceX} | Y: ${sourceY}`, 10, 20);
+            if (e.code === 'Space' && document.getElementById('game-modal').style.display === 'flex') {
+                e.preventDefault(); 
+                if (enSuelo && juegoActivo) saltar();
             }
         });
+
+        canvasJuego.addEventListener('touchstart', function(e) {
+            e.preventDefault(); 
+            if (enSuelo && juegoActivo) saltar();
+        });
+
+        function saltar() {
+            velocidadY = fuerzaSalto;
+            enSuelo = false;
+        }
+
+        function manejarObstaculosYPremios() {
+            // Generador de Bañeras (Obstáculos)
+            if (frames % 160 === 0) {
+                baneras.push({ x: canvasJuego.width, y: nivelSuelo + 35, ancho: 45, alto: 25 });
+            }
+            // Generador de Zanahorias (Premios)
+            if (frames % 100 === 0) {
+                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 10 : nivelSuelo + 20;
+                zanahorias.push({ x: canvasJuego.width, y: alturaZanahoria, ancho: 30, alto: 30 });
+            }
+
+            // Mover y dibujar Bañeras
+            for (let i = 0; i < baneras.length; i++) {
+                let b = baneras[i];
+                b.x -= velocidadJuego; 
+                
+                // Recorte de la bañera aplicando el desplazamiento calibrado (Alineada abajo a la izquierda en tu sprite sheet)
+                try {
+                    ctxJuego.drawImage(spriteSheet, 0 + calX, 360 + calY, 120, 120, b.x, b.y, b.ancho, b.alto);
+                } catch(e) {
+                    ctxJuego.fillStyle = '#4da6ff'; 
+                    ctxJuego.fillRect(b.x, b.y, b.ancho, b.alto);
+                }
+
+                // Hitbox precisa para evitar frustración al librar el salto
+                if (conejo.x < b.x + (b.ancho - 15) && conejo.x + (conejo.ancho - 25) > b.x &&
+                    conejo.y < b.y + (b.alto - 5) && conejo.y + (conejo.alto - 5) > b.y) {
+                    juegoActivo = false; 
+                    sonidoAgua.play().catch(e => {}); 
+                    alert("¡Te caíste en la bañera! 💦 Recogiste " + score + " zanahorias.");
+                    reiniciarJuego();
+                }
+            }
+
+            // Mover y dibujar Zanahorias
+            for (let i = 0; i < zanahorias.length; i++) {
+                let z = zanahorias[i];
+                z.x -= velocidadJuego;
+                
+                // Recorte de la zanahoria aplicando el desplazamiento calibrado
+                try {
+                    ctxJuego.drawImage(spriteSheet, 0 + calX, 480 + calY, 120, 120, z.x, z.y, z.ancho, z.alto);
+                } catch(e) {
+                    ctxJuego.fillStyle = '#ff9ac7'; 
+                    ctxJuego.fillRect(z.x, z.y, z.ancho, z.alto);
+                }
+
+                // Detección de colisión para sumar puntos
+                if (conejo.x < z.x + (z.ancho - 15) && conejo.x + (z.ancho - 15) > z.x &&
+                    conejo.y < z.y + (z.alto - 15) && conejo.y + (conejo.alto - 15) > z.y) {
+                    score += 10; 
+                    sonidoPuntos.play().catch(e => {}); 
+                    zanahorias.splice(i, 1); 
+                    i--;
+                }
+            }
+        }
+
+        function actualizarJuego() {
+            if (document.getElementById('game-modal').style.display === 'flex' && juegoActivo) {
+                ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
+                frames++; 
+
+                ctxJuego.fillStyle = '#22232a'; 
+                ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
+                
+                ctxJuego.fillStyle = '#ff6ec7'; 
+                ctxJuego.fillRect(0, nivelSuelo + 60, canvasJuego.width, 2);
+
+                velocidadY += gravedad; 
+                conejo.y += velocidadY; 
+
+                if (conejo.y > nivelSuelo) {
+                    conejo.y = nivelSuelo; 
+                    velocidadY = 0;        
+                    enSuelo = true;        
+                }
+
+                // Animación y dibujo de la conejita aplicando los valores calibrados
+                if (!enSuelo) {
+                    // Fotograma de brinco / salto (Cuadro en X=480, Y=0 de tu retícula)
+                    try {
+                        ctxJuego.drawImage(spriteSheet, 480 + calX, 0 + calY, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
+                    } catch(e) {
+                        ctxJuego.fillStyle = 'white';
+                        ctxJuego.fillRect(conejo.x, conejo.y, conejo.ancho, conejo.alto);
+                    }
+                } else {
+                    // Fotogramas de carrera secuenciales (Avanzan de 120px en 120px, Fila Y=0)
+                    let posXSprite = (frameActual * 120) + calX;
+                    try {
+                        ctxJuego.drawImage(spriteSheet, posXSprite, 0 + calY, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
+                    } catch(e) {
+                        ctxJuego.fillStyle = 'white';
+                        ctxJuego.fillRect(conejo.x, conejo.y, conejo.ancho, conejo.alto);
+                    }
+
+                    contadorAnimacion++;
+                    if (contadorAnimacion % 6 === 0) {
+                        frameActual++;
+                        if (frameActual > 7) frameActual = 0; // Bucle de los 8 fotogramas de carrera
+                    }
+                }
+
+                manejarObstaculosYPremios();
+                
+                document.getElementById('score-display').innerText = "Zanahorias: " + score;
+            }
+            
+            requestAnimationFrame(actualizarJuego); 
+        }
+
+        // Bucle de juego principal
+        requestAnimationFrame(actualizarJuego);
     </script>
 </body>
 </html>
