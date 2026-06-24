@@ -511,8 +511,8 @@
             setTimeout(()=>heart.remove(), 2000);
         });
 
-      // ==========================================
-        // LÓGICA DEL MINIJUEGO DEL CONEJO (ANIMACIÓN Y MEDIDAS REALES)
+    // ==========================================
+        // LÓGICA DEL MINIJUEGO DEL CONEJO (RECEMOS MILIMÉTRICO)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
@@ -549,15 +549,14 @@
         let baneras = [];
         let zanahorias = [];
 
-        // Dimensiones proporcionales a tu hoja de sprites (cuadros de 120x120)
+        // Tamaño del dibujo en el lienzo (60x60 píxeles para que se vea nítido)
         let conejo = { x: 50, y: 50, ancho: 60, alto: 60 };
         let gravedad = 1.5;      
         let velocidadY = 0;      
         let fuerzaSalto = -15;   
         let enSuelo = false;     
-        let nivelSuelo = canvasJuego.height - 70;   
+        let nivelSuelo = canvasJuelo.height - 70;   
 
-        // Variables para la animación de carrera (Frames de RUN_01 a RUN_08)
         let frameActual = 0;
         let contadorAnimacion = 0;
 
@@ -590,15 +589,15 @@
         }
 
         function manejarObstaculosYPremios() {
-            // Generar Bañeras (Obstáculo) - Espaciadas para poder saltar
+            // Generar Bañeras (Obstáculo)
             if (frames % 150 === 0) {
-                // Ajustado a 50x35 para que la bañera sea chaparrita y se pueda librar el salto
-                baneras.push({ x: canvasJuego.width, y: nivelSuelo + 25, ancho: 50, alto: 35 });
+                // Ancho 45, Alto 25: Tamaño pequeño y bajito para poder saltarlo bien
+                baneras.push({ x: canvasJuego.width, y: nivelSuelo + 35, ancho: 45, alto: 25 });
             }
             // Generar Zanahorias (Premio)
             if (frames % 100 === 0) {
-                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 15 : nivelSuelo + 20;
-                zanahorias.push({ x: canvasJuego.width, y: alturaZanahoria, ancho: 35, alto: 35 });
+                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 10 : nivelSuelo + 20;
+                zanahorias.push({ x: canvasJuego.width, y: alturaZanahoria, ancho: 30, alto: 30 });
             }
 
             // Mover y dibujar Bañeras
@@ -606,16 +605,16 @@
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
                 
-                // La bañera está en la segunda columna de tu imagen (X = 240 aprox)
+                // Recorte ajustado específicamente para la bañera (centrada en la tina de tu imagen)
                 try { 
-                    ctxJuego.drawImage(spriteSheet, 240, 360, 240, 160, b.x, b.y, b.ancho, b.alto); 
+                    ctxJuego.drawImage(spriteSheet, 20, 505, 240, 140, b.x, b.y, b.ancho, b.alto); 
                 } catch(e) {
                     ctxJuego.fillStyle = '#4da6ff'; 
                     ctxJuego.fillRect(b.x, b.y, b.ancho, b.alto);
                 }
 
-                // Detección de colisión ajustada
-                if (conejo.x < b.x + (b.ancho - 10) && conejo.x + (conejo.ancho - 10) > b.x &&
+                // Detección de colisión (reducida para que el salto sea justo y no frustrante)
+                if (conejo.x < b.x + (b.ancho - 15) && conejo.x + (conejo.ancho - 15) > b.x &&
                     conejo.y < b.y + (b.alto - 10) && conejo.y + (conejo.alto - 10) > b.y) {
                     juegoActivo = false; 
                     sonidoAgua.play().catch(e=>{}); 
@@ -629,16 +628,16 @@
                 let z = zanahorias[i];
                 z.x -= velocidadJuego;
                 
-                // Las zanahorias están a la derecha en tu imagen (X = 600 aprox)
+                // Recorte para la zanahoria (tomando el primer icono de PICKUPS)
                 try { 
-                    ctxJuego.drawImage(spriteSheet, 600, 360, 150, 150, z.x, z.y, z.ancho, z.alto); 
+                    ctxJuego.drawImage(spriteSheet, 650, 715, 110, 140, z.x, z.y, z.ancho, z.alto); 
                 } catch(e) {
                     ctxJuego.fillStyle = '#ff9ac7'; 
                     ctxJuego.fillRect(z.x, z.y, z.ancho, z.alto);
                 }
 
-                if (conejo.x < z.x + z.ancho && conejo.x + conejo.ancho > z.x &&
-                    conejo.y < z.y + z.alto && conejo.y + conejo.alto > z.y) {
+                if (conejo.x < z.x + (z.ancho - 10) && conejo.x + (conejo.ancho - 10) > z.x &&
+                    conejo.y < z.y + (z.alto - 10) && conejo.y + (conejo.alto - 10) > z.y) {
                     score += 10; 
                     sonidoPuntos.play().catch(e=>{}); 
                     zanahorias.splice(i, 1); 
@@ -652,7 +651,7 @@
                 ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
                 frames++; 
 
-                ctxJuego.fillStyle = '#22232a'; // Fondo a tono con la paleta de tu sprite sheet
+                ctxJuego.fillStyle = '#22232a'; 
                 ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
                 
                 ctxJuego.fillStyle = '#ff6ec7'; 
@@ -667,31 +666,30 @@
                     enSuelo = true;        
                 }
 
-                // LÓGICA DE ANIMACIÓN DE LA CONEJITA
+                // LÓGICA DE ANIMACIÓN MILIMÉTRICA
                 if (!enSuelo) {
-                    // Si está saltando, mostramos el frame fijo de salto (X=240, Y=120)
+                    // Cuadro de salto de la conejita
                     try {
-                        ctxJuego.drawImage(spriteSheet, 240, 120, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
+                        ctxJuego.drawImage(spriteSheet, 520, 320, 160, 170, conejo.x, conejo.y, conejo.ancho, conejo.alto);
                     } catch(e) {
                         ctxJuego.fillStyle = 'white';
                         ctxJuego.fillRect(conejo.x, conejo.y, conejo.ancho, conejo.alto);
                     }
                 } else {
-                    // Si está en el suelo, recorremos los 8 cuadros de carrera (RUN_01 a RUN_08)
-                    // Cada cuadro mide horizontalmente 120px
-                    let posXSprite = frameActual * 120;
+                    // Recorrido de los 8 sprites de correr (RUN_01 a RUN_08)
+                    // Cada cuadro horizontal mide exactamente 187px en tu imagen
+                    let posXSprite = frameActual * 187;
                     try {
-                        ctxJuego.drawImage(spriteSheet, posXSprite, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
+                        ctxJuego.drawImage(spriteSheet, posXSprite, 20, 165, 230, conejo.x, conejo.y, conejo.ancho, conejo.alto);
                     } catch(e) {
                         ctxJuego.fillStyle = 'white';
                         ctxJuego.fillRect(conejo.x, conejo.y, conejo.ancho, conejo.alto);
                     }
 
-                    // Control de velocidad de la animación (cambia de frame cada 6 cuadros del juego)
                     contadorAnimacion++;
                     if (contadorAnimacion % 6 === 0) {
                         frameActual++;
-                        if (frameActual > 7) frameActual = 0; // Reinicia el ciclo de los 8 sprites de correr
+                        if (frameActual > 7) frameActual = 0; 
                     }
                 }
 
