@@ -532,13 +532,13 @@
             canvasJuego.width = window.innerWidth - 40;
         }
 
-     // --- CARGA DE ASSETS CORREGIDA ---
+   // --- CARGA DE ASSETS DIRECTA ---
         const spriteSheet = new Image();
-        spriteSheet.src = './assets/sprites.png'; 
+        spriteSheet.src = './sprites.png'; 
 
-        const sonidoAgua = new Audio('./assets/splash.mp3');
-        const sonidoPuntos = new Audio('./assets/points.mp3');
-        const musicaFondo = new Audio('./assets/soundtrack.mp3');
+        const sonidoAgua = new Audio('./splash.mp3');
+        const sonidoPuntos = new Audio('./points.mp3');
+        const musicaFondo = new Audio('./soundtrack.mp3');
         musicaFondo.loop = true;
 
         let score = 0;
