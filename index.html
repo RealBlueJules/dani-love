@@ -215,7 +215,7 @@
 
         img.gif-media { display: block; width: 100%; height: auto; }
 
-        /* CALENDARIO */
+        /* CALENDARIO (INTACTO) */
         #calendar-container {
             background: rgba(20, 0, 10, 0.7);
             border: 2px solid #4da6ff;
@@ -233,18 +233,18 @@
             font-size: 16px;
         }
         #toggle-calendar-btn{
-            padding: 10px 15px;
-            border: none;
-            border-radius: 10px;
-            background: #4da6ff;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 0 10px #4da6ff;
+            padding:10px 15px;
+            border:none;
+            border-radius:10px;
+            background:#4da6ff;
+            color:white;
+            cursor:pointer;
+            font-weight:bold;
+            box-shadow:0 0 10px #4da6ff;
         }
 
-        #calendar-container {
-            display: none;
+        #calendar-container{
+            display:none;
         }
         .cal-row { display: flex; justify-content: space-between; margin-bottom: 5px; gap: 15px; }
         .cal-days { font-weight: bold; }
@@ -252,7 +252,7 @@
         .fert { color: #ff9ac7; }
         .muy-fert { color: #ff3b3b; font-weight: bold; text-shadow: 0 0 5px rgba(255,59,59,0.5); }
 
-        /* --- MODAL DEL JUEGUITO --- */
+        /* --- MODAL DEL JUEGO --- */
         #game-modal {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -315,7 +315,7 @@
         <h2>Ingresa la clave secreta 🤨💖</h2>
         <input type="password" id="password-input" placeholder="Contraseña">
         <div id="error-msg">Clave incorrecta 💔 Intenta de nuevo.</div>
-        <button id="login-btn">Entrar</button>
+        <button id="login-btn" onclick="checkPassword()">Entrar</button>
     </div>
 
     <div id="countdown-container">
@@ -346,67 +346,108 @@
     </div>
 
     <div id="game-modal">
-        <button id="close-game">X</button>
-        <div id="score-display">Zanahorias: 0</div>
+        <button id="close-game" onclick="closeGame()">X</button>
+        <div id="score-display">Puntos: 0</div>
         <canvas id="gameCanvas" width="600" height="250"></canvas>
         <div id="game-instructions">Toca la pantalla o presiona Espacio para saltar</div>
     </div>
 
     <script>
         /* --- LÓGICA DE LA CONTRASEÑA --- */
-        const passIn = document.getElementById("password-input");
-        const errM = document.getElementById("error-msg");
-        const logS = document.getElementById("login-screen");
-        
-        document.getElementById("login-btn").addEventListener("click", () => {
-            if (passIn.value.trim().toLowerCase() === "dani0122") {
-                logS.classList.add("unlocked");
-                document.getElementById('game-modal').style.display = 'flex';
+        const passwordInput = document.getElementById("password-input");
+        const errorMsg = document.getElementById("error-msg");
+
+        function checkPassword() {
+            const inputVal = passwordInput.value.trim().toLowerCase();
+            const secretCode = "dani0122"; 
+
+            if (inputVal === secretCode) {
+                const loginScreen = document.getElementById("login-screen");
+                loginScreen.classList.add("unlocked");
                 
                 const secretGif = document.getElementById("secret-gif");
                 secretGif.src = secretGif.getAttribute("data-src");
                 document.getElementById("content-wrapper").style.display = "flex";
 
-                setTimeout(() => { 
-                    logS.style.display = "none"; 
-                    reiniciarJuego(); 
-                }, 1000);
-            } else {
-                errM.style.opacity = "1";
-                passIn.value = "";
-                passIn.classList.add("error");
                 setTimeout(() => {
-                    errM.style.opacity = "0";
-                    passIn.classList.remove("error");
-                }, 3000);
+                    loginScreen.style.display = "none";
+                }, 1000); 
+            } else {
+                passwordInput.classList.add("error");
+                errorMsg.style.opacity = "1";
+                setTimeout(() => { passwordInput.classList.remove("error"); }, 400);
+            }
+        }
+
+        passwordInput.addEventListener("input", () => errorMsg.style.opacity = "0");
+        passwordInput.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); checkPassword(); } });
+
+        /* --- LÓGICA DEL CONTADOR --- */
+        function updateCountdown() {
+            const today = new Date();
+            const currentDay = today.getDate();
+            const countdownText = document.getElementById("countdown-text");
+            const daysLeftElement = document.getElementById("days-left");
+
+            if (currentDay === 9) {
+                countdownText.innerHTML = "¡Feliz día 9, mi amor! 🎉💖";
+            } else {
+                let targetDate = new Date(today.getFullYear(), today.getMonth(), 9);
+                if (currentDay > 9) targetDate.setMonth(targetDate.getMonth() + 1);
+                const diffTime = targetDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                daysLeftElement.innerText = diffDays;
+            }
+        }
+        updateCountdown();
+
+        /* --- LÓGICA DEL CALENDARIO (INTACTA) --- */
+        document.getElementById("toggle-calendar-btn").addEventListener("click", () => {
+            const cal = document.getElementById("calendar-container");
+
+            if(cal.style.display === "none" || cal.style.display === ""){
+                cal.style.display = "block";
+                document.getElementById("toggle-calendar-btn").innerText = "Ocultar 🌸";
+            } else {
+                cal.style.display = "none";
+                document.getElementById("toggle-calendar-btn").innerText = "Mostrar 🌸";
             }
         });
         
-        passIn.addEventListener("keypress", (e) => { if (e.key === "Enter") document.getElementById("login-btn").click(); });
+        /* --- FONDO ESTRELLADO --- */
+        for(let i=0; i<100; i++){
+            let star = document.createElement("div");
+            star.className = "star";
+            star.style.left = Math.random()*100+"vw";
+            star.style.top = Math.random()*100+"vh";
+            document.body.appendChild(star);
+        }
 
-        /* --- LÓGICA DEL CONTADOR --- */
-        const dL = document.getElementById("days-left");
-        const cT = document.getElementById("countdown-text");
-        function uC() {
-            const t = new Date();
-            if (t.getDate() === 9) cT.innerHTML = "¡Feliz día 9, mi amor! 🎉💖";
-            else {
-                let d = new Date(t.getFullYear(), t.getMonth(), 9);
-                if (t.getDate() > 9) d.setMonth(d.getMonth() + 1);
-                dL.innerText = Math.ceil((d - t) / (1000 * 60 * 60 * 24));
-            }
-        } uC();
-
-        /* --- DIBUJO DEL CORAZÓN DE LA PANTALLA INICIAL --- */
-        const cC = document.getElementById("heartLine");
+        /* --- DIBUJAR CORAZÓN --- */
+        const canvasCorazon = document.getElementById("heartLineE");
+        let ctxC;
+        
+        // Inicialización para el corazón de la pantalla de bloqueo
+        let cC = document.getElementById("heartLine");
+        if (!cC) {
+            cC = document.createElement("canvas");
+            cC.id = "heartLine";
+            cC.className = "heart";
+            document.getElementById("container").appendChild(cC);
+        }
+        cC.width = document.getElementById("container").offsetWidth;
+        cC.height = document.getElementById("container").offsetHeight;
         const ctC = cC.getContext("2d");
+        
         const c = document.getElementById("container");
-        cC.width = c.offsetWidth; cC.height = c.offsetHeight;
         const sz = c.offsetWidth / 2;
         let tim = 0;
+        let animacionCorazonFrame;
+
         function dr() {
             ctC.clearRect(0, 0, cC.width, cC.height);
-            ctC.strokeStyle = "#ff6ec7"; ctC.lineWidth = 3;
+            ctC.strokeStyle = "#ff6ec7"; 
+            ctC.lineWidth = 3;
             ctC.beginPath();
             for (let i = 0; i < tim; i += 0.02) {
                 let x = sz + 16 * Math.pow(Math.sin(i), 3) * (sz / 18);
@@ -415,8 +456,9 @@
             }
             ctC.stroke();
             tim += 0.05;
-            if (tim < Math.PI * 2) requestAnimationFrame(dr);
-            else {
+            if (tim < Math.PI * 2) {
+                animacionCorazonFrame = requestAnimationFrame(dr);
+            } else {
                 for (let i = 0; i < 170; i++) {
                     let a = Math.PI * 2 * i / 170;
                     let x = sz + 16 * Math.pow(Math.sin(a), 3) * (sz / 18);
@@ -428,16 +470,6 @@
             }
         } dr();
 
-        /* --- FONDO ESTRELLADO --- */
-        for(let i=0; i<100; i++){
-            let star = document.createElement("div");
-            star.className = "star";
-            star.style.left = Math.random()*100+"vw";
-            star.style.top = Math.random()*100+"vh";
-            document.body.appendChild(star);
-        }
-
-        /* --- CORAZÓN AL CLIC EN EL FONDO --- */
         document.addEventListener("click", function(e){
             if (e.target.closest('#video-container') || 
                 e.target.closest('#game-modal') ||
@@ -456,11 +488,30 @@
         });
 
         // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (GEOMÉTRICA SIMPLE)
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO 
         // ==========================================
+
+        document.getElementById("video-container").addEventListener("click", () => {
+            if(animacionCorazonFrame) cancelAnimationFrame(animacionCorazonFrame);
+            document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'paused');
+            document.getElementById('game-modal').style.display = 'flex';
+            reiniciarJuego();
+        });
+
+        function closeGame() {
+            document.getElementById('game-modal').style.display = 'none';
+            juegoActivo = false;
+            juegoTerminado = false;
+            if(typeof musicaFondo !== 'undefined') musicaFondo.pause(); 
+            document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'running');
+            if(tim < Math.PI * 2) dr();
+        }
 
         const canJ = document.getElementById('gameCanvas');
         const ctJ = canJ.getContext('2d');
+
+        canJ.width = 600;
+        canJ.height = 250;
 
         const imgBanera = new Image(); imgBanera.src = './banera.png';      
         const imgZanahoria = new Image(); imgZanahoria.src = './carrot.png';  
@@ -468,7 +519,7 @@
         const imgFondoNoche = new Image(); imgFondoNoche.src = './nightbg.png';
 
         const sonidoAgua = new Audio('./splash.mp3');
-        const sonidoPuntos = new Audio('./points.mp3');
+        constPuntos = new Audio('./points.mp3');
         const musicaFondo = new Audio('./soundtrack.mp3');
         musicaFondo.loop = true; 
 
@@ -480,64 +531,88 @@
         let baneras = [];
         let zanahorias = [];
 
-        // Geometría para dibujar la silueta de la conejita
         let conejo = { 
             x: 80, 
-            y: 120, 
+            y: 0, 
             tamano: 65,
             hitboxAncho: 45, 
             hitboxAlto: 45 
         };
         
-        let gravedad = 1.2;      
-        let velocidadY = 0; // Se mantiene tu variable de velocidad vertical de tu original
+        let gravedad = 1.5;      
+        let velocidadY = 0;      
         let fuerzaSalto = -14;   
         let enSuelo = true;     
         let nivelSuelo = canJ.height - 105; 
 
-        document.getElementById("close-game").addEventListener("click", () => { 
-            document.getElementById('game-modal').style.display = 'none'; 
-            juegoActivo = false; 
-            musicaFondo.pause(); 
-        });
+        function reiniciarJuego() {
+            score = 0;
+            frames = 0;
+            baneras = [];
+            zanahorias = [];
+            conejo.y = nivelSuelo;
+            velocidadY = 0;
+            velocidadJuego = 4;
+            enSuelo = true;
+            juegoTerminado = false;
+            juegoActivo = true;
+            musicaFondo.play().catch(e => console.log("Audio pendiente"));
+        }
 
-        window.addEventListener('keydown', e => { 
-            if (e.code === 'Space' && document.getElementById('game-modal').style.display === 'flex') { 
+        window.addEventListener('keydown', e => {
+            if (e.code === 'Space' && document.getElementById('game-modal').style.display === 'flex') {
                 e.preventDefault(); 
                 if (juegoTerminado) {
                     reiniciarJuego();
                 } else if (enSuelo) {
-                    letY = fuerzaSalto;
-                    enSuelo = false;
+                    saltar();
                 }
-            } 
+            }
         });
-        
-        canJ.addEventListener('touchstart', (e) => { 
+
+        canJ.addEventListener('touchstart', e => {
             e.preventDefault(); 
             if (juegoTerminado) {
                 reiniciarJuego();
             } else if (enSuelo) {
-                letY = fuerzaSalto;
-                enSuelo = false;
+                saltar();
             }
         });
-        
-        function mOP() {
+
+        function saltar() {
+            velocidadY = fuerzaSalto;
+            enSuelo = false;
+        }
+
+        function manejarObstaculosYPremios() {
             if (frames % 160 === 0) {
-                baneras.push({ x: canJ.width, y: nivelSuelo + 15, anchoHitbox: 30, altoHitbox: 25, anchoVisual: 60, altoVisual: 50 });
+                baneras.push({ 
+                    x: canJ.width, 
+                    y: nivelSuelo + 15, 
+                    anchoHitbox: 30, altoHitbox: 25,   
+                    anchoVisual: 60, altoVisual: 50     
+                });
             }
             if (frames % 100 === 0) {
                 let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 5 : nivelSuelo + 25;
-                za = { x: canJ.width, y: alturaZanahoria, anchoHitbox: 25, altoHitbox: 25, anchoVisual: 45, altoVisual: 45 };
-                zanahorias.push(za);
+                zanahorias.push({ 
+                    x: canJ.width, 
+                    y: alturaZanahoria, 
+                    anchoHitbox: 25, altoHitbox: 25,
+                    anchoVisual: 45, altoVisual: 45
+                });
             }
+
             if (frames % 500 === 0) velocidadJuego += 0.5;
-            
+
             for (let i = 0; i < baneras.length; i++) {
-                let b = baneras[i]; b.x -= velocidadJuego;
-                if(imgBanera.complete) ctJ.drawImage(imgBanera, 0, 0, imgBanera.width, imgBanera.height, b.x, b.y, b.anchoVisual, b.altoVisual);
+                let b = baneras[i];
+                b.x -= velocidadJuego; 
                 
+                if(imgBanera.complete) {
+                    ctJ.drawImage(imgBanera, 0, 0, imgBanera.width, imgBanera.height, b.x, b.y, b.anchoVisual, b.altoVisual); 
+                }
+
                 const cCenterX = conejo.x + (conejo.tamano / 2);
                 const cCenterY = conejo.y + (conejo.tamano / 2);
                 
@@ -546,14 +621,20 @@
                     cCenterY > b.y + (b.altoVisual/2 - b.altoHitbox/2) && 
                     cCenterY < b.y + (b.altoVisual/2 + b.altoHitbox/2)) {
                     
-                    juegoActivo = false; juegoTerminado = true; sonidoAgua.play().catch(e => {});
+                    juegoActivo = false; 
+                    juegoTerminado = true;
+                    constAgua.play().catch(e => {}); 
                 }
             }
-            
+
             for (let i = 0; i < zanahorias.length; i++) {
-                let z = zanahorias[i]; z.x -= velocidadJuego;
-                if(imgZanahoria.complete) ctJ.drawImage(imgZanahoria, 0, 0, imgZanahoria.width, imgZanahoria.height, z.x, z.y, z.anchoVisual, z.altoVisual);
+                let z = zanahorias[i];
+                z.x -= velocidadJuego;
                 
+                if(imgZanahoria.complete) {
+                    ctJ.drawImage(imgZanahoria, 0, 0, imgZanahoria.width, imgZanahoria.height, z.x, z.y, z.anchoVisual, z.altoVisual); 
+                }
+
                 const cCenterX = conejo.x + (conejo.tamano / 2);
                 const cCenterY = conejo.y + (conejo.tamano / 2);
 
@@ -562,79 +643,109 @@
                     cCenterY > z.y + (z.altoVisual/2 - z.altoHitbox/2) && 
                     cCenterY < z.y + (z.altoVisual/2 + z.altoHitbox/2)) {
                     
-                    score += 10; sonidoPuntos.play().catch(e => {}); zanahorias.splice(i, 1); i--;
+                    // Suma directa de 100 puntos al recoger zanahoria
+                    score += 100; 
+                    constPuntos.play().catch(e => {}); 
+                    zanahorias.splice(i, 1); 
+                    i--;
                 }
             }
         }
-        
-        function actF() {
-            let etapa = Math.floor(score / 500);
-            let fActual = (etapa % 2 === 0) ? imgFondoDia : imgFondoNoche;
-            if (fActual.complete) ctJ.drawImage(fActual, 0, 0, canJ.width, canJ.height);
-            else {
-                ctJ.fillStyle = (etapa % 2 === 0) ? '#70c5eb' : '#181124';
+
+        function actualizarFondo() {
+            let etapaFondo = Math.floor(score / 500);
+            let imgFondoActual = (etapaFondo % 2 === 0) ? imgFondoDia : imgFondoNoche;
+
+            if (imgFondoActual.complete) {
+                ctJ.drawImage(imgFondoActual, 0, 0, canJ.width, canJ.height);
+            } else {
+                ctJ.fillStyle = (etapaFondo % 2 === 0) ? '#70c5eb' : '#181124';
                 ctJ.fillRect(0, 0, canJ.width, canJ.height);
             }
-            ctJ.fillStyle = (etapa % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
+            
+            ctJ.fillStyle = (etapaFondo % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
             ctJ.fillRect(0, nivelSuelo + conejo.tamano, canJ.width, 4);
         }
-        
-        function reiniciarJuego() { 
-            score = 0; frames = 0; baneras = []; zanahorias = []; conejo.y = nivelSuelo; letY = 0; velocidadJuego = 4; enSuelo = true; juegoTerminado = false; juegoActivo = true; musicaFondo.play().catch(e => {}); 
-        }
-        
-        function actJ() {
-            requestAnimationFrame(actJ);
+
+        function actualizarJuego() { 
+            requestAnimationFrame(actualizarJuego);
+
             if (document.getElementById('game-modal').style.display !== 'flex') return;
+
             ctJ.clearRect(0, 0, canJ.width, canJ.height);
-            
+
             if (juegoTerminado) {
-                ctJ.fillStyle = 'rgba(0, 0, 0, 0.75)'; ctJ.fillRect(0, 0, canJ.width, canJ.height);
-                ctJ.fillStyle = '#ff3b3b'; ctJ.font = 'bold 32px Arial'; ctJ.textAlign = 'center';
+                // Pantalla de Game Over
+                ctJ.fillStyle = 'rgba(0, 0, 0, 0.75)';
+                ctJ.fillRect(0, 0, canJ.width, canJ.height);
+
+                ctJ.fillStyle = '#ff3b3b';
+                ctJ.font = 'bold 32px Arial';
+                ctJ.textAlign = 'center';
                 ctJ.fillText("¡GAME OVER!", canJ.width / 2, canJ.height / 2 - 15);
-                ctJ.fillStyle = 'white'; ctJ.font = '20px Arial';
+
+                ctJ.fillStyle = 'white';
+                ctJ.font = '20px Arial';
                 ctJ.fillText("Zanahorias obtenidas: " + score, canJ.width / 2, canJ.height / 2 + 20);
-                ctJ.fillStyle = '#4da6ff'; ctJ.font = '16px Arial';
+
+                ctJ.fillStyle = '#4da6ff';
+                ctJ.font = '16px Arial';
                 ctJ.fillText("Presiona ESPACIO para reiniciar", canJ.width / 2, canJ.height / 2 + 55);
-            } else if (juegoActivo) {
-                frames++; actF(); mOP();
-                
-                letY += gravedad; conejo.y += letY;
-                if (conejo.y >= nivelSuelo) { conejo.y = nivelSuelo; letY = 0; enSuelo = true; }
-                else enSuelo = false;
-                
-                // Conejita dibujada con trazo de vectores simple (orientada a la derecha)
+            } 
+            else if (juegoActivo) {
+                frames++; 
+
+                actualizarFondo();
+                manejarObstaculosYPremios();
+
+                velocidadY += gravedad; 
+                conejo.y += velocidadY; 
+
+                if (conejo.y >= nivelSuelo) {
+                    conejo.y = nivelSuelo; 
+                    velocidadY = 0;        
+                    enSuelo = true;        
+                } else {
+                    enSuelo = false;
+                }
+
+                // DIBUJO VECTORIAL DE LA CONEJITA 🐇 (Mirando hacia la derecha)
                 ctJ.save();
                 ctJ.translate(conejo.x + conejo.tamano, conejo.y);
                 ctJ.scale(-1, 1);
                 
+                // Cuerpo
                 ctJ.fillStyle = '#ffb3d1';
                 ctJ.beginPath();
                 ctJ.arc(20, 25, 20, 0, Math.PI * 2);
                 ctJ.fill();
 
+                // Cabeza
                 ctJ.fillStyle = '#ffffff';
                 ctJ.beginPath();
                 ctJ.arc(40, 15, 18, 0, Math.PI * 2);
                 ctJ.fill();
 
+                // Orejas
                 ctJ.fillStyle = '#ffffff';
                 ctJ.beginPath();
                 ctJ.ellipse(30, -5, 6, 15, 0, 0, Math.PI * 2);
                 ctJ.ellipse(45, -5, 6, 15, 0, 0, Math.PI * 2);
                 ctJ.fill();
 
+                // Ojo
                 ctJ.fillStyle = '#000000';
                 ctJ.beginPath();
                 ctJ.arc(42, 12, 2, 0, Math.PI * 2);
                 ctJ.fill();
-                
+
                 ctJ.restore();
             }
-            document.getElementById('score-display').innerText = "Zanahorias: " + score;
+            
+            document.getElementById('score-display').innerText = "Puntos: " + score;
         }
-        requestAnimationFrame(actJ);
 
+        requestAnimationFrame(actualizarJuego);
     </script>
 </body>
 
