@@ -232,19 +232,19 @@
             text-shadow: 0 0 5px #ff9ac7;
             font-size: 16px;
         }
-        #toggle-calendar-btn{
-            padding:10px 15px;
-            border:none;
-            border-radius:10px;
-            background:#4da6ff;
-            color:white;
-            cursor:pointer;
-            font-weight:bold;
+        #toggle-calendar-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 10px;
+            background: #4da6ff;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
             box-shadow:0 0 10px #4da6ff;
         }
 
-        #calendar-container{
-            display:none;
+        #calendar-container {
+            display: none;
         }
         .cal-row { display: flex; justify-content: space-between; margin-bottom: 5px; gap: 15px; }
         .cal-days { font-weight: bold; }
@@ -315,7 +315,7 @@
         <h2>Ingresa la clave secreta 🤨💖</h2>
         <input type="password" id="password-input" placeholder="Contraseña">
         <div id="error-msg">Clave incorrecta 💔 Intenta de nuevo.</div>
-        <button id="login-btn" onclick="checkPassword()">Entrar</button>
+        <button id="login-btn">Entrar</button>
     </div>
 
     <div id="countdown-container">
@@ -346,7 +346,7 @@
     </div>
 
     <div id="game-modal">
-        <button id="close-game" onclick="closeGame()">X</button>
+        <button id="close-game">X</button>
         <div id="score-display">Puntos: 0</div>
         <canvas id="gameCanvas" width="600" height="250"></canvas>
         <div id="game-instructions">Toca la pantalla o presiona Espacio para saltar</div>
@@ -354,66 +354,80 @@
 
     <script>
         /* --- LÓGICA DE LA CONTRASEÑA --- */
-        const passwordInput = document.getElementById("password-input");
-        const errorMsg = document.getElementById("error-msg");
+        const passIn = document.getElementById("password-input");
+        const errM = document.getElementById("error-msg");
+        const logS = document.getElementById("login-screen");
 
-        function checkPassword() {
-            const inputVal = passwordInput.value.trim().toLowerCase();
-            const secretCode = "dani0122"; 
-
-            if (inputVal === secretCode) {
-                const loginScreen = document.getElementById("login-screen");
-                loginScreen.classList.add("unlocked");
+        document.getElementById("login-btn").addEventListener("click", () => {
+            const inputVal = passIn.value.trim().toLowerCase();
+            if (inputVal === "dani0122") {
+                logS.classList.add("unlocked");
+                document.getElementById('game-modal').style.display = 'flex';
                 
                 const secretGif = document.getElementById("secret-gif");
                 secretGif.src = secretGif.getAttribute("data-src");
                 document.getElementById("content-wrapper").style.display = "flex";
 
+                setTimeout(() => { 
+                    logS.style.display = "none"; 
+                    reiniciarJuego(); 
+                }, 1000);
+            } else {
+                errM.style.opacity = "1";
+                passIn.value = "";
+                passIn.classList.add("error");
                 setTimeout(() => {
-                    loginScreen.style.display = "none";
-                }, 1000); 
-            } else {
-                passwordInput.classList.add("error");
-                errorMsg.style.opacity = "1";
-                setTimeout(() => { passwordInput.classList.remove("error"); }, 400);
-            }
-        }
-
-        passwordInput.addEventListener("input", () => errorMsg.style.opacity = "0");
-        passwordInput.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); checkPassword(); } });
-
-        /* --- LÓGICA DEL CONTADOR --- */
-        function updateCountdown() {
-            const today = new Date();
-            const currentDay = today.getDate();
-            const countdownText = document.getElementById("countdown-text");
-            const daysLeftElement = document.getElementById("days-left");
-
-            if (currentDay === 9) {
-                countdownText.innerHTML = "¡Feliz día 9, mi amor! 🎉💖";
-            } else {
-                let targetDate = new Date(today.getFullYear(), today.getMonth(), 9);
-                if (currentDay > 9) targetDate.setMonth(targetDate.getMonth() + 1);
-                const diffTime = targetDate - today;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                daysLeftElement.innerText = diffDays;
-            }
-        }
-        updateCountdown();
-
-        /* --- LÓGICA DEL CALENDARIO --- */
-        document.getElementById("toggle-calendar-btn").addEventListener("click", () => {
-            const cal = document.getElementById("calendar-container");
-
-            if(cal.style.display === "none" || cal.style.display === ""){
-                cal.style.display = "block";
-                document.getElementById("toggle-calendar-btn").innerText = "Ocultar 🌸";
-            } else {
-                cal.style.display = "none";
-                document.getElementById("toggle-calendar-btn").innerText = "Mostrar 🌸";
+                    errM.style.opacity = "0";
+                    passIn.classList.remove("error");
+                }, 3000);
             }
         });
         
+        passIn.addEventListener("keypress", (e) => { if (e.key === "Enter") document.getElementById("login-btn").click(); });
+
+        /* --- LÓGICA DEL CONTADOR --- */
+        const dL = document.getElementById("days-left");
+        const cT = document.getElementById("countdown-text");
+        function uC() {
+            const t = new Date();
+            if (t.getDate() === 9) cT.innerHTML = "¡Feliz día 9, mi amor! 🎉💖";
+            else {
+                let d = new Date(t.getFullYear(), t.getMonth(), 9);
+                if (t.getDate() > 9) d.setMonth(d.getMonth() + 1);
+                dL.innerText = Math.ceil((d - t) / (1000 * 60 * 60 * 24));
+            }
+        } uC();
+
+        const cC = document.getElementById("heartLine");
+        const ctC = cC.getContext("2d");
+        const c = document.getElementById("container");
+        cC.width = c.offsetWidth; cC.height = c.offsetHeight;
+        const sz = c.offsetWidth / 2;
+        let tim = 0;
+        function dr() {
+            ctC.clearRect(0, 0, cC.width, cC.height);
+            ctC.strokeStyle = "#ff6ec7"; ctC.lineWidth = 3;
+            ctC.beginPath();
+            for (let i = 0; i < tim; i += 0.02) {
+                let x = sz + 16 * Math.pow(Math.sin(i), 3) * (sz / 18);
+                let y = sz - (13 * Math.cos(i) - 5 * Math.cos(2 * i) - 2 * Math.cos(3 * i) - Math.cos(4 * i)) * (sz / 18);
+                if (i === 0) ctC.moveTo(x, y); else ctC.lineTo(x, y);
+            }
+            ctC.stroke();
+            tim += 0.05;
+            if (tim < Math.PI * 2) requestAnimationFrame(dr);
+            else {
+                for (let i = 0; i < 170; i++) {
+                    let a = Math.PI * 2 * i / 170;
+                    let x = sz + 16 * Math.pow(Math.sin(a), 3) * (sz / 18);
+                    let y = sz - (13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) * (sz / 18);
+                    let s = document.createElement("span"); s.className = "word"; s.innerText = "I love you Dani";
+                    s.style.left = x + "px"; s.style.top = y + "px"; s.style.animationDelay = (i * 0.02) + "s";
+                    c.appendChild(s);
+                }
+            }
+        } dr();
+
         /* --- FONDO ESTRELLADO --- */
         for(let i=0; i<100; i++){
             let star = document.createElement("div");
@@ -423,71 +437,7 @@
             document.body.appendChild(star);
         }
 
-        /* --- DIBUJAR CORAZÓN --- */
-        const canvasCorazon = document.getElementById("heartLine");
-        const ctxCorazon = canvasCorazon.getContext("2d");
-        const container = document.getElementById("container");
-        canvasCorazon.width = container.offsetWidth;
-        canvasCorazon.height = container.offsetHeight;
-
-        const size = container.offsetWidth/2;
-        let t = 0;
-
-        function draw(){
-            ctxCorazon.clearRect(0, 0, canvasCorazon.width, canvasCorazon.height);
-            ctxCorazon.strokeStyle = "#ff6ec7";
-            ctxCorazon.lineWidth = 3;
-            ctxCorazon.beginPath();
-
-            for(let i=0; i<t; i+=0.02){
-                let x = 16*Math.pow(Math.sin(i), 3);
-                let y = 13*Math.cos(i)-5*Math.cos(2*i)-2*Math.cos(3*i)-Math.cos(4*i);
-                let px = size + x*(size/18);
-                let py = size - y*(size/18);
-                if(i===0) ctxCorazon.moveTo(px, py);
-                else ctxCorazon.lineTo(px, py);
-            }
-            ctxCorazon.stroke();
-            t += 0.05;
-
-            if(t < Math.PI*2){
-                requestAnimationFrame(draw);
-            } else {
-                createWords();
-                heartExplosion();
-            }
-        }
-        draw();
-
-        function createWords(){
-            for(let i=0; i<170; i++){
-                let angle = Math.PI*2*i/170;
-                let x = 16*Math.pow(Math.sin(angle), 3);
-                let y = 13*Math.cos(angle)-5*Math.cos(2*angle)-2*Math.cos(3*angle)-Math.cos(4*angle);
-
-                let span = document.createElement("span");
-                span.className = "word";
-                span.innerText = "I love you Dani";
-                span.style.left = size+x*(size/18)+"px";
-                span.style.top = size-y*(size/18)+"px";
-                span.style.animationDelay = (i*0.02)+"s";
-                container.appendChild(span);
-            }
-        }
-
-        function heartExplosion(){
-            for(let i=0; i<40; i++){
-                let h = document.createElement("div");
-                h.className = "floatHeart";
-                h.innerHTML = "💗";
-                h.style.left = (window.innerWidth/2+(Math.random()*150-75))+"px";
-                h.style.top = (window.innerHeight/2+(Math.random()*150-75))+"px";
-                document.body.appendChild(h);
-                setTimeout(()=>h.remove(), 2000);
-            }
-        }
-
-        /* Corazones al hacer clic en el fondo */
+        /* --- CORAZÓN AL CLIC --- */
         document.addEventListener("click", function(e){
             if (e.target.closest('#video-container') || 
                 e.target.closest('#game-modal') ||
@@ -504,262 +454,134 @@
             setTimeout(()=>heart.remove(), 2000);
         });
 
-      // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (SINCRONIZACIÓN Y PROPORCIONES FIJAS)
+        /* --- LÓGICA DEL CALENDARIO --- */
+        document.getElementById("toggle-calendar-btn").addEventListener("click", () => {
+            const cal = document.getElementById("calendar-container");
+            if(cal.style.display === "none" || cal.style.display === ""){
+                cal.style.display = "block";
+                document.getElementById("toggle-calendar-btn").innerText = "Ocultar 🌸";
+            } else {
+                cal.style.display = "none";
+                document.getElementById("toggle-calendar-btn").innerText = "Mostrar 🌸";
+            }
+        });
+
+        // ==========================================
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (FLUJO CONTINUO)
         // ==========================================
 
-        document.getElementById("video-container").addEventListener("click", () => {
-            document.getElementById('game-modal').style.display = 'flex';
-            reiniciarJuego();
-        });
-
-        function closeGame() {
-            document.getElementById('game-modal').style.display = 'none';
-            juegoActivo = false;
-            musicaFondo.pause(); 
-        }
-
-        const canvasJuego = document.getElementById('gameCanvas');
-        const ctxJuego = canvasJuego.getContext('2d');
-
-        const ANCHO_CANVAS = 600;
-        const ALTO_CANVAS = 250;
-        canvasJuego.width = ANCHO_CANVAS;
-        canvasJuego.height = ALTO_CANVAS;
-
-        // --- CARGA DE ASSETS INDEPENDIENTES ---
-        const imgRun = new Image(); imgRun.src = './runbunny.png';         
-        const imgJump = new Image(); imgJump.src = './jumpbunny.png';       
-        const imgBanera = new Image(); imgBanera.src = './banera.png';      
-        const imgZanahoria = new Image(); imgZanahoria.src = './carrot.png';  
-        const imgFondoDia = new Image(); imgFondoDia.src = './daybg.png';
-        const imgFondoNoche = new Image(); imgFondoNoche.src = './nightbg.png';
-
-        const sonidoAgua = new Audio('./splash.mp3');
-        const sonidoPuntos = new Audio('./points.mp3');
-        const musicaFondo = new Audio('./soundtrack.mp3');
-        musicaFondo.loop = true; 
-
-        let assetsCargados = 0;
-        const totalAssets = 6; // Contamos solo las imágenes, el audio se maneja aparte
-
-        function verificarPrecarga(e) {
-            assetsCargados++;
-        }
-
-        imgRun.onload = verificarPrecarga;
-        imgJump.onload = verificarPrecarga;
-        imgBanera.onload = verificarPrecarga;
-        imgZanahoria.onload = verificarPrecarga;
-        imgFondoDia.onload = verificarPrecarga;
-        imgFondoNoche.onload = verificarPrecarga;
-
-        let score = 0;
-        let juegoActivo = false;
-        let frames = 0; 
-        let velocidadJuego = 4;
-        let baneras = [];
-        let zanahorias = [];
-
-        // Dimensión visual fija de la conejita (proporción estable de 60x60 para evitar distorsión)
-        let conejo = { 
-            x: 50, 
-            y: 50, 
-            anchoRender: 60,   
-            altoRender: 60,
-            hitboxAncho: 25,   
-            hitboxAlto: 40
-        };
+        const canJ = document.getElementById('gameCanvas');
+        const ctJ = canJ.getContext('2d');
         
-        let gravedad = 1.2;      
-        let velocidadY = 0;      
-        let fuerzaSalto = -14;   
-        let enSuelo = false;     
-        let nivelSuelo = canvasJuego.height - 110;
-
-        let frameActual = 0;
-        let contadorAnimacion = 0;
-
-        function reiniciarJuego() {
-            score = 0;
-            frames = 0;
-            baneras = [];
-            zanahorias = [];
-            conejo.y = nivelSuelo;
-            velocidadY = 0;
-            velocidadJuego = 4;
-            frameActual = 0;
-            contadorAnimacion = 0;
-            juegoActivo = true;
-            musicaFondo.play().catch(e => console.log("Esperando interacción de usuario para audio"));
-        }
-
-        window.addEventListener('keydown', e => {
-            if (e.code === 'Space' && document.getElementById('game-modal').style.display === 'flex') {
+        const imR = new Image(); imR.src = 'runbunny.png';
+        const imJ = new Image(); imJ.src = 'jumpbunny.png';
+        const imB = new Image(); imB.src = 'banera.png';
+        const imZ = new Image(); imZ.src = 'carrot.png';
+        const imD = new Image(); imD.src = 'daybg.png';
+        const imN = new Image(); imN.src = 'nightbg.png';
+        
+        const snA = new Audio('splash.mp3');
+        const snP = new Audio('points.mp3');
+        const msF = new Audio('soundtrack.mp3'); msF.loop = true;
+        
+        let sc = 0, f = 0, vj = 4, ja = false, enS = false, fAct = 0, cAn = 0, vY = 0;
+        let ba = [], za = [];
+        
+        // Medida del marco de dibujo (ancho 75, alto 80) sin distorsión
+        let cn = { x: 50, y: 50, an: 75, al: 80, ht: { an: 30, al: 50 } };
+        let gr = 1.5, fS = -16, nS = canJ.height - 90;
+        
+        function saltar() { vY = fS; enS = false; }
+        
+        document.getElementById("close-game").addEventListener("click", () => { 
+            document.getElementById('game-modal').style.display = 'none'; 
+            ja = false; 
+            msF.pause(); 
+        });
+        
+        window.addEventListener('keydown', (e) => { 
+            if (e.code === 'Space' && ja) { 
                 e.preventDefault(); 
-                if (enSuelo && juegoActivo) saltar();
-            }
+                if (enS) saltar(); 
+            } 
         });
-
-        canvasJuego.addEventListener('touchstart', e => {
+        
+        canJ.addEventListener('touchstart', (e) => { 
             e.preventDefault(); 
-            if (enSuelo && juegoActivo) saltar();
+            if (ja && enS) saltar(); 
         });
-
-        function saltar() {
-            velocidadY = fuerzaSalto;
-            enSuelo = false;
-        }
-
-        function manejarObstaculosYPremios() {
-            if (assetsCargados < totalAssets) return;
-
-            // Generador de Bañeras (Obstáculos)
-            if (frames % 160 === 0) {
-                baneras.push({ 
-                    x: canvasJuego.width, 
-                    y: nivelSuelo + 25, 
-                    anchoHitbox: 25, altoHitbox: 20,   
-                    anchoVisual: 60, altoVisual: 45     
-                });
-            }
-            // Generador de Zanahorias (Premios)
-            if (frames % 100 === 0) {
-                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 15 : nivelSuelo + 25;
-                zanahorias.push({ 
-                    x: canvasJuego.width, 
-                    y: alturaZanahoria, 
-                    anchoHitbox: 25, altoHitbox: 25,
-                    anchoVisual: 40, altoVisual: 40
-                });
-            }
-
-            if (frames % 500 === 0) velocidadJuego += 0.5;
-
-            // DIBUJO Y COLISIÓN DE BAÑERAS
-            for (let i = 0; i < baneras.length; i++) {
-                let b = baneras[i];
-                b.x -= velocidadJuego; 
-                
-                if(imgBanera.complete) {
-                    ctxJuego.drawImage(imgBanera, 0, 0, imgBanera.width, imgBanera.height, b.x, b.y, b.anchoVisual, b.altoVisual); 
+        
+        function mOP() {
+            if (f % 160 === 0) ba.push({ x: canJ.width, y: nS + 35, an: 55, al: 35, ht: { an: 35, al: 20 } });
+            if (f % 100 === 0) za.push({ x: canJ.width, y: Math.random() > 0.5 ? nS - 10 : nS + 20, an: 40, al: 40, ht: { an: 25, al: 25 } });
+            if (f % 500 === 0) vj += 0.5;
+            
+            for (let i = ba.length - 1; i >= 0; i--) {
+                let b = ba[i]; b.x -= vj;
+                // Dibujamos la bañera solo si está cargada (evitamos detener el juego)
+                ctJ.drawImage(imB, b.x, b.y, b.an, b.al);
+                if (cn.x < b.x + b.ht.an && cn.x + cn.ht.an > b.x && cn.y < b.y + b.ht.al && cn.y + cn.ht.al > b.y) {
+                    ja = false; snA.play(); alert("¡Te caíste en la bañera! 💦 Recogiste " + sc + " zanahorias."); reiniciarJuego();
                 }
-
-                const cCenterX = conejo.x + (conejo.anchoRender / 2);
-                const cCenterY = conejo.y + (conejo.altoRender / 2);
-                
-                // Hitbox estrecha para la bañera (fácil de saltar)
-                if (cCenterX > b.x + (b.anchoVisual/2 - b.anchoHitbox/2) && 
-                    cCenterX < b.x + (b.anchoVisual/2 + b.anchoHitbox/2) &&
-                    cCenterY > b.y + (b.altoVisual/2 - b.altoHitbox/2) && 
-                    cCenterY < b.y + (b.altoVisual/2 + b.altoHitbox/2)) {
-                    
-                    juegoActivo = false; 
-                    sonidoAgua.play().catch(e => {}); 
-                    alert("¡Te caíste en la bañera! 💦 Recogiste " + score + " zanahorias.");
-                    reiniciarJuego();
-                }
-            }
-
-            // DIBUJO Y COLISIÓN DE ZANAHORIAS
-            for (let i = 0; i < zanahorias.length; i++) {
-                let z = zanahorias[i];
-                z.x -= velocidadJuego;
-                
-                if(imgZanahoria.complete) {
-                    ctxJuego.drawImage(imgZanahoria, 0, 0, imgZanahoria.width, imgZanahoria.height, z.x, z.y, z.anchoVisual, z.altoVisual); 
-                }
-
-                const cCenterX = conejo.x + (conejo.anchoRender / 2);
-                const cCenterY = conejo.y + (conejo.altoRender / 2);
-
-                if (cCenterX > z.x + (z.anchoVisual/2 - z.anchoHitbox/2) && 
-                    cCenterX < z.x + (z.anchoVisual/2 + z.anchoHitbox/2) &&
-                    cCenterY > z.y + (z.altoVisual/2 - z.altoHitbox/2) && 
-                    cCenterY < z.y + (z.altoVisual/2 + z.altoHitbox/2)) {
-                    
-                    score += 10; 
-                    sonidoPuntos.play().catch(e => {}); 
-                    zanahorias.splice(i, 1); 
-                    i--;
-                }
-            }
-        }
-
-        function actualizarFondo() {
-            let etapaFondo = Math.floor(score / 500);
-            let imgFondoActual = (etapaFondo % 2 === 0) ? imgFondoDia : imgFondoNoche;
-
-            if (imgFondoActual.complete) {
-                ctxJuego.drawImage(imgFondoActual, 0, 0, canvasJuego.width, canvasJuego.height);
-            } else {
-                ctxJuego.fillStyle = (etapaFondo % 2 === 0) ? '#70c5eb' : '#181124';
-                ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
+                if (b.x + b.an < 0) ba.splice(i, 1);
             }
             
-            // Suelo visible
-            ctxJuego.fillStyle = (etapaFondo % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
-            ctxJuego.fillRect(0, nivelSuelo + 75, canvasJuego.width, 4);
+            for (let i = za.length - 1; i >= 0; i--) {
+                let z = za[i]; z.x -= vj;
+                ctJ.drawImage(imZ, z.x, z.y, z.an, z.al);
+                if (cn.x < z.x + z.ht.an && cn.x + cn.ht.an > z.x && cn.y < z.y + z.ht.al && cn.y + cn.ht.al > z.y) {
+                    sc += 10; snP.play(); za.splice(i, 1);
+                }
+                if (z.x + z.an < 0) za.splice(i, 1);
+            }
         }
-
-        function, actualizarJuego() { // Nota: Corregido el error tipográfico de sintaxis `, actualizarJuego`
-            if (document.getElementById('game-modal').style.display === 'flex' && juegoActivo) {
-                ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
+        
+        function actF() {
+            let e = Math.floor(sc / 500);
+            let i = (e % 2 === 0) ? imD : imN;
+            ctJ.drawImage(i, 0, 0, canJ.width, canJ.height);
+            ctJ.fillStyle = (e % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
+            ctJ.fillRect(0, nS + 60, canJ.width, 2);
+        }
+        
+        function reiniciarJuego() { 
+            sc = 0; f = 0; vj = 4; cn.y = nS; vY = 0; ja = true; msF.play(); ba = []; za = []; 
+        }
+        
+        function actJ() {
+            // El juego se ejecutará sin pausas ni esperas de imágenes
+            if (ja) {
+                f++; 
+                ctJ.clearRect(0, 0, canJ.width, canJ.height); 
+                actF(); 
+                mOP();
                 
-                if (assetsCargados < totalAssets) {
-                    requestAnimationFrame(actualizarJuego);
-                    return;
+                vY += gr; 
+                cn.y += vY;
+                
+                if (cn.y > nS) { 
+                    cn.y = nS; 
+                    vY = 0; 
+                    enS = true; 
                 }
-
-                frames++; 
-
-                // 1. Fondo
-                actualizarFondo();
-
-                // 2. Obstáculos
-                manejarObstaculosYPremios();
-
-                // 3. Gravedad
-                velocidadY += gravedad; // Mantenemos vY consistente
-                conejo.y += vY;
-
-                if (conejo.y > nivelSuelo) {
-                    conejo.y = nivelSuelo; 
-                    vY = 0;      
-                    enSuelo = true;        
-                }
-
-                // 4. Animación de la conejita con proporciones fijas e independientes
-                if (!enSuelo) {
-                    // Salto: Recortamos usando una medida fija (cuadro de 120x120 limpio de tu asset) pintado a 60x60
-                    if(imgJump.complete) {
-                        ctxJuego.drawImage(imgJump, 0, 0, 120, 120, conejo.x, conejo.y - 15, conejo.anchoRender, conejo.altoRender);
-                    }
+                
+                if (!enS) { 
+                    // SALTO: Dibuja el frame de salto respetando la caja fija (75x80)
+                    ctJ.drawImage(imJ, 0, 0, imJ.width, imJ.height, cn.x, cn.y - 15, cn.an, cn.al); 
                 } else {
-                    // Carrera: Asume 8 fotogramas exactos. Ancho fotograma fijo = (Ancho total de la imagen / 8)
-                    if(imgRun.complete) {
-                        const totalFotogramasCarrera = 8;
-                        const anchoFotogramaNativo = imgRun.width / totalFotogramasCarrera;
-                        const posXSprite = frameActual * anchoFotogramaNativo;
-                        
-                        ctxJuego.drawImage(imgRun, posXSprite, 0, anchoFotogramaNativo, imgRun.height, conejo.x, conejo.y, conejo.anchoRender, conejo.altoRender);
-
-                        contadorAnimacion++;
-                        if (contadorAnimacion % 6 === 0) {
-                            frameActual++;
-                            if (frameActual >= totalFotogramasCarrera) frameActual = 0; 
-                        }
-                    }
+                    // CARRERA: Se divide el ancho total entre 8 de forma nativa. Mantiene la caja (75x80)
+                    let w = imR.width / 8;
+                    ctJ.drawImage(imR, fAct * w, 0, w, imR.height, cn.x, cn.y - 5, cn.an, cn.al);
+                    if (++cAn % 6 === 0) fAct = (fAct + 1) % 8;
                 }
-                
-                document.getElementById('score-display').innerText = "Zanahorias: " + score;
-            }
-            
-            requestAnimationFrame(actualizarJuego); 
-        }
+                document.getElementById('score-display').innerText = "Zanahorias: " + sc;
+            } 
+            requestAnimationFrame(actJ);
+        } 
+        
+        // Arrancamos el motor sin restricciones
+        requestAnimationFrame(actJ);
 
-        // Bucle principal inicial
-        requestAnimationFrame(actualizarJuego);
     </script>
 </body>
 </html>
