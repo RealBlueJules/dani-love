@@ -352,7 +352,7 @@
         <div id="game-instructions">Toca la pantalla o presiona Espacio para saltar</div>
     </div>
 
- <script>
+<script>
         /* --- LÓGICA DE LA CONTRASEÑA --- */
         const passwordInput = document.getElementById("password-input");
         const errorMsg = document.getElementById("error-msg");
@@ -401,7 +401,7 @@
         }
         updateCountdown();
 
-        /* --- LÓGICA DEL CALENDARIO --- */
+        /* --- LÓGICA DEL CALENDARIO (INTACTA) --- */
         document.getElementById("toggle-calendar-btn").addEventListener("click", () => {
             const cal = document.getElementById("calendar-container");
 
@@ -428,10 +428,11 @@
         const ctxCorazon = canvasCorazon.getContext("2d");
         const container = document.getElementById("container");
         canvasCorazon.width = container.offsetWidth;
-        canvasCorazon.height = container.offsetHeight;
+        canvasCorazon.height = container.offsetWidth;
 
         const size = container.offsetWidth/2;
         let t = 0;
+        let animacionCorazonFrame; // Variable para controlar la animación principal
 
         function draw(){
             ctxCorazon.clearRect(0, 0, canvasCorazon.width, canvasCorazon.height);
@@ -451,7 +452,8 @@
             t += 0.05;
 
             if(t < Math.PI*2){
-                requestAnimationFrame(draw);
+                // Guardamos el ID del frame para poder pausarlo si es necesario
+                animacionCorazonFrame = requestAnimationFrame(draw);
             } else {
                 createWords();
                 heartExplosion();
@@ -493,7 +495,8 @@
                 e.target.closest('#game-modal') ||
                 e.target.id === 'login-screen' || 
                 e.target.tagName.toLowerCase() === 'input' || 
-                e.target.tagName.toLowerCase() === 'button') return;
+                e.target.tagName.toLowerCase() === 'button' ||
+                e.target.closest('#calendar-container')) return;
                 
             let heart = document.createElement("div");
             heart.className = "floatHeart";
@@ -505,10 +508,15 @@
         });
 
         // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (AMPLIADO A 1.5X Y GAME OVER)
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (PANTALLA AMPLIADA 900x375)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
+            // Al abrir el juego, pausamos la animación del corazón de fondo para liberar FPS
+            cancelAnimationFrame(animacionCorazonFrame);
+            // Ocultamos las palabras flotantes temporalmente pausando su animación si lo requieren
+            document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'paused');
+
             document.getElementById('game-modal').style.display = 'flex';
             reiniciarJuego();
         });
@@ -518,19 +526,24 @@
             juegoActivo = false;
             juegoTerminado = false;
             musicaFondo.pause(); 
+
+            // Al cerrar el juego, reanudamos o reactivamos las animaciones de fondo intactas
+            document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'running');
+            if (t < Math.PI * 2) {
+                draw(); // Retoma el trazado del corazón exactamente donde se quedó
+            }
         }
 
         const canvasJuego = document.getElementById('gameCanvas');
         const ctxJuego = canvasJuego.getContext('2d');
 
-        // Resolución interna nítida (1.5x más grande que la original: 900x375)
         const ANCHO_LOGICO = 900;
         const ALTO_LOGICO = 375; 
         
         canvasJuego.width = ANCHO_LOGICO;
         canvasJuego.height = ALTO_LOGICO;
 
-        // --- CARGA DE ASSETS INDEPENDIENTES ---
+        // --- CARGA DE ASSETS ---
         const imgRun = new Image(); imgRun.src = './runbunny.png';         
         const imgJump = new Image(); imgJump.src = './jumpbunny.png';       
         const imgBanera = new Image(); imgBanera.src = './banera.png';      
@@ -558,11 +571,11 @@
         let juegoActivo = false;
         let juegoTerminado = false;
         let frames = 0; 
-        let velocidadJuego = 6; // Aumentado ligeramente para mantener ritmo en pantalla grande
+        let velocidadJuego = 6; 
         let baneras = [];
         let zanahorias = [];
 
-        // Sprite de la conejita escalado de forma limpia a 120x120 (Se ve grande y respeta proporción cuadrada)
+        // Proporción cuadrada de la coneja ampliada (120x120)
         let conejo = { 
             x: 80, 
             y: 50, 
@@ -575,7 +588,7 @@
         let velocidadY = 0;      
         let fuerzaSalto = -20;   
         let enSuelo = false;     
-        let nivelSuelo = canvasJuego.height - 150; // Posición de suelo adaptada a la altura de 375px
+        let nivelSuelo = canvasJuego.height - 150; 
 
         let frameActual = 0;
         let contadorAnimacion = 0;
@@ -623,7 +636,6 @@
         function manejarObstaculosYPremios() {
             if (!verificarPrecarga()) return;
 
-            // Generador de Bañeras adaptado a escala
             if (frames % 140 === 0) {
                 baneras.push({ 
                     x: canvasJuego.width, 
@@ -632,7 +644,6 @@
                     anchoVisual: 90, altoVisual: 75 
                 });
             }
-            // Generador de Zanahorias adaptado a escala
             if (frames % 90 === 0) {
                 let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 20 : nivelSuelo + 40;
                 zanahorias.push({ 
@@ -645,7 +656,6 @@
 
             if (frames % 400 === 0) velocidadJuego += 0.5;
 
-            // Dibujar Bañeras
             for (let i = 0; i < baneras.length; i++) {
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
@@ -663,7 +673,6 @@
                 }
             }
 
-            // Dibujar Zanahorias
             for (let i = 0; i < zanahorias.length; i++) {
                 let z = zanahorias[i];
                 z.x -= velocidadJuego;
@@ -694,7 +703,6 @@
                 ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
             }
             
-            // Suelo
             ctxJuego.fillStyle = (etapaFondo % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
             ctxJuego.fillRect(0, nivelSuelo + 120, canvasJuego.width, 6);
         }
@@ -707,6 +715,7 @@
                 }
 
                 if (juegoTerminado) {
+                    // Panel semitransparente de Game Over
                     ctxJuego.fillStyle = 'rgba(0, 0, 0, 0.85)';
                     ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
 
@@ -730,22 +739,20 @@
                     actualizarFondo();
                     manejarObstaculosYPremios();
 
-                    velocidadY = (velocidadY || 0) + gravedad; 
+                    velocidadY = (velocY || 0) + gravedad; 
                     velocidadY = velocY;
                     conejo.y += velocidadY; 
 
                     if (conejo.y > nivelSuelo) {
                         conejo.y = nivelSuelo; 
-                        velocidadY = 0;        
+                        velocY = 0;        
                         enSuelo = true;        
                     }
 
-                    // Animación de la conejita de salto
+                    // Renderizado de animaciones con recortes nativos exactos (evita repeticiones)
                     if (!enSuelo) {
-                        // Salto: Recorte directo cuadrado limpio de 120x120 de tu archivo `jumpbunny.png`
                         ctxJuego.drawImage(imgJump, 0, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
                     } else {
-                        // Carrera: Recorte limpio de tiras de 120x120 exactos sobre `runbunny.png` evitando duplicados
                         let anchoFotograma = imgRun.width / 8;
                         let posXSprite = frameActual * anchoFotograma;
                         ctxJuego.drawImage(imgRun, posXSprite, 0, anchoFotograma, imgRun.height, conejo.x, conejo.y, conejo.ancho, conejo.alto);
