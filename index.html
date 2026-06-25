@@ -508,12 +508,12 @@
         });
 
        // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (FLUJO CONTINUO Y ESTABLE)
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (VERSIÓN SIMPLE: EMOJI 🐇)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
-            // Pausamos animaciones de fondo decorativas para liberar memoria del navegador (sin tocar tu calendario)
-            cancelAnimationFrame(animacionCorazonFrame);
+            // Pausamos animaciones de fondo decorativas para liberar memoria
+            if (typeof animacionCorazonFrame !== 'undefined') cancelAnimationFrame(animacionCorazonFrame);
             document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'paused');
             
             document.getElementById('game-modal').style.display = 'flex';
@@ -524,28 +524,25 @@
             document.getElementById('game-modal').style.display = 'none';
             juegoActivo = false;
             juegoTerminado = false;
-            musicaFondo.pause(); 
+            if (typeof musicaFondo !== 'undefined') musicaFondo.pause(); 
 
-            // Al cerrar el minijuego, reanudamos las animaciones de la pantalla principal
+            // Reanudamos animaciones de la pantalla principal al cerrar
             document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'running');
-            if (t < Math.PI * 2) {
-                draw(); 
+            if (typeof t !== 'undefined' && t < Math.PI * 2) {
+                if (typeof draw === 'function') draw(); 
             }
         }
 
         const canvasJuego = document.getElementById('gameCanvas');
         const ctxJuego = canvasJuego.getContext('2d');
 
-        // Resolución interna nítida y amplia (900x375)
-        const ANCHO_LOGICO = 900;
-        const ALTO_LOGICO = 375; 
+        const ANCHO_LOGICO = 600;
+        const ALTO_LOGICO = 250; 
         
         canvasJuego.width = ANCHO_LOGICO;
         canvasJuego.height = ALTO_LOGICO;
 
-        // --- CARGA DE ASSETS INDEPENDIENTES ---
-        const imgRun = new Image(); imgRun.src = './runbunny.png';         
-        const imgJump = new Image(); imgJump.src = './jumpbunny.png';       
+        // --- CARGA DE ASSETS ---
         const imgBanera = new Image(); imgBanera.src = './banera.png';      
         const imgZanahoria = new Image(); imgZanahoria.src = './carrot.png';  
         const imgFondoDia = new Image(); imgFondoDia.src = './daybg.png';
@@ -560,27 +557,28 @@
         let juegoActivo = false;
         let juegoTerminado = false;
         let frames = 0; 
-        let velocidadJuego = 6; 
+        let velocidadJuego = 4; 
         let baneras = [];
         let zanahorias = [];
 
-        // Proporción cuadrada centrada de la coneja (120x120 nativos dibujados a 120x120)
+        // Dimensiones lógicas para el emoji 🐇 de la conejita
         let conejo = { 
             x: 80, 
             y: 50, 
-            ancho: 120, 
-            alto: 120,
-            hitbox: { ancho: 40, alto: 60 } 
+            tamano: 65, // Tamaño grande para que destaque
+            hitboxAncho: 45, 
+            hitboxAlto: 45 
         };
         
         let gravedad = 1.5;      
         let velocidadY = 0;      
-        let fuerzaSalto = -20;   
+        let fuerzaSalto = -14;   
         let enSuelo = false;     
-        let nivelSuelo = canvasJuego.height - 150; 
+        let nivelSuelo = canvasJuego.height - 105; 
 
-        let frameActual = 0;
-        let contadorAnimacion = 0;
+        function verificarPrecarga() {
+            return imgFondoDia.complete && imgFondoNoche.complete;
+        }
 
         function reiniciarJuego() {
             score = 0;
@@ -589,9 +587,7 @@
             zanahorias = [];
             conejo.y = nivelSuelo;
             velocidadY = 0;
-            velocidadJuego = 6;
-            frameActual = 0;
-            contadorAnimacion = 0;
+            velocidadJuego = 4;
             juegoTerminado = false;
             juegoActivo = true;
             musicaFondo.play().catch(e => console.log("Esperando audio por interacción de usuario"));
@@ -623,41 +619,42 @@
         }
 
         function manejarObstaculosYPremios() {
-            // Generador de Bañeras
-            if (frames % 140 === 0) {
+            if (frames % 160 === 0) {
                 baneras.push({ 
                     x: canvasJuego.width, 
-                    y: nivelSuelo + 45, 
-                    anchoLogic: 40, altoLogic: 40,
-                    anchoVisual: 90, altoVisual: 75 
+                    y: nivelSuelo + 15, 
+                    anchoHitbox: 30, altoHitbox: 25,   
+                    anchoVisual: 60, altoVisual: 50     
                 });
             }
-            // Generador de Zanahorias
-            if (frames % 90 === 0) {
-                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 20 : nivelSuelo + 40;
+            if (frames % 100 === 0) {
+                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 5 : nivelSuelo + 25;
                 zanahorias.push({ 
                     x: canvasJuego.width, 
                     y: alturaZanahoria, 
-                    anchoLogic: 40, altoLogic: 40,
-                    anchoVisual: 70, altoVisual: 70
+                    anchoHitbox: 25, altoHitbox: 25,
+                    anchoVisual: 45, altoVisual: 45
                 });
             }
 
-            if (frames % 400 === 0) velocidadJuego += 0.5;
+            if (frames % 500 === 0) velocidadJuego += 0.5;
 
             // DIBUJO Y COLISIÓN DE BAÑERAS
             for (let i = 0; i < baneras.length; i++) {
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
                 
-                if (imgBanera.complete) {
+                if(imgBanera.complete) {
                     ctxJuego.drawImage(imgBanera, 0, 0, imgBanera.width, imgBanera.height, b.x, b.y, b.anchoVisual, b.altoVisual); 
                 }
 
-                if (conejo.x + (conejo.ancho - conejo.hitbox.ancho)/2 < b.x + b.anchoLogic && 
-                    conejo.x + (conejo.ancho + conejo.hitbox.ancho)/2 > b.x &&
-                    conejo.y + (conejo.alto - conejo.hitbox.alto)/2 < b.y + b.altoLogic && 
-                    conejo.y + (conejo.alto + conejo.hitbox.alto)/2 > b.y) {
+                const cCenterX = conejo.x + (conejo.tamano / 2);
+                const cCenterY = conejo.y + (conejo.tamano / 2);
+                
+                if (cCenterX > b.x + (b.anchoVisual/2 - b.anchoHitbox/2) && 
+                    cCenterX < b.x + (b.anchoVisual/2 + b.anchoHitbox/2) &&
+                    cCenterY > b.y + (b.altoVisual/2 - b.altoHitbox/2) && 
+                    cCenterY < b.y + (b.altoVisual/2 + b.altoHitbox/2)) {
                     
                     juegoActivo = false; 
                     juegoTerminado = true;
@@ -670,14 +667,17 @@
                 let z = zanahorias[i];
                 z.x -= velocidadJuego;
                 
-                if (imgZanahoria.complete) {
+                if(imgZanahoria.complete) {
                     ctxJuego.drawImage(imgZanahoria, 0, 0, imgZanahoria.width, imgZanahoria.height, z.x, z.y, z.anchoVisual, z.altoVisual); 
                 }
 
-                if (conejo.x + (conejo.ancho - conejo.hitbox.ancho)/2 < z.x + z.anchoLogic && 
-                    conejo.x + (conejo.ancho + conejo.hitbox.ancho)/2 > z.x &&
-                    conejo.y + (conejo.alto - conejo.hitbox.alto)/2 < z.y + z.altoLogic && 
-                    conejo.y + (conejo.alto + conejo.hitbox.alto)/2 > z.y) {
+                const cCenterX = conejo.x + (conejo.tamano / 2);
+                const cCenterY = conejo.y + (conejo.tamano / 2);
+
+                if (cCenterX > z.x + (z.anchoVisual/2 - z.anchoHitbox/2) && 
+                    cCenterX < z.x + (z.anchoVisual/2 + z.anchoHitbox/2) &&
+                    cCenterY > z.y + (z.altoVisual/2 - z.altoHitbox/2) && 
+                    cCenterY < z.y + (z.altoVisual/2 + z.altoHitbox/2)) {
                     
                     score += 10; 
                     sonidoPuntos.play().catch(e => {}); 
@@ -700,37 +700,41 @@
             
             // Suelo visible
             ctxJuego.fillStyle = (etapaFondo % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
-            ctxJuego.fillRect(0, nivelSuelo + 120, canvasJuego.width, 6);
+            ctxJuego.fillRect(0, nivelSuelo + conejo.tamano, canvasJuego.width, 4);
         }
 
-        function actualizarJuego() {
+        function actualizarJuego() { 
             if (document.getElementById('game-modal').style.display === 'flex') {
                 ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
 
                 if (juegoTerminado) {
-                    // Pantalla de Game Over nítida y centrada
-                    ctxJuego.fillStyle = 'rgba(0, 0, 0, 0.85)';
+                    // Pantalla de Game Over
+                    ctxJuego.fillStyle = 'rgba(0, 0, 0, 0.75)';
                     ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
 
                     ctxJuego.fillStyle = '#ff3b3b';
-                    ctxJuego.font = 'bold 48px Arial';
+                    ctxJuego.font = 'bold 32px Arial';
                     ctxJuego.textAlign = 'center';
-                    ctxJuego.fillText("¡GAME OVER!", canvasJuego.width / 2, canvasJuego.height / 2 - 20);
+                    ctxJuego.fillText("¡GAME OVER!", canvasJuego.width / 2, canvasJuego.height / 2 - 15);
 
                     ctxJuego.fillStyle = 'white';
-                    ctxJuego.font = '28px Arial';
-                    ctxJuego.fillText("Zanahorias obtenidas: " + score, canvasJuego.width / 2, canvasJuego.height / 2 + 30);
+                    ctxJuego.font = '20px Arial';
+                    ctxJuego.fillText("Zanahorias obtenidas: " + score, canvasJuego.width / 2, canvasJuego.height / 2 + 20);
 
                     ctxJuego.fillStyle = '#4da6ff';
-                    ctxJuego.font = '22px Arial';
-                    ctxJuego.fillText("Presiona ESPACIO o toca la pantalla para reiniciar", canvasJuego.width / 2, canvasJuego.height / 2 + 90);
+                    ctxJuego.font = '16px Arial';
+                    ctxJuego.fillText("Presiona ESPACIO para reiniciar", canvasJuego.width / 2, canvasJuego.height / 2 + 55);
                 } 
                 else if (juegoActivo) {
                     frames++; 
 
+                    // 1. Fondo
                     actualizarFondo();
+
+                    // 2. Obstáculos y Premios
                     manejarObstaculosYPremios();
 
+                    // 3. Gravedad y Salto
                     velocidadY = (velocY || 0) + gravedad; 
                     conejo.y += velocY; 
 
@@ -740,26 +744,15 @@
                         enSuelo = true;        
                     }
 
-                    // 1. Animación de Salto: Recorte preciso de 120x120 de tu imagen individual
-                    if (!enSuelo) {
-                        if(imgJump.complete) {
-                            ctxJuego.drawImage(imgJump, 0, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
-                        }
-                    } else {
-                        // 2. Animación de Carrera: Se divide el ancho total entre los 8 fotogramas exactos de la tira
-                        if(imgRun.complete) {
-                            let anchoFotograma = imgRun.width / 8;
-                            let posXSprite = frameActual * anchoFotograma;
-                            
-                            ctxJuego.drawImage(imgRun, posXSprite, 0, anchoFotograma, imgRun.height, conejo.x, conejo.y, conejo.ancho, conejo.alto);
-
-                            contadorAnimacion++;
-                            if (contadorAnimacion % 6 === 0) {
-                                frameActual++;
-                                if (frameActual >= 8) frameActual = 0; 
-                            }
-                        }
-                    }
+                    // 4. Dibujar Conejita Simple (Emoji Grande 🐇 viendo a la derecha)
+                    ctxJuego.font = `${conejo.tamano}px Arial`;
+                    ctxJuego.textBaseline = 'top';
+                    // El emoji 🐇 por defecto mira a la izquierda, aplicamos escala -1 para voltearlo a la derecha de forma nativa
+                    ctxJuego.save();
+                    ctxJuego.translate(conejo.x + conejo.tamano, conejo.y);
+                    ctxJuego.scale(-1, 1);
+                    ctxJuego.fillText("🐇", 0, 0);
+                    ctxJuego.restore();
                 }
                 
                 document.getElementById('score-display').innerText = "Zanahorias: " + score;
@@ -768,7 +761,7 @@
             requestAnimationFrame(actualizarJuego); 
         }
 
-        // Bucle principal de ejecución ininterrumpida
+        // Bucle principal inicial
         requestAnimationFrame(actualizarJuego);
     </script>
 </body>
