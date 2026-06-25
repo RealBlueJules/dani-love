@@ -513,7 +513,7 @@
         canJ.width = 600;
         canJ.height = 250;
 
-        // --- CARGA DE ASSETS (CONEJO NUEVO) ---
+        // --- CARGA DE ASSETS (NUEVO CONEJO BUNNY.PNG) ---
         const imgRun = new Image(); imgRun.src = './bunny.png'; 
         const imgJump = new Image(); imgJump.src = './bunny.png'; 
         const imgBanera = new Image(); imgBanera.src = './banera.png';      
@@ -646,8 +646,7 @@
                     cCenterY > z.y + (z.altoVisual/2 - z.altoHitbox/2) && 
                     cCenterY < z.y + (z.altoVisual/2 + z.altoHitbox/2)) {
                     
-                    // --- INCREMENTO DE PUNTOS MODIFICADO ---
-                    // Al recoger zanahoria sube 100 puntos de inmediato
+                    // Zanahorias dan 100 puntos inmediatos
                     score += 100; 
                     sonidoPuntos.play().catch(e => {}); 
                     zanahorias.splice(i, 1); 
@@ -690,7 +689,6 @@
 
                 ctJ.fillStyle = 'white';
                 ctJ.font = '20px Arial';
-                // Muestra cuántas zanahorias equivalen a los puntos base o simplemente el total
                 ctJ.fillText("Zanahorias recolectadas (aprox.): " + Math.floor(score / 100), canJ.width / 2, canJ.height / 2 + 20); 
                 
                 ctJ.fillStyle = '#ffffff';
@@ -704,27 +702,26 @@
             else if (juegoActivo) {
                 frames++; 
 
-                // --- AUMENTO DE PUNTOS POR TIEMPO ---
-                // El puntaje sube con el tiempo transcurrido de juego
+                // Puntos incrementando por tiempo transcurrido
                 score += 1; 
 
                 actualizarFondo();
                 manejarObstaculosYPremios();
 
                 velocidadY += gravedad; 
-                conejo.y += velocY; 
+                conejo.y += velocidadY; 
 
                 if (conejo.y >= nivelSuelo) {
                     conejo.y = nivelSuelo; 
-                    velocY = 0;        
+                    velocidadY = 0;        
                     enSuelo = true;        
                 } else {
                     enSuelo = false;
                 }
 
-                // --- RENDERIZADO DEL CONEJO NUEVO ---
+                // Dibujo corregido y estable para la imagen nueva bunny.png
                 if (!enSuelo && imgJump.complete) {
-                    ctJ.drawImage(imgJump, 0, 0, imgJump.width, imgJump.height, conejo.x, conejo.y - 20, conejo.tamano, conejo.tamano);
+                    ctJ.drawImage(imgJump, 0, 0, imgJump.width, imgJump.height, conejo.x, conejo.y, conejo.tamano, conejo.tamano);
                 } else if (imgRun.complete) {
                     ctJ.drawImage(imgRun, 0, 0, imgRun.width, imgRun.height, conejo.x, conejo.y, conejo.tamano, conejo.tamano);
                 }
