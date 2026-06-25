@@ -689,7 +689,7 @@
             ctxJuego.fillRect(0, nivelSuelo + conejo.tamano, canvasJuego.width, 4);
         }
 
-        function actualizarJuego() { 
+      function actualizarJuego() { 
             requestAnimationFrame(actualizarJuego);
 
             if (document.getElementById('game-modal').style.display !== 'flex') return;
@@ -730,19 +730,41 @@
                     enSuelo = false;
                 }
 
-                ctxJuego.font = `${conejo.tamano}px Arial`;
-                ctxJuego.textBaseline = 'top';
-                
+                // DIBUJO DE LA CONEJITA (Sustitución de emoji por trazo gráfico vectorial garantizado)
                 ctxJuego.save();
-                ctxJuego.translate(conejo.x + conejo.tamano, conejo.y);
-                ctxJuego.scale(-1, 1);
-                ctxJuego.fillText("🐇", 0, 0);
+                
+                // Cuerpo de la conejita (Círculo principal rosado)
+                ctxJuego.fillStyle = '#ffb3d1';
+                ctxJuego.beginPath();
+                ctxJuego.arc(conejo.x + 35, conejo.y + 35, 30, 0, Math.PI * 2);
+                ctxJuego.fill();
+
+                // Cabeza de la conejita
+                ctxJuego.fillStyle = '#ffffff';
+                ctxJuego.beginPath();
+                ctxJuego.arc(conejo.x + 55, conejo.y + 25, 25, 0, Math.PI * 2);
+                ctxJuego.fill();
+
+                // Orejitas
+                ctxJuego.fillStyle = '#ffffff';
+                ctxJuego.beginPath();
+                ctxJuego.ellipse(conejo.x + 45, conejo.y - 5, 8, 20, 0, 0, Math.PI * 2);
+                ctxJuego.ellipse(conejo.x + 65, conejo.y - 5, 8, 20, 0, 0, Math.PI * 2);
+                ctxJuego.fill();
+
+                // Ojos
+                ctxJuego.fillStyle = '#000000';
+                ctxJuego.beginPath();
+                ctxJuego.arc(conejo.x + 60, conejo.y + 20, 3, 0, Math.PI * 2);
+                ctxJuego.fill();
+
                 ctxJuego.restore();
             }
             
             document.getElementById('score-display').innerText = "Zanahorias: " + score;
         }
 
+        // Bucle principal inicial
         requestAnimationFrame(actualizarJuego);
     </script>
 </body>
