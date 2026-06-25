@@ -215,7 +215,7 @@
 
         img.gif-media { display: block; width: 100%; height: auto; }
 
-        /* CALENDARIO (INTACTO) */
+        /* CALENDARIO */
         #calendar-container {
             background: rgba(20, 0, 10, 0.7);
             border: 2px solid #4da6ff;
@@ -232,19 +232,19 @@
             text-shadow: 0 0 5px #ff9ac7;
             font-size: 16px;
         }
-        #toggle-calendar-btn{
-            padding:10px 15px;
-            border:none;
-            border-radius:10px;
-            background:#4da6ff;
-            color:white;
-            cursor:pointer;
-            font-weight:bold;
-            box-shadow:0 0 10px #4da6ff;
+        #toggle-calendar-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 10px;
+            background: #4da6ff;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 10px #4da6ff;
         }
 
-        #calendar-container{
-            display:none;
+        #calendar-container {
+            display: none;
         }
         .cal-row { display: flex; justify-content: space-between; margin-bottom: 5px; gap: 15px; }
         .cal-days { font-weight: bold; }
@@ -401,7 +401,7 @@
         }
         updateCountdown();
 
-        /* --- LÓGICA DEL CALENDARIO (INTACTA) --- */
+        /* --- LÓGICA DEL CALENDARIO --- */
         document.getElementById("toggle-calendar-btn").addEventListener("click", () => {
             const cal = document.getElementById("calendar-container");
 
@@ -423,24 +423,24 @@
             document.body.appendChild(star);
         }
 
-        /* --- DIBUJAR CORAZÓN --- */
-        const canvasCorazon = document.getElementById("heartLineE");
-        let ctxC;
-        
-        // Inicialización para el corazón de la pantalla de bloqueo
-        let cC = document.getElementById("heartLine");
+        /* --- DIBUJAR CORAZÓN DE PANTALLA INICIAL --- */
+        let cC = document.getElementById("heartLineE");
+        if (!cC) {
+            cC = document.getElementById("heartLine");
+        }
         if (!cC) {
             cC = document.createElement("canvas");
             cC.id = "heartLine";
             cC.className = "heart";
             document.getElementById("container").appendChild(cC);
         }
-        cC.width = document.getElementById("container").offsetWidth;
-        cC.height = document.getElementById("container").offsetHeight;
+        
+        const containerEl = document.getElementById("container");
+        cC.width = containerEl.offsetWidth;
+        cC.height = containerEl.offsetHeight;
         const ctC = cC.getContext("2d");
         
-        const c = document.getElementById("container");
-        const sz = c.offsetWidth / 2;
+        const sz = containerEl.offsetWidth / 2;
         let tim = 0;
         let animacionCorazonFrame;
 
@@ -465,7 +465,7 @@
                     let y = sz - (13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) * (sz / 18);
                     let s = document.createElement("span"); s.className = "word"; s.innerText = "I love you Dani";
                     s.style.left = x + "px"; s.style.top = y + "px"; s.style.animationDelay = (i * 0.02) + "s";
-                    c.appendChild(s);
+                    containerEl.appendChild(s);
                 }
             }
         } dr();
@@ -513,13 +513,16 @@
         canJ.width = 600;
         canJ.height = 250;
 
+        // --- CARGA DE ASSETS (CONEJO NUEVO) ---
+        const imgRun = new Image(); imgRun.src = './bunny.png'; 
+        const imgJump = new Image(); imgJump.src = './bunny.png'; 
         const imgBanera = new Image(); imgBanera.src = './banera.png';      
         const imgZanahoria = new Image(); imgZanahoria.src = './carrot.png';  
         const imgFondoDia = new Image(); imgFondoDia.src = './daybg.png';
         const imgFondoNoche = new Image(); imgFondoNoche.src = './nightbg.png';
 
         const sonidoAgua = new Audio('./splash.mp3');
-        constPuntos = new Audio('./points.mp3');
+        const sonidoPuntos = new Audio('./points.mp3');
         const musicaFondo = new Audio('./soundtrack.mp3');
         musicaFondo.loop = true; 
 
@@ -623,7 +626,7 @@
                     
                     juegoActivo = false; 
                     juegoTerminado = true;
-                    constAgua.play().catch(e => {}); 
+                    sonidoAgua.play().catch(e => {}); 
                 }
             }
 
@@ -643,9 +646,10 @@
                     cCenterY > z.y + (z.altoVisual/2 - z.altoHitbox/2) && 
                     cCenterY < z.y + (z.altoVisual/2 + z.altoHitbox/2)) {
                     
-                    // Suma directa de 100 puntos al recoger zanahoria
+                    // --- INCREMENTO DE PUNTOS MODIFICADO ---
+                    // Al recoger zanahoria sube 100 puntos de inmediato
                     score += 100; 
-                    constPuntos.play().catch(e => {}); 
+                    sonidoPuntos.play().catch(e => {}); 
                     zanahorias.splice(i, 1); 
                     i--;
                 }
@@ -686,7 +690,12 @@
 
                 ctJ.fillStyle = 'white';
                 ctJ.font = '20px Arial';
-                ctJ.fillText("Zanahorias obtenidas: " + score, canJ.width / 2, canJ.height / 2 + 20);
+                // Muestra cuántas zanahorias equivalen a los puntos base o simplemente el total
+                ctJ.fillText("Zanahorias recolectadas (aprox.): " + Math.floor(score / 100), canJ.width / 2, canJ.height / 2 + 20); 
+                
+                ctJ.fillStyle = '#ffffff';
+                ctJ.font = '20px Arial';
+                ctJ.fillText("Puntos totales: " + score, canJ.width / 2, canJ.height / 2 - 55);
 
                 ctJ.fillStyle = '#4da6ff';
                 ctJ.font = '16px Arial';
@@ -695,51 +704,30 @@
             else if (juegoActivo) {
                 frames++; 
 
+                // --- AUMENTO DE PUNTOS POR TIEMPO ---
+                // El puntaje sube con el tiempo transcurrido de juego
+                score += 1; 
+
                 actualizarFondo();
                 manejarObstaculosYPremios();
 
                 velocidadY += gravedad; 
-                conejo.y += velocidadY; 
+                conejo.y += velocY; 
 
                 if (conejo.y >= nivelSuelo) {
                     conejo.y = nivelSuelo; 
-                    velocidadY = 0;        
+                    velocY = 0;        
                     enSuelo = true;        
                 } else {
                     enSuelo = false;
                 }
 
-                // DIBUJO VECTORIAL DE LA CONEJITA 🐇 (Mirando hacia la derecha)
-                ctJ.save();
-                ctJ.translate(conejo.x + conejo.tamano, conejo.y);
-                ctJ.scale(-1, 1);
-                
-                // Cuerpo
-                ctJ.fillStyle = '#ffb3d1';
-                ctJ.beginPath();
-                ctJ.arc(20, 25, 20, 0, Math.PI * 2);
-                ctJ.fill();
-
-                // Cabeza
-                ctJ.fillStyle = '#ffffff';
-                ctJ.beginPath();
-                ctJ.arc(40, 15, 18, 0, Math.PI * 2);
-                ctJ.fill();
-
-                // Orejas
-                ctJ.fillStyle = '#ffffff';
-                ctJ.beginPath();
-                ctJ.ellipse(30, -5, 6, 15, 0, 0, Math.PI * 2);
-                ctJ.ellipse(45, -5, 6, 15, 0, 0, Math.PI * 2);
-                ctJ.fill();
-
-                // Ojo
-                ctJ.fillStyle = '#000000';
-                ctJ.beginPath();
-                ctJ.arc(42, 12, 2, 0, Math.PI * 2);
-                ctJ.fill();
-
-                ctJ.restore();
+                // --- RENDERIZADO DEL CONEJO NUEVO ---
+                if (!enSuelo && imgJump.complete) {
+                    ctJ.drawImage(imgJump, 0, 0, imgJump.width, imgJump.height, conejo.x, conejo.y - 20, conejo.tamano, conejo.tamano);
+                } else if (imgRun.complete) {
+                    ctJ.drawImage(imgRun, 0, 0, imgRun.width, imgRun.height, conejo.x, conejo.y, conejo.tamano, conejo.tamano);
+                }
             }
             
             document.getElementById('score-display').innerText = "Puntos: " + score;
