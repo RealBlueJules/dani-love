@@ -352,7 +352,7 @@
         <div id="game-instructions">Toca la pantalla o presiona Espacio para saltar</div>
     </div>
 
-<script>
+    <script>
         /* --- LÓGICA DE LA CONTRASEÑA --- */
         const passwordInput = document.getElementById("password-input");
         const errorMsg = document.getElementById("error-msg");
@@ -361,7 +361,7 @@
             const inputVal = passwordInput.value.trim().toLowerCase();
             const secretCode = "dani0122"; 
 
-            if (inputVal === "dani0122") {
+            if (inputVal === secretCode) {
                 const loginScreen = document.getElementById("login-screen");
                 loginScreen.classList.add("unlocked");
                 
@@ -424,70 +424,53 @@
         }
 
         /* --- DIBUJAR CORAZÓN --- */
-        const canvasCorazon = document.getElementById("heartLine");
-        const ctxCorazon = document.getElementById("heartLine").getContext("2d");
+        const canvasCorazon = document.getElementById("heartLineE");
+        let ctxC;
+        if (!canvasCorazon) {
+            let cC = document.createElement("canvas");
+            cC.id = "LineE";
+            cC.className = "heart";
+            document.getElementById("container").appendChild(cC);
+            cC.width = document.getElementById("container").offsetWidth;
+            cC.height = document.getElementById("container").offsetHeight;
+            ctxC = cC.getContext("2d");
+        } else {
+            canvasCorazon.width = document.getElementById("container").offsetWidth;
+            canvasCorazon.height = document.getElementById("container").offsetHeight;
+            ctxC = canvasCorazon.getContext("2d");
+        }
+        
         const cont = document.getElementById("container");
-        document.getElementById("heartLine").width = cont.offsetWidth;
-        document.getElementById("heartLine").height = cont.offsetHeight;
-
-        const sz = cont.offsetWidth/2;
+        const sz = cont.offsetWidth / 2;
         let tim = 0;
+        let animacionCorazonFrame;
 
-        function dr(){
-            ctxCorazon.clearRect(0, 0, document.getElementById("heartLine").width, document.getElementById("heartLine").height);
-            ctxCorazon.strokeStyle = "#ff6ec7";
-            ctxCorazon.lineWidth = 3;
-            ctxCorazon.beginPath();
-
-            for(let i=0; i<tim; i+=0.02){
-                let x = 16*Math.pow(Math.sin(i), 3);
-                let y = 13*Math.cos(i)-5*Math.cos(2*i)-2*Math.cos(3*i)-Math.cos(4*i);
-                let px = sz + x*(sz/18);
-                let py = sz - y*(sz/18);
-                if(i===0) ctxCorazon.moveTo(px, py);
-                else ctxCorazon.lineTo(px, py);
+        function dr() {
+            ctxC.clearRect(0, 0, cont.offsetWidth, cont.offsetHeight);
+            ctxC.strokeStyle = "#ff6ec7"; 
+            ctxC.lineWidth = 3;
+            ctxC.beginPath();
+            for (let i = 0; i < tim; i += 0.02) {
+                let x = sz + 16 * Math.pow(Math.sin(i), 3) * (sz / 18);
+                let y = sz - (13 * Math.cos(i) - 5 * Math.cos(2 * i) - 2 * Math.cos(3 * i) - Math.cos(4 * i)) * (sz / 18);
+                if (i === 0) ctxC.moveTo(x, y); else ctxC.lineTo(x, y);
             }
-            ctxCorazon.stroke();
+            ctxC.stroke();
             tim += 0.05;
-
-            if(tim < Math.PI*2){
-                requestAnimationFrame(dr);
+            if (tim < Math.PI * 2) {
+                animacionCorazonFrame = requestAnimationFrame(dr);
             } else {
-                createWords();
-                heartExplosion();
+                for (let i = 0; i < 170; i++) {
+                    let a = Math.PI * 2 * i / 170;
+                    let x = sz + 16 * Math.pow(Math.sin(a), 3) * (sz / 18);
+                    let y = sz - (13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) * (sz / 18);
+                    let s = document.createElement("span"); s.className = "word"; s.innerText = "I love you Dani";
+                    s.style.left = x + "px"; s.style.top = y + "px"; s.style.animationDelay = (i * 0.02) + "s";
+                    cont.appendChild(s);
+                }
             }
-        }
-        dr();
+        } dr();
 
-        function createWords(){
-            for(let i=0; i<170; i++){
-                let angle = Math.PI*2*i/170;
-                let x = 16*Math.pow(Math.sin(angle), 3);
-                let y = 13*Math.cos(angle)-5*Math.cos(2*angle)-2*Math.cos(3*angle)-Math.cos(4*angle);
-
-                let span = document.createElement("span");
-                span.className = "word";
-                span.innerText = "I love you Dani";
-                span.style.left = sz+x*(sz/18)+"px";
-                span.style.top = sz-y*(sz/18)+"px";
-                span.style.animationDelay = (i*0.02)+"s";
-                cont.appendChild(span);
-            }
-        }
-
-        function heartExplosion(){
-            for(let i=0; i<40; i++){
-                let h = document.createElement("div");
-                h.className = "floatHeart";
-                h.innerHTML = "💗";
-                h.style.left = (window.innerWidth/2+(Math.random()*150-75))+"px";
-                h.style.top = (window.innerHeight/2+(Math.random()*150-75))+"px";
-                document.body.appendChild(h);
-                setTimeout(()=>h.remove(), 2000);
-            }
-        }
-
-        /* Corazones al hacer clic en el fondo */
         document.addEventListener("click", function(e){
             if (e.target.closest('#video-container') || 
                 e.target.closest('#game-modal') ||
@@ -506,10 +489,12 @@
         });
 
         // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (DIRECTA Y ESTABLE)
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (EMOJI 🐇 INFALIBLE)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
+            if(animacionCorazonFrame) cancelAnimationFrame(animacionCorazonFrame);
+            document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'paused');
             document.getElementById('game-modal').style.display = 'flex';
             reiniciarJuego();
         });
@@ -519,6 +504,8 @@
             juegoActivo = false;
             juegoTerminado = false;
             musicaFondo.pause(); 
+            document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'running');
+            if(tim < Math.PI * 2) dr();
         }
 
         const canJ = document.getElementById('gameCanvas');
@@ -545,11 +532,11 @@
         let baneras = [];
         let zanahorias = [];
 
-        // Posición y dimensiones fijas de la conejita
+        // Geometría del emoji 🐇
         let conejo = { 
             x: 80, 
-            y: 120, 
-            tamano: 65, 
+            y: 0, 
+            tamano: 65,
             hitboxAncho: 45, 
             hitboxAlto: 45 
         };
@@ -571,7 +558,7 @@
             enSuelo = true;
             juegoTerminado = false;
             juegoActivo = true;
-            musicaFondo.play().catch(e => console.log("Audio pendiente de interacción"));
+            musicaFondo.play().catch(e => console.log("Audio pendiente"));
         }
 
         window.addEventListener('keydown', e => {
@@ -620,10 +607,13 @@
 
             if (frames % 500 === 0) velocidadJuego += 0.5;
 
-            // Lógica de colisión con bañeras
             for (let i = 0; i < baneras.length; i++) {
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
+                
+                if(imgBanera.complete) {
+                    ctJ.drawImage(imgBanera, 0, 0, imgBanera.width, imgBanera.height, b.x, b.y, b.anchoVisual, b.altoVisual); 
+                }
 
                 const cCenterX = conejo.x + (conejo.tamano / 2);
                 const cCenterY = conejo.y + (conejo.tamano / 2);
@@ -639,10 +629,13 @@
                 }
             }
 
-            // Lógica de recolección de zanahorias
             for (let i = 0; i < zanahorias.length; i++) {
                 let z = zanahorias[i];
                 z.x -= velocidadJuego;
+                
+                if(imgZanahoria.complete) {
+                    ctJ.drawImage(imgZanahoria, 0, 0, imgZanahoria.width, imgZanahoria.height, z.x, z.y, z.anchoVisual, z.altoVisual); 
+                }
 
                 const cCenterX = conejo.x + (conejo.tamano / 2);
                 const cCenterY = conejo.y + (conejo.tamano / 2);
@@ -660,74 +653,29 @@
             }
         }
 
-        function dibujarElementosGraficos() {
-            // 1. Fondo de pantalla del juego
-            let etapa = Math.floor(score / 500);
-            let fActual = (etapa % 2 === 0) ? imgFondoDia : imgFondoNoche;
-            
-            if (fActual.complete) {
-                ctJ.drawImage(fActual, 0, 0, canJ.width, canJ.height);
+        function actualizarFondo() {
+            let etapaFondo = Math.floor(score / 500);
+            let imgFondoActual = (etapaFondo % 2 === 0) ? imgFondoDia : imgFondoNoche;
+
+            if (imgFondoActual.complete) {
+                ctJ.drawImage(imgFondoActual, 0, 0, canJ.width, canJ.height);
             } else {
-                ctJ.fillStyle = (etapa % 2 === 0) ? '#70c5eb' : '#181124';
+                ctJ.fillStyle = (etapaFondo % 2 === 0) ? '#70c5eb' : '#181124';
                 ctJ.fillRect(0, 0, canJ.width, canJ.height);
             }
             
-            // Suelo
-            ctJ.fillStyle = (etapa % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
+            ctJ.fillStyle = (etapaFondo % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
             ctJ.fillRect(0, nivelSuelo + conejo.tamano, canJ.width, 4);
-
-            // 2. Bañeras
-            for (let b of baneras) {
-                if(imgBanera.complete) ctJ.drawImage(imgBanera, 0, 0, imgBanera.width, imgBanera.height, b.x, b.y, b.anchoVisual, b.altoVisual);
-            }
-
-            // 3. Zanahorias
-            for (let z of zanahorias) {
-                if(imgZanahoria.complete) ctJ.drawImage(imgZanahoria, 0, 0, imgZanahoria.width, imgZanahoria.height, z.x, z.y, z.anchoVisual, z.altoVisual);
-            }
-
-            // 4. Conejita (Vectorial geométrica fija, visible siempre, viendo a la derecha)
-            ctJ.save();
-            ctJ.translate(conejo.x + conejo.tamano, conejo.y);
-            ctJ.scale(-1, 1);
-            
-            // Cuerpo
-            ctJ.fillStyle = '#ffb3d1';
-            ctJ.beginPath();
-            ctJ.arc(20, 25, 20, 0, Math.PI * 2);
-            ctJ.fill();
-
-            // Cabeza
-            ctJ.fillStyle = '#ffffff';
-            ctJ.beginPath();
-            ctJ.arc(40, 15, 18, 0, Math.PI * 2);
-            ctJ.fill();
-
-            // Orejas
-            ctJ.fillStyle = '#ffffff';
-            ctJ.beginPath();
-            ctJ.ellipse(30, -5, 6, 15, 0, 0, Math.PI * 2);
-            ctJ.ellipse(45, -5, 6, 15, 0, 0, Math.PI * 2);
-            ctJ.fill();
-
-            // Ojo
-            ctJ.fillStyle = '#000000';
-            ctJ.beginPath();
-            ctJ.arc(42, 12, 2, 0, Math.PI * 2);
-            ctJ.fill();
-
-            ctJ.restore();
         }
 
-        function actualizarJuego() { 
-            requestAnimationFrame(actualizarJuego);
+        function buclePrincipal() { 
+            requestAnimationFrame(buclePrincipal);
 
             if (document.getElementById('game-modal').style.display !== 'flex') return;
 
             ctJ.clearRect(0, 0, canJ.width, canJ.height);
 
             if (juegoTerminado) {
-                // Pantalla de Game Over
                 ctJ.fillStyle = 'rgba(0, 0, 0, 0.75)';
                 ctJ.fillRect(0, 0, canJ.width, canJ.height);
 
@@ -747,27 +695,57 @@
             else if (juegoActivo) {
                 frames++; 
 
+                actualizarFondo();
                 manejarObstaculosYPremios();
 
-                // Gravedad
-                velocidadY = (velocY || 0) + gravedad; 
-                conejo.y += velocY; 
+                velocidadY += gravedad; 
+                conejo.y += velocidadY; 
 
                 if (conejo.y >= nivelSuelo) {
                     conejo.y = nivelSuelo; 
-                    velocY = 0;        
+                    velocidadY = 0;        
                     enSuelo = true;        
                 } else {
                     enSuelo = false;
                 }
 
-                dibujarElementosGraficos();
+                // DIBUJO DE LA CONEJITA 🐇 (Vectorial, sin fuentes de texto que fallen)
+                ctJ.save();
+                ctJ.translate(conejo.x + conejo.tamano, conejo.y);
+                ctJ.scale(-1, 1);
+                
+                // Cuerpo
+                ctJ.fillStyle = '#ffb3d1';
+                ctJ.beginPath();
+                ctJ.arc(20, 25, 20, 0, Math.PI * 2);
+                ctJ.fill();
+
+                // Cabeza
+                ctJ.fillStyle = '#ffffff';
+                ctJ.beginPath();
+                ctJ.arc(40, 15, 18, 0, Math.PI * 2);
+                ctJ.fill();
+
+                // Orejas
+                ctJ.fillStyle = '#ffffff';
+                ctJ.beginPath();
+                ctJ.ellipse(30, -5, 6, 15, 0, 0, Math.PI * 2);
+                ctJ.ellipse(45, -5, 6, 15, 0, 0, Math.PI * 2);
+                ctJ.fill();
+
+                // Ojo
+                ctJ.fillStyle = '#000000';
+                ctJ.beginPath();
+                ctJ.arc(42, 12, 2, 0, Math.PI * 2);
+                ctJ.fill();
+
+                ctJ.restore();
             }
             
             document.getElementById('score-display').innerText = "Zanahorias: " + score;
         }
 
-        requestAnimationFrame(actualizarJuego);
+        requestAnimationFrame(buclePrincipal);
     </script>
 </body>
 </html>
