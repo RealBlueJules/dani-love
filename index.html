@@ -352,7 +352,7 @@
         <div id="game-instructions">Toca la pantalla o presiona Espacio para saltar</div>
     </div>
 
-    <script>
+   <script>
         /* --- LÓGICA DE LA CONTRASEÑA --- */
         const passwordInput = document.getElementById("password-input");
         const errorMsg = document.getElementById("error-msg");
@@ -504,8 +504,8 @@
             setTimeout(()=>heart.remove(), 2000);
         });
 
-      // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (PANTALLA AMPLIADA)
+        // ==========================================
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO 
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
@@ -516,18 +516,16 @@
         function closeGame() {
             document.getElementById('game-modal').style.display = 'none';
             juegoActivo = false;
-            juegoTerminado = false;
             musicaFondo.pause(); 
         }
 
         const canvasJuego = document.getElementById('gameCanvas');
         const ctxJuego = canvasJuego.getContext('2d');
 
-        // Pantalla ampliada a 800x350 (Resolución nítida y panorámica)
-        const ANCHO_LOGICO = 800;
-        const ALTO_LOGICO = 350; 
+        const ANCHO_LOGICO = 600;
+        const ALTO_LOGICO = 250; 
         
-        if(window.innerWidth < 850) {
+        if(window.innerWidth < 650) {
             canvasJuego.width = window.innerWidth - 40;
             canvasJuego.height = ALTO_LOGICO * (canvasJuego.width / ANCHO_LOGICO);
         } else {
@@ -535,7 +533,7 @@
             canvasJuego.height = ALTO_LOGICO;
         }
 
-        // --- CARGA DE ASSETS INDEPENDIENTES ---
+        // --- CARGA DE ASSETS ---
         const imgRun = new Image(); imgRun.src = './runbunny.png';         
         const imgJump = new Image(); imgJump.src = './jumpbunny.png';       
         const imgBanera = new Image(); imgBanera.src = './banera.png';      
@@ -561,26 +559,25 @@
 
         let score = 0;
         let juegoActivo = false;
-        let juegoTerminado = false;
         let frames = 0; 
-        let velocidadJuego = 5; // Ligeramente más dinámica para el tamaño del mapa
+        let velocidadJuego = 4;
         let baneras = [];
         let zanahorias = [];
 
-        // Dimensiones lógicas y proporcionales del personaje (acorde a la nueva escala)
+        // Conejita ampliada y nítida a 75x75 en el canvas
         let conejo = { 
-            x: 60, 
+            x: 50, 
             y: 50, 
-            ancho: 100, 
-            alto: 100,
-            hitbox: { ancho: 40, alto: 60 } 
+            ancho: 75, 
+            alto: 75,
+            hitbox: { ancho: 25, alto: 35 } 
         };
         
         let gravedad = 1.2;      
-        let velocidadY = 0; // velocidadY
-        let fuerzaSalto = -16;   
+        let velocidadY = 0;      
+        let fuerzaSalto = -14;   
         let enSuelo = false;     
-        let nivelSuelo = canvasJuego.height - 120;   
+        let nivelSuelo = canvasJuego.height - 100; // Posición base del suelo fija
 
         let frameActual = 0;
         let contadorAnimacion = 0;
@@ -591,64 +588,54 @@
             baneras = [];
             zanahorias = [];
             conejo.y = nivelSuelo;
-            letY = 0;
-            velocidadJuego = 5;
-            juegoTerminado = false;
+            velocidadY = 0;
+            velocidadJuego = 4;
+            frameActual = 0;
+            contadorAnimacion = 0;
             juegoActivo = true;
-            musicaFondo.play().catch(e => console.log("Esperando interacción de usuario para audio"));
+            musicaFondo.play().catch(e => console.log("Esperando audio por interacción"));
         }
 
         window.addEventListener('keydown', e => {
             if (e.code === 'Space' && document.getElementById('game-modal').style.display === 'flex') {
                 e.preventDefault(); 
-                if (juegoTerminado) {
-                    reiniciarJuego();
-                } else if (enSuelo && juegoActivo) {
-                    saltar();
-                }
+                if (enSuelo && juegoActivo) saltar();
             }
         });
 
         canvasJuego.addEventListener('touchstart', e => {
             e.preventDefault(); 
-            if (juegoTerminado) {
-                reiniciarJuego();
-            } else if (enSuelo && juegoActivo) {
-                saltar();
-            }
+            if (enSuelo && juegoActivo) saltar();
         });
 
         function saltar() {
-            letY = fuerzaSalto;
+            velocidadY = fuerzaSalto;
             enSuelo = false;
         }
 
         function manejarObstaculosYPremios() {
             if (!verificarPrecarga()) return;
 
-            // Generador de Bañeras
             if (frames % 160 === 0) {
                 baneras.push({ 
                     x: canvasJuego.width, 
                     y: nivelSuelo + 35, 
-                    anchoLogic: 45, altoLogic: 30,
-                    anchoVisual: 85, altoVisual: 85 
+                    anchoLogic: 25, altoLogic: 25,
+                    anchoVisual: 65, altoVisual: 40 
                 });
             }
-            // Generador de Zanahorias
             if (frames % 100 === 0) {
-                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 10 : nivelSuelo + 30;
+                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 10 : nivelSuelo + 20;
                 zanahorias.push({ 
                     x: canvasJuego.width, 
                     y: alturaZanahoria, 
-                    anchoLogic: 35, altoLogic: 35,
-                    anchoVisual: 65, altoVisual: 65
+                    anchoLogic: 25, altoLogic: 25,
+                    anchoVisual: 45, altoVisual: 45
                 });
             }
 
             if (frames % 500 === 0) velocidadJuego += 0.5;
 
-            // Dibujar Bañeras
             for (let i = 0; i < baneras.length; i++) {
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
@@ -661,12 +648,12 @@
                     conejo.y + (conejo.alto + conejo.hitbox.alto)/2 > b.y) {
                     
                     juegoActivo = false; 
-                    juegoTerminado = true;
                     sonidoAgua.play().catch(e => {}); 
+                    alert("¡Te caíste en la bañera! 💦 Recogiste " + score + " zanahorias.");
+                    reiniciarJuego();
                 }
             }
 
-            // Dibujar Zanahorias
             for (let i = 0; i < zanahorias.length; i++) {
                 let z = zanahorias[i];
                 z.x -= velocidadJuego;
@@ -697,68 +684,52 @@
                 ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
             }
             
-            // Suelo
             ctxJuego.fillStyle = (etapaFondo % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
-            ctxJuego.fillRect(0, nivelSuelo + 100, canvasJuego.width, 6);
+            ctxJuego.fillRect(0, nivelSuelo + 75, canvasJuego.width, 3);
         }
 
         function actualizarJuego() {
-            if (document.getElementById('game-modal').style.display === 'flex') {
+            if (document.getElementById('game-modal').style.display === 'flex' && juegoActivo) {
+                ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
+                
                 if (!verificarPrecarga()) {
                     requestAnimationFrame(actualizarJuego);
                     return;
                 }
 
-                if (juegoTerminado) {
-                    ctxJuego.fillStyle = 'rgba(0, 0, 0, 0.8)';
-                    ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
+                frames++; 
 
-                    ctxJuego.fillStyle = '#ff3b3b';
-                    ctxJuego.font = 'bold 42px Arial';
-                    ctxJuego.textAlign = 'center';
-                    ctxJuego.fillText("¡GAME OVER!", canvasJuego.width / 2, canvasJuego.height / 2 - 20);
+                actualizarFondo();
+                manejarObstaculosYPremios();
 
-                    ctxJuego.fillStyle = 'white';
-                    ctxJuego.font = '24px Arial';
-                    ctxJuego.fillText("Zanahorias obtenidas: " + score, canvasJuego.width / 2, canvasJuego.height / 2 + 30);
+                velocidadY += gravedad; 
+                conejo.y += velocidadY; 
 
-                    ctxJuego.fillStyle = '#4da6ff';
-                    ctxJuego.font = '20px Arial';
-                    ctxJuego.fillText("Presiona ESPACIO para reiniciar", canvasJuego.width / 2, canvasJuego.height / 2 + 80);
-                } 
-                else if (juegoActivo) {
-                    ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
-                    frames++; 
+                if (conejo.y > nivelSuelo) {
+                    conejo.y = nivelSuelo; 
+                    velocidadY = 0;        
+                    enSuelo = true;        
+                }
 
-                    actualizarFondo();
-                    manejarObstaculosYPremios();
+                if (!enSuelo) {
+                    // Salto: Recorte preciso del archivo estático (leyendo desde 0,0 el total de su tamaño original)
+                    ctxJuego.drawImage(imgJump, 0, 0, imgJump.width, imgJump.height, conejo.x, conejo.y, conejo.ancho, conejo.alto);
+                } else {
+                    // Carrera: Ancho del fotograma calculado exactamente dividiendo el total entre 8
+                    let anchoFotograma = imgRun.width / 8;
+                    let posXSprite = frameActual * anchoFotograma;
+                    
+                    ctxJuego.drawImage(imgRun, posXSprite, 0, anchoFotograma, imgRun.height, conejo.x, conejo.y, conejo.ancho, conejo.alto);
 
-                    letY += gravedad; 
-                    conejo.y += letY; 
-
-                    if (conejo.y > nivelSuelo) {
-                        conejo.y = nivelSuelo; 
-                        letY = 0;        
-                        enSuelo = true;        
-                    }
-
-                    if (!enSuelo) {
-                        ctxJuego.drawImage(imgJump, 0, 0, imgJump.width, imgJump.height, conejo.x, conejo.y, conejo.ancho, conejo.alto);
-                    } else {
-                        let posXSprite = frameActual * 120;
-                        ctxJuego.drawImage(imgRun, posXSprite, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
-
-                        contadorAnimacion++;
-                        if (contadorAnimacion % 6 === 0) {
-                            frameActual++;
-                            if (frameActual > 7) frameActual = 0; 
-                        }
+                    contadorAnimacion++;
+                    if (contadorAnimacion % 6 === 0) {
+                        frameActual++;
+                        if (frameActual > 7) frameActual = 0; 
                     }
                 }
                 
                 document.getElementById('score-display').innerText = "Zanahorias: " + score;
             }
-            
             requestAnimationFrame(actualizarJuego); 
         }
 
