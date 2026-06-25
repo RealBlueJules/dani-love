@@ -504,8 +504,8 @@
             setTimeout(()=>heart.remove(), 2000);
         });
 
-      // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (COORDENADAS CALIBRADAS)
+     // ==========================================
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (ASSETS SEPARADOS E INDEPENDIENTES)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
@@ -522,29 +522,59 @@
         const canvasJuego = document.getElementById('gameCanvas');
         const ctxJuego = canvasJuego.getContext('2d');
 
+        const ANCHO_LOGICO = 600;
+        const ALTO_LOGICO = 150;
+        
         if(window.innerWidth < 650) {
             canvasJuego.width = window.innerWidth - 40;
+            canvasJuego.height = ALTO_LOGICO * (canvasJuego.width / ANCHO_LOGICO);
+        } else {
+            canvasJuego.width = ANCHO_LOGICO;
+            canvasJuego.height = ALTO_LOGICO;
         }
 
-        // --- CARGA DE ASSETS ---
-        const spriteSheet = new Image();
-        spriteSheet.src = './sprites.png'; 
+        // --- CARGA DE ASSETS SEPARADOS ---
+        // Tus archivos PNG individuales en la raíz
+        const imgRun = new Image(); imgRun.src = './runbunny.png';     // Hoja horizontal con 8 frames (secuenciales de 120x120)
+        const imgJump = new Image(); imgJump.src = './jumpbunny.png';   // Fotograma único de salto (120x120)
+        const imgBanera = new Image(); imgBanera.src = './banera.png';  // Obstáculo (Centrado sin márgenes)
+        const imgZanahoria = new Image(); imgZanahoria.src = './carrot.png'; // Premio (Centrado sin márgenes)
+        const imgFondoDia = new Image(); imgFondoDia.src = './daybg.png';   // Fondo de día
+        const imgFondoNoche = new Image(); imgFondoNoche.src = './nightbg.png'; // Fondo de noche
 
         const sonidoAgua = new Audio('./splash.mp3');
         const sonidoPuntos = new Audio('./points.mp3');
         const musicaFondo = new Audio('./soundtrack.mp3');
         musicaFondo.loop = true; 
 
+        let assetsCargados = 0;
+        const totalAssets = 8; // 6 imágenes + 2 efectos de audio
+
+        const verificarCarga = () => {
+            assetsCargados++;
+        };
+
+        [imgRun, imgJump, imgBanera, imgZanahoria, imgFondoDia, imgFondoNoche, sonidoAgua, sonidoPuntos].forEach(asset => {
+            if (asset instanceof Image) asset.onload = verificarCarga;
+            else if (asset instanceof Audio) asset.oncanplaythrough = verificarCarga;
+        });
+
         let score = 0;
-        let musicaIniciada = false; 
         let juegoActivo = false;
         let frames = 0; 
         let velocidadJuego = 4;
         let baneras = [];
         let zanahorias = [];
 
-        // Dimensiones lógicas para renderizar en el canvas
-        let conejo = { x: 50, y: 50, ancho: 60, alto: 60 };
+        // Renderizado lógico en el canvas
+        let conejo = { 
+            x: 50, 
+            y: 50, 
+            ancho: 60, 
+            alto: 60,
+            hitbox: { ancho: 30, alto: 50 } // Área de choque reducida para evitar frustración
+        };
+        
         let gravedad = 1.5;      
         let velocidadY = 0;      
         let fuerzaSalto = -16;   
@@ -554,10 +584,6 @@
         let frameActual = 0;
         let contadorAnimacion = 0;
 
-        // Desplazamiento base calibrado para evitar márgenes vacíos
-        const calX = 35;
-        const calY = 155;
-
         function reiniciarJuego() {
             score = 0;
             frames = 0;
@@ -565,18 +591,21 @@
             zanahorias = [];
             conejo.y = 50;
             velocidadY = 0;
+            velocidadJuego = 4;
             juegoActivo = true;
-            musicaFondo.play().catch(e => console.log("Esperando interacción de usuario para audio"));
+            if (assetsCargados >= totalAssets) {
+                musicaFondo.play().catch(e => console.log("Esperando interacción de usuario para audio"));
+            }
         }
 
-        window.addEventListener('keydown', function(e) {
+        window.addEventListener('keydown', e => {
             if (e.code === 'Space' && document.getElementById('game-modal').style.display === 'flex') {
                 e.preventDefault(); 
                 if (enSuelo && juegoActivo) saltar();
             }
         });
 
-        canvasJuego.addEventListener('touchstart', function(e) {
+        canvasJuego.addEventListener('touchstart', e => {
             e.preventDefault(); 
             if (enSuelo && juegoActivo) saltar();
         });
@@ -587,32 +616,45 @@
         }
 
         function manejarObstaculosYPremios() {
-            // Generador de Bañeras (Obstáculos)
+            // Generar Bañeras (Obstáculos)
             if (frames % 160 === 0) {
-                baneras.push({ x: canvasJuego.width, y: nivelSuelo + 35, ancho: 45, alto: 25 });
+                // Hitbox lógica (45x25) posicionada abajo
+                baneras.push({ 
+                    x: canvasJuego.width, 
+                    y: nivelSuelo + 35, 
+                    anchoLogic: 45, altoLogic: 25,
+                    anchoVisual: 60, altoVisual: 60 // Dibujado a escala en el canvas
+                });
             }
-            // Generador de Zanahorias (Premios)
+            // Generar Zanahorias (Premios)
             if (frames % 100 === 0) {
                 let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 10 : nivelSuelo + 20;
-                zanahorias.push({ x: canvasJuego.width, y: alturaZanahoria, ancho: 30, alto: 30 });
+                // Hitbox lógica (30x30)
+                zanahorias.push({ 
+                    x: canvasJuego.width, 
+                    y: alturaZanahoria, 
+                    anchoLogic: 30, altoLogic: 30,
+                    anchoVisual: 50, altoVisual: 50
+                });
             }
+
+            // Aumento de dificultad progresiva
+            if (frames % 500 === 0) velocidadJuego += 0.5;
 
             // Mover y dibujar Bañeras
             for (let i = 0; i < baneras.length; i++) {
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
                 
-                // Recorte de la bañera aplicando el desplazamiento calibrado (Alineada abajo a la izquierda en tu sprite sheet)
-                try {
-                    ctxJuego.drawImage(spriteSheet, 0 + calX, 360 + calY, 120, 120, b.x, b.y, b.ancho, b.alto);
-                } catch(e) {
-                    ctxJuego.fillStyle = '#4da6ff'; 
-                    ctxJuego.fillRect(b.x, b.y, b.ancho, b.alto);
-                }
+                // Dibuja la imagen independiente directamente centrada en el canvas
+                ctxJuego.drawImage(imgBanera, b.x, b.y, b.anchoVisual, b.altoVisual); 
 
-                // Hitbox precisa para evitar frustración al librar el salto
-                if (conejo.x < b.x + (b.ancho - 15) && conejo.x + (conejo.ancho - 25) > b.x &&
-                    conejo.y < b.y + (b.alto - 5) && conejo.y + (conejo.alto - 5) > b.y) {
+                // Colisión precisa
+                if (conejo.x + (conejo.ancho - conejo.hitbox.ancho)/2 < b.x + b.anchoLogic && 
+                    conejo.x + (conejo.ancho + conejo.hitbox.ancho)/2 > b.x &&
+                    conejo.y + (conejo.alto - conejo.hitbox.alto)/2 < b.y + b.altoLogic && 
+                    conejo.y + (conejo.alto + conejo.hitbox.alto)/2 > b.y) {
+                    
                     juegoActivo = false; 
                     sonidoAgua.play().catch(e => {}); 
                     alert("¡Te caíste en la bañera! 💦 Recogiste " + score + " zanahorias.");
@@ -625,17 +667,14 @@
                 let z = zanahorias[i];
                 z.x -= velocidadJuego;
                 
-                // Recorte de la zanahoria aplicando el desplazamiento calibrado
-                try {
-                    ctxJuego.drawImage(spriteSheet, 0 + calX, 480 + calY, 120, 120, z.x, z.y, z.ancho, z.alto);
-                } catch(e) {
-                    ctxJuego.fillStyle = '#ff9ac7'; 
-                    ctxJuego.fillRect(z.x, z.y, z.ancho, z.alto);
-                }
+                ctxJuego.drawImage(imgZanahoria, z.x, z.y, z.anchoVisual, z.altoVisual); 
 
                 // Detección de colisión para sumar puntos
-                if (conejo.x < z.x + (z.ancho - 15) && conejo.x + (z.ancho - 15) > z.x &&
-                    conejo.y < z.y + (z.alto - 15) && conejo.y + (conejo.alto - 15) > z.y) {
+                if (conejo.x + (conejo.ancho - conejo.hitbox.ancho)/2 < z.x + z.anchoLogic && 
+                    conejo.x + (conejo.ancho + conejo.hitbox.ancho)/2 > z.x &&
+                    conejo.y + (conejo.alto - conejo.hitbox.alto)/2 < z.y + z.altoLogic && 
+                    conejo.y + (conejo.alto + conejo.hitbox.alto)/2 > z.y) {
+                    
                     score += 10; 
                     sonidoPuntos.play().catch(e => {}); 
                     zanahorias.splice(i, 1); 
@@ -644,17 +683,31 @@
             }
         }
 
+        function actualizarFondo() {
+            // Alternancia de fondos cada 500 puntos (Día / Noche)
+            let etapaFondo = Math.floor(score / 500);
+            let imgFondoActual = (etapaFondo % 2 === 0) ? imgFondoDia : imgFondoNoche;
+
+            if (imgFondoActual.complete) {
+                ctxJuego.drawImage(imgFondoActual, 0, 0, canvasJuego.width, canvasJuego.height);
+            } else {
+                ctxJuego.fillStyle = (etapaFondo % 2 === 0) ? '#70c5eb' : '#181124';
+                ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
+            }
+        }
+
         function actualizarJuego() {
             if (document.getElementById('game-modal').style.display === 'flex' && juegoActivo) {
                 ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
                 frames++; 
 
-                ctxJuego.fillStyle = '#22232a'; 
-                ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
-                
-                ctxJuego.fillStyle = '#ff6ec7'; 
-                ctxJuego.fillRect(0, nivelSuelo + 60, canvasJuego.width, 2);
+                // 1. Fondo dinámico
+                actualizarFondo();
 
+                // 2. Obstáculos y premios
+                manejarObstaculosYPremios();
+
+                // 3. Gravedad
                 velocidadY += gravedad; 
                 conejo.y += velocidadY; 
 
@@ -664,33 +717,21 @@
                     enSuelo = true;        
                 }
 
-                // Animación y dibujo de la conejita aplicando los valores calibrados
+                // 4. Animación de la conejita utilizando los archivos separados
                 if (!enSuelo) {
-                    // Fotograma de brinco / salto (Cuadro en X=480, Y=0 de tu retícula)
-                    try {
-                        ctxJuego.drawImage(spriteSheet, 480 + calX, 0 + calY, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
-                    } catch(e) {
-                        ctxJuego.fillStyle = 'white';
-                        ctxJuego.fillRect(conejo.x, conejo.y, conejo.ancho, conejo.alto);
-                    }
+                    // Fotograma estático de salto
+                    ctxJuego.drawImage(imgJump, 0, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
                 } else {
-                    // Fotogramas de carrera secuenciales (Avanzan de 120px en 120px, Fila Y=0)
-                    let posXSprite = (frameActual * 120) + calX;
-                    try {
-                        ctxJuego.drawImage(spriteSheet, posXSprite, 0 + calY, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
-                    } catch(e) {
-                        ctxJuego.fillStyle = 'white';
-                        ctxJuego.fillRect(conejo.x, conejo.y, conejo.ancho, conejo.alto);
-                    }
+                    // Carrera: Fotogramas secuenciales en la hoja horizontal `runbunny.png`
+                    let posXSprite = frameActual * 120;
+                    ctxJuego.drawImage(imgRun, posXSprite, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
 
                     contadorAnimacion++;
                     if (contadorAnimacion % 6 === 0) {
                         frameActual++;
-                        if (frameActual > 7) frameActual = 0; // Bucle de los 8 fotogramas de carrera
+                        if (frameActual > 7) frameActual = 0; // Bucle de 8 fotogramas de carrera
                     }
                 }
-
-                manejarObstaculosYPremios();
                 
                 document.getElementById('score-display').innerText = "Zanahorias: " + score;
             }
