@@ -508,11 +508,10 @@
         });
 
        // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (VERSIÓN SIMPLE: EMOJI 🐇)
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (VERSIÓN ESTABLE - EMOJI 🐇)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
-            // Pausamos animaciones de fondo decorativas para liberar memoria
             if (typeof animacionCorazonFrame !== 'undefined') cancelAnimationFrame(animacionCorazonFrame);
             document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'paused');
             
@@ -526,7 +525,6 @@
             juegoTerminado = false;
             if (typeof musicaFondo !== 'undefined') musicaFondo.pause(); 
 
-            // Reanudamos animaciones de la pantalla principal al cerrar
             document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'running');
             if (typeof t !== 'undefined' && t < Math.PI * 2) {
                 if (typeof draw === 'function') draw(); 
@@ -536,13 +534,9 @@
         const canvasJuego = document.getElementById('gameCanvas');
         const ctxJuego = canvasJuego.getContext('2d');
 
-        const ANCHO_LOGICO = 600;
-        const ALTO_LOGICO = 250; 
-        
-        canvasJuego.width = ANCHO_LOGICO;
-        canvasJuego.height = ALTO_LOGICO;
+        canvasJuego.width = 600;
+        canvasJuego.height = 250;
 
-        // --- CARGA DE ASSETS ---
         const imgBanera = new Image(); imgBanera.src = './banera.png';      
         const imgZanahoria = new Image(); imgZanahoria.src = './carrot.png';  
         const imgFondoDia = new Image(); imgFondoDia.src = './daybg.png';
@@ -561,11 +555,10 @@
         let baneras = [];
         let zanahorias = [];
 
-        // Dimensiones lógicas para el emoji 🐇 de la conejita
         let conejo = { 
             x: 80, 
             y: 50, 
-            tamano: 65, // Tamaño grande para que destaque
+            tamano: 65,
             hitboxAncho: 45, 
             hitboxAlto: 45 
         };
@@ -575,10 +568,6 @@
         let fuerzaSalto = -14;   
         let enSuelo = false;     
         let nivelSuelo = canvasJuego.height - 105; 
-
-        function verificarPrecarga() {
-            return imgFondoDia.complete && imgFondoNoche.complete;
-        }
 
         function reiniciarJuego() {
             score = 0;
@@ -590,7 +579,7 @@
             velocidadJuego = 4;
             juegoTerminado = false;
             juegoActivo = true;
-            musicaFondo.play().catch(e => console.log("Esperando audio por interacción de usuario"));
+            musicaFondo.play().catch(e => console.log("Audio pendiente de interacción"));
         }
 
         window.addEventListener('keydown', e => {
@@ -639,7 +628,6 @@
 
             if (frames % 500 === 0) velocidadJuego += 0.5;
 
-            // DIBUJO Y COLISIÓN DE BAÑERAS
             for (let i = 0; i < baneras.length; i++) {
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
@@ -662,7 +650,6 @@
                 }
             }
 
-            // DIBUJO Y COLISIÓN DE ZANAHORIAS
             for (let i = 0; i < zanahorias.length; i++) {
                 let z = zanahorias[i];
                 z.x -= velocidadJuego;
@@ -698,70 +685,64 @@
                 ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
             }
             
-            // Suelo visible
             ctxJuego.fillStyle = (etapaFondo % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
             ctxJuego.fillRect(0, nivelSuelo + conejo.tamano, canvasJuego.width, 4);
         }
 
         function actualizarJuego() { 
-            if (document.getElementById('game-modal').style.display === 'flex') {
-                ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
+            requestAnimationFrame(actualizarJuego);
 
-                if (juegoTerminado) {
-                    // Pantalla de Game Over
-                    ctxJuego.fillStyle = 'rgba(0, 0, 0, 0.75)';
-                    ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
+            if (document.getElementById('game-modal').style.display !== 'flex') return;
 
-                    ctxJuego.fillStyle = '#ff3b3b';
-                    ctxJuego.font = 'bold 32px Arial';
-                    ctxJuego.textAlign = 'center';
-                    ctxJuego.fillText("¡GAME OVER!", canvasJuego.width / 2, canvasJuego.height / 2 - 15);
+            ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
 
-                    ctxJuego.fillStyle = 'white';
-                    ctxJuego.font = '20px Arial';
-                    ctxJuego.fillText("Zanahorias obtenidas: " + score, canvasJuego.width / 2, canvasJuego.height / 2 + 20);
+            if (juegoTerminado) {
+                ctxJuego.fillStyle = 'rgba(0, 0, 0, 0.75)';
+                ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
 
-                    ctxJuego.fillStyle = '#4da6ff';
-                    ctxJuego.font = '16px Arial';
-                    ctxJuego.fillText("Presiona ESPACIO para reiniciar", canvasJuego.width / 2, canvasJuego.height / 2 + 55);
-                } 
-                else if (juegoActivo) {
-                    frames++; 
+                ctxJuego.fillStyle = '#ff3b3b';
+                ctxJuego.font = 'bold 32px Arial';
+                ctxJuego.textAlign = 'center';
+                ctxJuego.fillText("¡GAME OVER!", canvasJuego.width / 2, canvasJuego.height / 2 - 15);
 
-                    // 1. Fondo
-                    actualizarFondo();
+                ctxJuego.fillStyle = 'white';
+                ctxJuego.font = '20px Arial';
+                ctxJuego.fillText("Zanahorias obtenidas: " + score, canvasJuego.width / 2, canvasJuego.height / 2 + 20);
 
-                    // 2. Obstáculos y Premios
-                    manejarObstaculosYPremios();
+                ctxJuego.fillStyle = '#4da6ff';
+                ctxJuego.font = '16px Arial';
+                ctxJuego.fillText("Presiona ESPACIO para reiniciar", canvasJuego.width / 2, canvasJuego.height / 2 + 55);
+            } 
+            else if (juegoActivo) {
+                frames++; 
 
-                    // 3. Gravedad y Salto
-                    velocidadY = (velocY || 0) + gravedad; 
-                    conejo.y += velocY; 
+                actualizarFondo();
+                manejarObstaculosYPremios();
 
-                    if (conejo.y > nivelSuelo) {
-                        conejo.y = nivelSuelo; 
-                        velocY = 0;        
-                        enSuelo = true;        
-                    }
+                velocidadY = (velocY || 0) + gravedad; 
+                conejo.y += velocY; 
 
-                    // 4. Dibujar Conejita Simple (Emoji Grande 🐇 viendo a la derecha)
-                    ctxJuego.font = `${conejo.tamano}px Arial`;
-                    ctxJuego.textBaseline = 'top';
-                    // El emoji 🐇 por defecto mira a la izquierda, aplicamos escala -1 para voltearlo a la derecha de forma nativa
-                    ctxJuego.save();
-                    ctxJuego.translate(conejo.x + conejo.tamano, conejo.y);
-                    ctxJuego.scale(-1, 1);
-                    ctxJuego.fillText("🐇", 0, 0);
-                    ctxJuego.restore();
+                if (conejo.y >= nivelSuelo) {
+                    conejo.y = nivelSuelo; 
+                    velocY = 0;        
+                    enSuelo = true;        
+                } else {
+                    enSuelo = false;
                 }
+
+                ctxJuego.font = `${conejo.tamano}px Arial`;
+                ctxJuego.textBaseline = 'top';
                 
-                document.getElementById('score-display').innerText = "Zanahorias: " + score;
+                ctxJuego.save();
+                ctxJuego.translate(conejo.x + conejo.tamano, conejo.y);
+                ctxJuego.scale(-1, 1);
+                ctxJuego.fillText("🐇", 0, 0);
+                ctxJuego.restore();
             }
             
-            requestAnimationFrame(actualizarJuego); 
+            document.getElementById('score-display').innerText = "Zanahorias: " + score;
         }
 
-        // Bucle principal inicial
         requestAnimationFrame(actualizarJuego);
     </script>
 </body>
