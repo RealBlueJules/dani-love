@@ -504,8 +504,8 @@
             setTimeout(()=>heart.remove(), 2000);
         });
 
-     // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (ASSETS SEPARADOS E INDEPENDIENTES)
+    // ==========================================
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (ALTURA Y POSICIONES CORREGIDAS)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
@@ -522,8 +522,9 @@
         const canvasJuego = document.getElementById('gameCanvas');
         const ctxJuego = canvasJuego.getContext('2d');
 
+        // Aumentamos el lienzo a 600x250 para dar espacio al salto y a los obstáculos
         const ANCHO_LOGICO = 600;
-        const ALTO_LOGICO = 150;
+        const ALTO_LOGICO = 250;
         
         if(window.innerWidth < 650) {
             canvasJuego.width = window.innerWidth - 40;
@@ -533,14 +534,13 @@
             canvasJuego.height = ALTO_LOGICO;
         }
 
-        // --- CARGA DE ASSETS SEPARADOS ---
-        // Tus archivos PNG individuales en la raíz
-        const imgRun = new Image(); imgRun.src = './runbunny.png';     // Hoja horizontal con 8 frames (secuenciales de 120x120)
-        const imgJump = new Image(); imgJump.src = './jumpbunny.png';   // Fotograma único de salto (120x120)
-        const imgBanera = new Image(); imgBanera.src = './banera.png';  // Obstáculo (Centrado sin márgenes)
-        const imgZanahoria = new Image(); imgZanahoria.src = './carrot.png'; // Premio (Centrado sin márgenes)
-        const imgFondoDia = new Image(); imgFondoDia.src = './daybg.png';   // Fondo de día
-        const imgFondoNoche = new Image(); imgFondoNoche.src = './nightbg.png'; // Fondo de noche
+        // --- CARGA DE ASSETS INDEPENDIENTES ---
+        const imgRun = new Image(); imgRun.src = './runbunny.png';         // Tira horizontal 8 fotogramas (120x120 cada uno)
+        const imgJump = new Image(); imgJump.src = './jumpbunny.png';       // Fotograma de salto (120x120)
+        const imgBanera = new Image(); imgBanera.src = './banera.png';      // Obstáculo
+        const imgZanahoria = new Image(); imgZanahoria.src = './carrot.png';  // Premio
+        const imgFondoDia = new Image(); imgFondoDia.src = './daybg.png';
+        const imgFondoNoche = new Image(); imgFondoNoche.src = './nightbg.png';
 
         const sonidoAgua = new Audio('./splash.mp3');
         const sonidoPuntos = new Audio('./points.mp3');
@@ -548,7 +548,7 @@
         musicaFondo.loop = true; 
 
         let assetsCargados = 0;
-        const totalAssets = 8; // 6 imágenes + 2 efectos de audio
+        const totalAssets = 8;
 
         const verificarCarga = () => {
             assetsCargados++;
@@ -566,20 +566,21 @@
         let baneras = [];
         let zanahorias = [];
 
-        // Renderizado lógico en el canvas
+        // Dimensiones lógicas de la conejita en el nuevo lienzo
         let conejo = { 
-            x: 50, 
+            x: 60, 
             y: 50, 
-            ancho: 60, 
-            alto: 60,
-            hitbox: { ancho: 30, alto: 50 } // Área de choque reducida para evitar frustración
+            ancho: 80, 
+            alto: 80,
+            hitbox: { ancho: 40, alto: 60 } 
         };
         
-        let gravedad = 1.5;      
+        let gravedad = 1.2;      
         let velocidadY = 0;      
-        let fuerzaSalto = -16;   
+        let fuerzaSalto = -14;   
         let enSuelo = false;     
-        let nivelSuelo = canvasJuego.height - 70;   
+        // El nivel del suelo se adapta a la nueva altura del canvas de 250px
+        let nivelSuelo = canvasJuego.height - 100;   
 
         let frameActual = 0;
         let contadorAnimacion = 0;
@@ -589,7 +590,7 @@
             frames = 0;
             baneras = [];
             zanahorias = [];
-            conejo.y = 50;
+            conejo.y = nivelSuelo;
             velocidadY = 0;
             velocidadJuego = 4;
             juegoActivo = true;
@@ -616,20 +617,18 @@
         }
 
         function manejarObstaculosYPremios() {
-            // Generar Bañeras (Obstáculos)
+            // Generar Bañeras (Obstáculos) a una altura donde la conejita pueda saltar por encima
             if (frames % 160 === 0) {
-                // Hitbox lógica (45x25) posicionada abajo
                 baneras.push({ 
                     x: canvasJuego.width, 
-                    y: nivelSuelo + 35, 
-                    anchoLogic: 45, altoLogic: 25,
-                    anchoVisual: 60, altoVisual: 60 // Dibujado a escala en el canvas
+                    y: nivelSuelo + 20, 
+                    anchoLogic: 40, altoLogic: 40,
+                    anchoVisual: 70, altoVisual: 70 
                 });
             }
             // Generar Zanahorias (Premios)
             if (frames % 100 === 0) {
-                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 10 : nivelSuelo + 20;
-                // Hitbox lógica (30x30)
+                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 20 : nivelSuelo + 30;
                 zanahorias.push({ 
                     x: canvasJuego.width, 
                     y: alturaZanahoria, 
@@ -638,7 +637,6 @@
                 });
             }
 
-            // Aumento de dificultad progresiva
             if (frames % 500 === 0) velocidadJuego += 0.5;
 
             // Mover y dibujar Bañeras
@@ -646,10 +644,9 @@
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
                 
-                // Dibuja la imagen independiente directamente centrada en el canvas
                 ctxJuego.drawImage(imgBanera, b.x, b.y, b.anchoVisual, b.altoVisual); 
 
-                // Colisión precisa
+                // Colisión ajustada al tamaño visible de la bañera
                 if (conejo.x + (conejo.ancho - conejo.hitbox.ancho)/2 < b.x + b.anchoLogic && 
                     conejo.x + (conejo.ancho + conejo.hitbox.ancho)/2 > b.x &&
                     conejo.y + (conejo.alto - conejo.hitbox.alto)/2 < b.y + b.altoLogic && 
@@ -669,7 +666,6 @@
                 
                 ctxJuego.drawImage(imgZanahoria, z.x, z.y, z.anchoVisual, z.altoVisual); 
 
-                // Detección de colisión para sumar puntos
                 if (conejo.x + (conejo.ancho - conejo.hitbox.ancho)/2 < z.x + z.anchoLogic && 
                     conejo.x + (conejo.ancho + conejo.hitbox.ancho)/2 > z.x &&
                     conejo.y + (conejo.alto - conejo.hitbox.alto)/2 < z.y + z.altoLogic && 
@@ -684,7 +680,6 @@
         }
 
         function actualizarFondo() {
-            // Alternancia de fondos cada 500 puntos (Día / Noche)
             let etapaFondo = Math.floor(score / 500);
             let imgFondoActual = (etapaFondo % 2 === 0) ? imgFondoDia : imgFondoNoche;
 
@@ -694,6 +689,10 @@
                 ctxJuego.fillStyle = (etapaFondo % 2 === 0) ? '#70c5eb' : '#181124';
                 ctxJuego.fillRect(0, 0, canvasJuego.width, canvasJuego.height);
             }
+            
+            // Línea de suelo referencial adaptada a los 250px
+            ctxJuego.fillStyle = (etapaFondo % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
+            ctxJuego.fillRect(0, nivelSuelo + 80, canvasJuego.width, 4);
         }
 
         function actualizarJuego() {
@@ -701,13 +700,9 @@
                 ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
                 frames++; 
 
-                // 1. Fondo dinámico
                 actualizarFondo();
-
-                // 2. Obstáculos y premios
                 manejarObstaculosYPremios();
 
-                // 3. Gravedad
                 velocidadY += gravedad; 
                 conejo.y += velocidadY; 
 
@@ -717,19 +712,19 @@
                     enSuelo = true;        
                 }
 
-                // 4. Animación de la conejita utilizando los archivos separados
+                // Animación de la conejita usando sus archivos individuales
                 if (!enSuelo) {
-                    // Fotograma estático de salto
+                    // Fotograma estático de salto leyendo la imagen `jumpbunny.png` completa (asumiendo 120x120 en su interior)
                     ctxJuego.drawImage(imgJump, 0, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
                 } else {
-                    // Carrera: Fotogramas secuenciales en la hoja horizontal `runbunny.png`
+                    // Carrera: Fotogramas secuenciales en la tira horizontal `runbunny.png` (recortes de 120x120)
                     let posXSprite = frameActual * 120;
                     ctxJuego.drawImage(imgRun, posXSprite, 0, 120, 120, conejo.x, conejo.y, conejo.ancho, conejo.alto);
 
                     contadorAnimacion++;
                     if (contadorAnimacion % 6 === 0) {
                         frameActual++;
-                        if (frameActual > 7) frameActual = 0; // Bucle de 8 fotogramas de carrera
+                        if (frameActual > 7) frameActual = 0; 
                     }
                 }
                 
@@ -739,7 +734,6 @@
             requestAnimationFrame(actualizarJuego); 
         }
 
-        // Bucle de juego principal
         requestAnimationFrame(actualizarJuego);
     </script>
 </body>
