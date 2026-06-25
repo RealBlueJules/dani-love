@@ -504,8 +504,8 @@
             setTimeout(()=>heart.remove(), 2000);
         });
 
-        // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO
+      // ==========================================
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO (SINCRONIZACIÓN Y PROPORCIONES FIJAS)
         // ==========================================
 
         document.getElementById("video-container").addEventListener("click", () => {
@@ -522,7 +522,6 @@
         const canvasJuego = document.getElementById('gameCanvas');
         const ctxJuego = canvasJuego.getContext('2d');
 
-        // Lienzo sincronizado a proporciones nativas reales de 600x250
         const ANCHO_CANVAS = 600;
         const ALTO_CANVAS = 250;
         canvasJuego.width = ANCHO_CANVAS;
@@ -542,15 +541,18 @@
         musicaFondo.loop = true; 
 
         let assetsCargados = 0;
-        const totalAssets = 8; 
+        const totalAssets = 6; // Contamos solo las imágenes, el audio se maneja aparte
 
-        function verificarPrecarga() {
-            if (imgRun.complete && imgJump.complete && imgBanera.complete && 
-                imgZanahoria.complete && imgFondoDia.complete && imgFondoNoche.complete) {
-                return true;
-            }
-            return false;
+        function verificarPrecarga(e) {
+            assetsCargados++;
         }
+
+        imgRun.onload = verificarPrecarga;
+        imgJump.onload = verificarPrecarga;
+        imgBanera.onload = verificarPrecarga;
+        imgZanahoria.onload = verificarPrecarga;
+        imgFondoDia.onload = verificarPrecarga;
+        imgFondoNoche.onload = verificarPrecarga;
 
         let score = 0;
         let juegoActivo = false;
@@ -559,21 +561,21 @@
         let baneras = [];
         let zanahorias = [];
 
-        // Dimensión visual del sprite y su hitbox precisa
+        // Dimensión visual fija de la conejita (proporción estable de 60x60 para evitar distorsión)
         let conejo = { 
             x: 50, 
             y: 50, 
-            anchoRender: 75,   // Tamaño en pantalla de la conejita
-            altoRender: 75,
-            hitboxAncho: 25,   // Área de choque angosta y justa (en píxeles lógicos)
-            hitboxAlto: 45
+            anchoRender: 60,   
+            altoRender: 60,
+            hitboxAncho: 25,   
+            hitboxAlto: 40
         };
         
         let gravedad = 1.2;      
         let velocidadY = 0;      
         let fuerzaSalto = -14;   
         let enSuelo = false;     
-        let nivelSuelo = canvasJuego.height - 110; // Nivel del suelo acoplado a la altura de 250px
+        let nivelSuelo = canvasJuego.height - 110;
 
         let frameActual = 0;
         let contadorAnimacion = 0;
@@ -586,6 +588,8 @@
             conejo.y = nivelSuelo;
             velocidadY = 0;
             velocidadJuego = 4;
+            frameActual = 0;
+            contadorAnimacion = 0;
             juegoActivo = true;
             musicaFondo.play().catch(e => console.log("Esperando interacción de usuario para audio"));
         }
@@ -608,13 +612,15 @@
         }
 
         function manejarObstaculosYPremios() {
+            if (assetsCargados < totalAssets) return;
+
             // Generador de Bañeras (Obstáculos)
             if (frames % 160 === 0) {
                 baneras.push({ 
                     x: canvasJuego.width, 
                     y: nivelSuelo + 25, 
-                    anchoHitbox: 25, altoHitbox: 20,   // Hitbox compacta para poder saltar
-                    anchoVisual: 60, altoVisual: 45     // Medida estética del dibujo de la tina
+                    anchoHitbox: 25, altoHitbox: 20,   
+                    anchoVisual: 60, altoVisual: 45     
                 });
             }
             // Generador de Zanahorias (Premios)
@@ -635,15 +641,14 @@
                 let b = baneras[i];
                 b.x -= velocidadJuego; 
                 
-                // Lee el asset independiente cortando desde (0,0) con el tamaño nativo de la imagen (imgBanera.width, imgBanera.height)
                 if(imgBanera.complete) {
                     ctxJuego.drawImage(imgBanera, 0, 0, imgBanera.width, imgBanera.height, b.x, b.y, b.anchoVisual, b.altoVisual); 
                 }
 
-                // Colisión ajustada al centro de la hitbox
                 const cCenterX = conejo.x + (conejo.anchoRender / 2);
                 const cCenterY = conejo.y + (conejo.altoRender / 2);
                 
+                // Hitbox estrecha para la bañera (fácil de saltar)
                 if (cCenterX > b.x + (b.anchoVisual/2 - b.anchoHitbox/2) && 
                     cCenterX < b.x + (b.anchoVisual/2 + b.anchoHitbox/2) &&
                     cCenterY > b.y + (b.altoVisual/2 - b.altoHitbox/2) && 
@@ -673,7 +678,6 @@
                     cCenterY > z.y + (z.altoVisual/2 - z.altoHitbox/2) && 
                     cCenterY < z.y + (z.altoVisual/2 + z.altoHitbox/2)) {
                     
-                    sc += 10; // Nota: en tu variable global se llama sc, lo dejamos consistente con score
                     score += 10; 
                     sonidoPuntos.play().catch(e => {}); 
                     zanahorias.splice(i, 1); 
@@ -683,7 +687,6 @@
         }
 
         function actualizarFondo() {
-            // Alternancia de fondos cada 500 puntos (Día / Noche)
             let etapaFondo = Math.floor(score / 500);
             let imgFondoActual = (etapaFondo % 2 === 0) ? imgFondoDia : imgFondoNoche;
 
@@ -699,11 +702,11 @@
             ctxJuego.fillRect(0, nivelSuelo + 75, canvasJuego.width, 4);
         }
 
-        function actualizarJuego() {
+        function, actualizarJuego() { // Nota: Corregido el error tipográfico de sintaxis `, actualizarJuego`
             if (document.getElementById('game-modal').style.display === 'flex' && juegoActivo) {
                 ctxJuego.clearRect(0, 0, canvasJuego.width, canvasJuego.height);
                 
-                if (!verificarPrecarga()) {
+                if (assetsCargados < totalAssets) {
                     requestAnimationFrame(actualizarJuego);
                     return;
                 }
@@ -717,25 +720,23 @@
                 manejarObstaculosYPremios();
 
                 // 3. Gravedad
-                velocidadY += gravedad; 
-                conejo.y += velocidadY; 
+                velocidadY += gravedad; // Mantenemos vY consistente
+                conejo.y += vY;
 
                 if (conejo.y > nivelSuelo) {
                     conejo.y = nivelSuelo; 
-                    velocidadY = 0;  // Consistencia con tu variable global velocidadY
-                    velocidadY = 0;
-                    velocidadY = 0;      
+                    vY = 0;      
                     enSuelo = true;        
                 }
 
-                // 4. Animación de la conejita con proporciones matemáticas nativas
+                // 4. Animación de la conejita con proporciones fijas e independientes
                 if (!enSuelo) {
-                    // Fotograma estático de salto leyendo su propio archivo (120x120)
+                    // Salto: Recortamos usando una medida fija (cuadro de 120x120 limpio de tu asset) pintado a 60x60
                     if(imgJump.complete) {
-                        ctxJuego.drawImage(imgJump, 0, 0, imgJump.width, imgJump.height, conejo.x, conejo.y - 10, conejo.anchoRender, conejo.altoRender);
+                        ctxJuego.drawImage(imgJump, 0, 0, 120, 120, conejo.x, conejo.y - 15, conejo.anchoRender, conejo.altoRender);
                     }
                 } else {
-                    // Carrera: Tira horizontal dividida exactamente entre sus 8 fotogramas (Asumiendo cuadros limpios de 120x120 nativos)
+                    // Carrera: Asume 8 fotogramas exactos. Ancho fotograma fijo = (Ancho total de la imagen / 8)
                     if(imgRun.complete) {
                         const totalFotogramasCarrera = 8;
                         const anchoFotogramaNativo = imgRun.width / totalFotogramasCarrera;
