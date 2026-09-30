@@ -218,6 +218,7 @@
             padding: 10px 15px;
             box-shadow: 0 0 15px #4da6ff;
             font-size: clamp(12px, 2.5vw, 14px);
+            max-width: 250px;
         }
 
         #calendar-container h3 {
@@ -332,7 +333,7 @@
         <button id="toggle-calendar-btn">🌸 Mostrar</button>
         <div id="calendar-container">
             <h3>Ciclo 🌸</h3>
-            <!-- CAJA DE CÁLCULO AUTOMÁTICO DE FASE -->
+            <!-- CAJA DE CÁLCULO AUTOMÁTICO DE FASE (CON MENSAJES GRACIOSOS) -->
             <div id="fase-actual" style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #ff6ec7;">
                 Calculando...
             </div>
@@ -382,7 +383,7 @@
         passwordInput.addEventListener("input", () => errorMsg.style.opacity = "0");
         passwordInput.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); checkPassword(); } });
 
-        /* --- LÓGICA DEL CONTADOR ACTUALIZADA --- */
+        /* --- LÓGICA DEL CONTADOR (HASTA EL DÍA 21) --- */
         function updateCountdown() {
             const today = new Date();
             const currentDay = today.getDate();
@@ -401,7 +402,7 @@
         }
         updateCountdown();
 
-        /* --- LÓGICA AUTOMÁTICA DEL CICLO MENSTRUAL --- */
+        /* --- LÓGICA AUTOMÁTICA DEL CICLO (VERSIÓN DIVERTIDA) --- */
         function updateCyclePhase() {
             const today = new Date();
             // Buscar el último día 21
@@ -418,16 +419,39 @@
 
             let phase = "";
             let colorClass = "";
+            let funnyMsg = "";
 
-            if (cycleDay >= 1 && cycleDay <= 9) { phase = "Infértil"; colorClass = "inf"; }
-            else if (cycleDay >= 10 && cycleDay <= 12) { phase = "Fértil"; colorClass = "fert"; }
-            else if (cycleDay >= 13 && cycleDay <= 16) { phase = "MUY FÉRTIL"; colorClass = "muy-fert"; }
-            else if (cycleDay >= 17 && cycleDay <= 18) { phase = "Fértil"; colorClass = "fert"; }
-            else { phase = "Infértil"; colorClass = "inf"; } // Del 19 en adelante
+            // Mensajes personalizados para cada fase 
+            if (cycleDay >= 1 && cycleDay <= 9) { 
+                phase = "Infértil"; 
+                colorClass = "inf"; 
+                funnyMsg = "Riesgo de bebé: Bajo. ¡Vía libre, poi poi! 😈💖";
+            }
+            else if (cycleDay >= 10 && cycleDay <= 12) { 
+                phase = "Fértil"; 
+                colorClass = "fert"; 
+                funnyMsg = "Mañana es un buen día para quedar embarazada' 👀👶🏻";
+            }
+            else if (cycleDay >= 13 && cycleDay <= 16) { 
+                phase = "MUY FÉRTIL"; 
+                colorClass = "muy-fert"; 
+                funnyMsg = "🚨 ALERTA ROJA 🚨 Excelente día para encargar un mini-tu... ¡Cuidado! 🫣🍼";
+            }
+            else if (cycleDay >= 17 && cycleDay <= 18) { 
+                phase = "Fértil"; 
+                colorClass = "fert"; 
+                funnyMsg = "Aún hay riesgo de mini Ekira . ¡Mucho ojo! 👀";
+            }
+            else { 
+                phase = "Infértil"; 
+                colorClass = "inf"; 
+                funnyMsg = "Óvulo de vacaciones 🏖️. Cero bebés por ahora. 🙌💖";
+            }
 
             document.getElementById("fase-actual").innerHTML = `
                 Hoy es el <strong>Día ${cycleDay}</strong><br>
-                Fase actual: <strong class="${colorClass}" style="font-size: 16px;">${phase}</strong>
+                Fase actual: <strong class="${colorClass}" style="font-size: 16px;">${phase}</strong><br>
+                <span style="display:block; margin-top: 10px; font-size: 13px; font-style: italic; color: #ff9ac7;">${funnyMsg}</span>
             `;
         }
         updateCyclePhase();
