@@ -179,11 +179,6 @@
             z-index: 200;
         }
 
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-120px); opacity: 0; }
-        }
-
         /* CONTADOR */
         #countdown-container {
             position: absolute; top: 3%; color: white; text-align: center;
@@ -337,11 +332,16 @@
         <button id="toggle-calendar-btn">🌸 Mostrar</button>
         <div id="calendar-container">
             <h3>Ciclo 🌸</h3>
+            <!-- CAJA DE CÁLCULO AUTOMÁTICO DE FASE -->
+            <div id="fase-actual" style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #ff6ec7;">
+                Calculando...
+            </div>
+            <!-- LEYENDA GENERAL DE DÍAS -->
             <div class="cal-row"><span class="cal-days">Día 1-9:</span> <span class="inf">infértil</span></div>
             <div class="cal-row"><span class="cal-days">Día 10-12:</span> <span class="fert">fértil</span></div>
             <div class="cal-row"><span class="cal-days">Día 13-16:</span> <span class="muy-fert">MUY FÉRTIL</span></div>
             <div class="cal-row"><span class="cal-days">Día 17-18:</span> <span class="fert">fértil</span></div>
-            <div class="cal-row"><span class="cal-days">Día 19-29/30:</span> <span class="inf">infértil</span></div>
+            <div class="cal-row"><span class="cal-days">Día 19-30:</span> <span class="inf">infértil</span></div>
         </div>
     </div>
 
@@ -382,18 +382,18 @@
         passwordInput.addEventListener("input", () => errorMsg.style.opacity = "0");
         passwordInput.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); checkPassword(); } });
 
-        /* --- LÓGICA DEL CONTADOR --- */
+        /* --- LÓGICA DEL CONTADOR ACTUALIZADA --- */
         function updateCountdown() {
             const today = new Date();
             const currentDay = today.getDate();
             const countdownText = document.getElementById("countdown-text");
             const daysLeftElement = document.getElementById("days-left");
 
-            if (currentDay === 9) {
-                countdownText.innerHTML = "¡Feliz día 9, mi amor! 🎉💖";
+            if (currentDay === 21) {
+                countdownText.innerHTML = "¡Feliz día 21, mi amor! 🎉💖";
             } else {
-                let targetDate = new Date(today.getFullYear(), today.getMonth(), 9);
-                if (currentDay > 9) targetDate.setMonth(targetDate.getMonth() + 1);
+                let targetDate = new Date(today.getFullYear(), today.getMonth(), 21);
+                if (currentDay > 21) targetDate.setMonth(targetDate.getMonth() + 1);
                 const diffTime = targetDate - today;
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
                 daysLeftElement.innerText = diffDays;
@@ -401,7 +401,38 @@
         }
         updateCountdown();
 
-        /* --- LÓGICA DEL CALENDARIO --- */
+        /* --- LÓGICA AUTOMÁTICA DEL CICLO MENSTRUAL --- */
+        function updateCyclePhase() {
+            const today = new Date();
+            // Buscar el último día 21
+            let lastPeriod = new Date(today.getFullYear(), today.getMonth(), 21);
+            
+            // Si hoy es antes del 21, su último periodo fue el mes pasado
+            if (today.getDate() < 21) {
+                lastPeriod.setMonth(lastPeriod.getMonth() - 1);
+            }
+
+            const diffTime = today - lastPeriod;
+            // +1 porque el día 21 ya cuenta como el Día 1
+            const cycleDay = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; 
+
+            let phase = "";
+            let colorClass = "";
+
+            if (cycleDay >= 1 && cycleDay <= 9) { phase = "Infértil"; colorClass = "inf"; }
+            else if (cycleDay >= 10 && cycleDay <= 12) { phase = "Fértil"; colorClass = "fert"; }
+            else if (cycleDay >= 13 && cycleDay <= 16) { phase = "MUY FÉRTIL"; colorClass = "muy-fert"; }
+            else if (cycleDay >= 17 && cycleDay <= 18) { phase = "Fértil"; colorClass = "fert"; }
+            else { phase = "Infértil"; colorClass = "inf"; } // Del 19 en adelante
+
+            document.getElementById("fase-actual").innerHTML = `
+                Hoy es el <strong>Día ${cycleDay}</strong><br>
+                Fase actual: <strong class="${colorClass}" style="font-size: 16px;">${phase}</strong>
+            `;
+        }
+        updateCyclePhase();
+
+        /* --- LÓGICA DEL BOTÓN DEL CALENDARIO --- */
         document.getElementById("toggle-calendar-btn").addEventListener("click", () => {
             const cal = document.getElementById("calendar-container");
 
@@ -513,7 +544,7 @@
         canJ.width = 600;
         canJ.height = 250;
 
-        // --- CARGA DE ASSETS (NUEVO CONEJO BUNNY.PNG) ---
+        // --- CARGA DE ASSETS ---
         const imgRun = new Image(); imgRun.src = './bunny.png'; 
         const imgJump = new Image(); imgJump.src = './bunny.png'; 
         const imgBanera = new Image(); imgBanera.src = './banera.png';      
@@ -646,7 +677,6 @@
                     cCenterY > z.y + (z.altoVisual/2 - z.altoHitbox/2) && 
                     cCenterY < z.y + (z.altoVisual/2 + z.altoHitbox/2)) {
                     
-                    // Zanahorias dan 100 puntos inmediatos
                     score += 100; 
                     sonidoPuntos.play().catch(e => {}); 
                     zanahorias.splice(i, 1); 
@@ -678,7 +708,6 @@
             ctJ.clearRect(0, 0, canJ.width, canJ.height);
 
             if (juegoTerminado) {
-                // Pantalla de Game Over
                 ctJ.fillStyle = 'rgba(0, 0, 0, 0.75)';
                 ctJ.fillRect(0, 0, canJ.width, canJ.height);
 
@@ -701,8 +730,6 @@
             } 
             else if (juegoActivo) {
                 frames++; 
-
-                // Puntos incrementando por tiempo transcurrido
                 score += 1; 
 
                 actualizarFondo();
@@ -719,7 +746,6 @@
                     enSuelo = false;
                 }
 
-                // Dibujo corregido y estable para la imagen nueva bunny.png
                 if (!enSuelo && imgJump.complete) {
                     ctJ.drawImage(imgJump, 0, 0, imgJump.width, imgJump.height, conejo.x, conejo.y, conejo.tamano, conejo.tamano);
                 } else if (imgRun.complete) {
@@ -733,5 +759,4 @@
         requestAnimationFrame(actualizarJuego);
     </script>
 </body>
-
 </html>
