@@ -1,786 +1,1934 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html lang="es" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KronoJules | Sanctuary of High Horology & Vault Management</title>
+    <!-- Google Fonts: Cinzel for Hellenic Royalty & Inter for Modern Precision -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <meta property="og:title" content="Para Dani ❤️">
-    <meta property="og:description" content="Sorpresa...">
-
-    <title>Para Dani 💙</title>
-
     <style>
-        body {
+        /* ==========================================================================
+           DESIGN TOKENS - KRONOJULES AZUL REY & ORO PULIDO
+           ========================================================================== */
+        :root {
+            /* Theme: Azul Rey Olimpo (Dark Royal Blue & Gold) */
+            --bg-body: #061024;
+            --bg-body-gradient: radial-gradient(circle at 50% 0%, #0d234d 0%, #061024 85%);
+            --bg-card: rgba(11, 29, 58, 0.85);
+            --bg-card-solid: #0b1d3a;
+            --bg-sidebar: #040a18;
+            --bg-header: rgba(6, 16, 36, 0.92);
+            --bg-input: #0f274d;
+            --bg-modal-overlay: rgba(3, 8, 20, 0.88);
+            
+            /* Gold Accent Palette */
+            --gold-primary: #d4af37;
+            --gold-light: #fef1c7;
+            --gold-dark: #a1801f;
+            --gold-hover: #e5c158;
+            --gold-gradient: linear-gradient(135deg, #fef1c7 0%, #d4af37 50%, #997819 100%);
+            --gold-border: rgba(212, 175, 55, 0.35);
+            --gold-glow: 0 0 20px rgba(212, 175, 55, 0.28);
+            
+            /* Royal Blue Accents */
+            --royal-blue: #002366;
+            --royal-light: #163773;
+            --royal-badge: rgba(37, 99, 235, 0.25);
+            
+            --text-main: #f0f4f9;
+            --text-muted: #8ca3c7;
+            --text-gold: #f3e5ab;
+            
+            --border-color: rgba(212, 175, 55, 0.20);
+            --glass-bg: rgba(212, 175, 55, 0.04);
+            
+            --status-stock: #10b981;
+            --status-stock-bg: rgba(16, 185, 129, 0.15);
+            --status-reserved: #f59e0b;
+            --status-reserved-bg: rgba(245, 158, 11, 0.15);
+            --status-sold: #ef4444;
+            --status-sold-bg: rgba(239, 68, 68, 0.15);
+            --status-service: #a855f7;
+            --status-service-bg: rgba(168, 85, 247, 0.15);
+            
+            --shadow-lux: 0 12px 35px -5px rgba(0, 0, 0, 0.75), 0 0 15px rgba(212, 175, 55, 0.08);
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            
+            --sidebar-width: 275px;
+            --header-height: 78px;
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="light"] {
+            /* Theme: Mármol Helénico (Hellenic White Marble & Gold) */
+            --bg-body: #f4f7fb;
+            --bg-body-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #e8eeef 100%);
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --bg-card-solid: #ffffff;
+            --bg-sidebar: #0a192f;
+            --bg-header: rgba(244, 247, 251, 0.95);
+            --bg-input: #ffffff;
+            --bg-modal-overlay: rgba(10, 25, 47, 0.75);
+            
+            --gold-primary: #b89128;
+            --gold-light: #7a5c0b;
+            --gold-dark: #8c6a15;
+            --gold-border: rgba(184, 145, 40, 0.35);
+            --gold-glow: 0 0 15px rgba(184, 145, 40, 0.18);
+            
+            --text-main: #0c1829;
+            --text-muted: #546882;
+            --text-gold: #8c6a15;
+            
+            --border-color: rgba(10, 25, 47, 0.14);
+            --shadow-lux: 0 10px 30px -5px rgba(10, 25, 47, 0.12), 0 0 12px rgba(184, 145, 40, 0.12);
+        }
+
+        /* ==========================================================================
+           RESET & TYPOGRAPHY
+           ========================================================================== */
+        * {
             margin: 0;
-            background: black;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: 'Arial', sans-serif;
-            color: white;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: auto;
         }
 
-        /* --- PANTALLA DE BLOQUEO --- */
-        #login-screen {
+        body {
+            background: var(--bg-body-gradient);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background var(--transition-speed), color var(--transition-speed);
+        }
+
+        h1, h2, h3, h4, .brand-title, .font-cinzel {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+        }
+
+        /* Greek Key Meander Border Utilities */
+        .meander-top-border {
+            position: relative;
+        }
+        .meander-top-border::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='4' viewBox='0 0 16 4'%3E%3Cpath d='M0 4V0h16v4h-2V2H2v2H0zm4-2h8v2H4V2z' fill='%23d4af37' fill-opacity='0.75'/%3E%3C/svg%3E");
+            background-repeat: repeat-x;
+        }
+
+        .meander-divider {
+            height: 6px;
+            width: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='6' viewBox='0 0 16 6'%3E%3Cpath d='M0 6V0h16v6h-2V2H2v4H0zm4-2h8v2H4V4z' fill='%23d4af37' fill-opacity='0.55'/%3E%3C/svg%3E");
+            background-repeat: repeat-x;
+            margin: 1.2rem 0;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 4px; }
+
+        /* ==========================================================================
+           SIDEBAR NAVIGATION & OVERLAY
+           ========================================================================== */
+        aside.sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: black;
+            top: 0; bottom: 0; left: 0;
             z-index: 100;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #ff9ac7;
-            transition: all 1s ease;
+            border-right: 1px solid var(--gold-border);
+            transition: transform var(--transition-speed) ease;
+            box-shadow: 5px 0 25px rgba(0,0,0,0.6);
         }
 
-        .unlocked {
-            transform: scale(1.5);
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        #login-screen h2 {
-            text-shadow: 0 0 15px #ff6ec7;
-            margin-bottom: 20px;
-            font-size: clamp(20px, 5vw, 30px);
-            text-align: center;
-        }
-
-        #password-input {
-            padding: 12px;
-            font-size: 18px;
-            border: 2px solid #ff6ec7;
-            border-radius: 10px;
-            background: transparent;
-            color: white;
-            text-align: center;
-            margin-bottom: 10px;
-            outline: none;
-            box-shadow: 0 0 10px #ff6ec7;
-            transition: 0.3s;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-10px); }
-            40%, 80% { transform: translateX(10px); }
-        }
-
-        .error {
-            animation: shake 0.4s ease-in-out;
-            border-color: #ff3b3b !important;
-            box-shadow: 0 0 15px #ff3b3b !important;
-        }
-
-        #error-msg {
-            color: #ff3b3b;
-            font-size: 14px;
-            min-height: 20px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            margin-bottom: 20px;
-            text-shadow: 0 0 5px #ff3b3b;
-        }
-
-        #login-btn {
-            padding: 10px 25px;
-            font-size: 18px;
-            border: none;
-            border-radius: 10px;
-            background: #ff6ec7;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 0 15px #ff6ec7;
-            transition: 0.3s;
-        }
-
-        #login-btn:hover {
-            background: #ff9ac7;
-            transform: scale(1.05);
-        }
-
-        /* estrellas */
-        .star {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: white;
-            opacity: 0.8;
-            animation: twinkle 2s infinite alternate;
-        }
-
-        @keyframes twinkle {
-            from { opacity: 0.2; }
-            to { opacity: 1; }
-        }
-
-        /* contenedor del corazón */
-        #container {
-            position: absolute;
-            top: 20%;
-            width: min(50vw, 280px);
-            height: min(50vw, 280px);
-            animation: beat 1.3s infinite;
-            z-index: 5;
-        }
-
-        @keyframes beat {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.07); }
-            100% { transform: scale(1); }
-        }
-
-        canvas.heart { position: absolute; top: 0; left: 0; }
-
-        /* palabras */
-        .word {
-            position: absolute;
-            color: #ff9ac7;
-            font-size: clamp(8px, 1.5vw, 12px); 
-            white-space: nowrap;
-            text-shadow: 0 0 10px white, 0 0 20px #ff6ec7;
-            opacity: 0;
-            animation: fade 1s forwards;
-        }
-
-        @keyframes fade { to { opacity: 1; } }
-
-        /* corazones centro */
-        #centerHearts {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: clamp(20px, 4vw, 40px); 
-            animation: spin 6s linear infinite;
-        }
-
-        .blue { color: #4da6ff; text-shadow: 0 0 20px #4da6ff; }
-        .pink { color: #ff6ec7; text-shadow: 0 0 20px #ff6ec7; }
-
-        @keyframes spin {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        /* corazones flotantes */
-        .floatHeart {
-            position: absolute; font-size: 20px;
-            animation: floatUp 2s ease-out forwards;
-            pointer-events: none;
-            z-index: 200;
-        }
-
-        /* CONTADOR */
-        #countdown-container {
-            position: absolute; top: 3%; color: white; text-align: center;
-            font-size: clamp(16px, 4vw, 22px); text-shadow: 0 0 15px #ff6ec7; z-index: 10;
-        }
-
-        /* CONTENEDOR DEL GIF Y CALENDARIO */
-        #content-wrapper {
-            position: absolute;
-            bottom: 3%;
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-            align-items: flex-end;
-            z-index: 10;
-            display: none; /* Oculto al inicio */
-        }
-
-        #video-container {
-            border: 2px solid #ff6ec7; border-radius: 12px;
-            overflow: hidden; box-shadow: 0 0 15px #ff6ec7; width: 180px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        #video-container:hover {
-            transform: scale(1.05);
-        }
-
-        img.gif-media { display: block; width: 100%; height: auto; }
-
-        /* CALENDARIO */
-        #calendar-container {
-            background: rgba(20, 0, 10, 0.7);
-            border: 2px solid #4da6ff;
-            border-radius: 12px;
-            padding: 10px 15px;
-            box-shadow: 0 0 15px #4da6ff;
-            font-size: clamp(12px, 2.5vw, 14px);
-            max-width: 250px;
-        }
-
-        #calendar-container h3 {
-            margin: 0 0 10px 0;
-            text-align: center;
-            color: #ff9ac7;
-            text-shadow: 0 0 5px #ff9ac7;
-            font-size: 16px;
-        }
-        #toggle-calendar-btn {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 10px;
-            background: #4da6ff;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 0 10px #4da6ff;
-        }
-
-        #calendar-container {
-            display: none;
-        }
-        .cal-row { display: flex; justify-content: space-between; margin-bottom: 5px; gap: 15px; }
-        .cal-days { font-weight: bold; }
-        .inf { color: #4da6ff; }
-        .fert { color: #ff9ac7; }
-        .muy-fert { color: #ff3b3b; font-weight: bold; text-shadow: 0 0 5px rgba(255,59,59,0.5); }
-
-        /* --- MODAL DEL JUEGO --- */
-        #game-modal {
+        .sidebar-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 300;
-            display: none; /* Oculto por defecto */
-            flex-direction: column;
-            justify-content: center;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px);
+            z-index: 95;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        body.sidebar-open .sidebar-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .sidebar-header {
+            height: var(--header-height);
+            display: flex;
             align-items: center;
+            padding: 0 1.4rem;
+            border-bottom: 1px solid var(--gold-border);
         }
 
-        #gameCanvas {
-            background: #111;
-            border: 2px solid #ff6ec7;
-            border-radius: 8px;
-            box-shadow: 0 0 20px #ff6ec7;
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            text-decoration: none;
+            color: #fff;
         }
 
-        #score-display {
-            color: #ff9ac7;
-            font-size: 20px;
-            margin-bottom: 10px;
-            font-weight: bold;
-            text-shadow: 0 0 10px #ff9ac7;
-        }
-
-        #close-game {
-            position: absolute;
-            top: 20px; right: 20px;
-            background: #ff3b3b;
-            color: white;
-            border: none;
+        .brand-emblem {
+            width: 44px;
+            height: 44px;
+            background: var(--gold-gradient);
             border-radius: 50%;
-            width: 40px; height: 40px;
-            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #061024;
+            box-shadow: var(--gold-glow);
+            flex-shrink: 0;
+            border: 2px solid #ffffff;
+        }
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+
+        .brand-subtitle {
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.5rem 0.9rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+            overflow-y: auto;
+        }
+
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.88rem 1.1rem;
+            color: #92a4c0;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        .menu-item a:hover {
+            color: #ffffff;
+            background: rgba(212, 175, 55, 0.1);
+            border-color: rgba(212, 175, 55, 0.25);
+            transform: translateX(3px);
+        }
+
+        .menu-item.active a {
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.22) 0%, rgba(13, 35, 77, 0.4) 100%);
+            color: var(--gold-light);
+            border: 1px solid var(--gold-border);
+            font-weight: 700;
+            box-shadow: var(--gold-glow);
+        }
+
+        .menu-item.active a::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 15%; bottom: 15%;
+            width: 4px;
+            background: var(--gold-gradient);
+            border-radius: 2px;
+        }
+
+        .menu-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            color: var(--gold-primary);
+        }
+
+        .admin-only-badge {
+            margin-left: auto;
+            font-size: 0.62rem;
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 0.15rem 0.45rem;
+            border-radius: 9999px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-footer {
+            padding: 1.2rem 1.4rem;
+            border-top: 1px solid var(--gold-border);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.2);
+        }
+
+        /* ==========================================================================
+           MAIN CONTENT & TOP HEADER
+           ========================================================================== */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        header.top-header {
+            height: var(--header-height);
+            background-color: var(--bg-header);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--gold-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--gold-primary);
             cursor: pointer;
-            box-shadow: 0 0 10px #ff3b3b;
+            padding: 0.4rem;
         }
 
-        #game-instructions {
-            margin-top: 15px;
-            color: #4da6ff;
-            font-size: 14px;
+        .page-title-heading {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--text-main);
         }
 
-        @media (max-width: 600px) {
-            #content-wrapper {
-                flex-direction: column;
-                align-items: center;
-                bottom: 2%;
-            }
-            #video-container { width: 150px; }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.1rem;
+        }
+
+        /* Currency Selector */
+        .currency-selector {
+            display: flex;
+            background: var(--bg-input);
+            border: 1px solid var(--gold-border);
+            border-radius: 9999px;
+            padding: 3px;
+        }
+
+        .currency-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.38rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .currency-btn.active {
+            background: var(--gold-gradient);
+            color: #061024;
+            box-shadow: 0 2px 10px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Role Pill & Login Controls */
+        .role-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            border: 1px solid var(--gold-border);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .role-pill.admin { background: rgba(212, 175, 55, 0.18); color: var(--gold-light); }
+        .role-pill.user { background: rgba(37, 99, 235, 0.18); color: #60a5fa; border-color: rgba(37, 99, 235, 0.4); }
+
+        .header-icon-btn {
+            background: var(--bg-input);
+            border: 1px solid var(--gold-border);
+            color: var(--gold-primary);
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-speed);
+        }
+
+        .header-icon-btn:hover {
+            background: rgba(212, 175, 55, 0.15);
+            box-shadow: var(--gold-glow);
+            transform: translateY(-2px);
+        }
+
+        /* User Profile Pill (CEO Jules Ortiz) */
+        .user-profile-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.35rem 0.85rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--gold-border);
+            border-radius: 9999px;
+            cursor: pointer;
+        }
+
+        .user-avatar-crown {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--gold-gradient);
+            color: #061024;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.85rem;
+            box-shadow: var(--gold-glow);
+            border: 2px solid #ffffff;
+        }
+
+        .user-meta-name { font-size: 0.85rem; font-weight: 700; }
+        .user-meta-role { font-size: 0.7rem; color: var(--gold-primary); font-weight: 600; }
+
+        /* ==========================================================================
+           VIEWS & CONTENT LAYOUT
+           ========================================================================== */
+        main.content-area { padding: 2rem; flex: 1; }
+        .view-section { display: none; animation: fadeIn 0.35s ease; }
+        .view-section.active-view { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ==========================================================================
+           KPI METRICS (OLYMPUS & VAULT)
+           ========================================================================== */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.2rem;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--gold-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lux);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--gold-gradient);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--gold-primary);
+            box-shadow: 0 15px 35px -5px rgba(0,0,0,0.8), var(--gold-glow);
+        }
+
+        .kpi-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.9rem; }
+        .kpi-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 700; }
+        .kpi-icon-box {
+            width: 44px; height: 44px; border-radius: var(--radius-md);
+            background: rgba(212, 175, 55, 0.12); border: 1px solid var(--gold-border);
+            color: var(--gold-primary); display: flex; align-items: center; justify-content: center;
+        }
+
+        .kpi-value { font-size: 2rem; font-weight: 800; color: var(--text-main); line-height: 1.1; margin-bottom: 0.4rem; font-family: 'Cinzel', serif; }
+        .kpi-subtext { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; }
+
+        /* Buttons & Controls */
+        .btn-gold {
+            background: var(--gold-gradient);
+            color: #061024;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1.4rem;
+            font-weight: 800;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 18px rgba(212, 175, 55, 0.35);
+            transition: all var(--transition-speed);
+        }
+
+        .btn-gold:hover { filter: brightness(1.12); transform: translateY(-2px); }
+
+        .btn-outline-gold {
+            background: transparent;
+            color: var(--gold-primary);
+            border: 1px solid var(--gold-border);
+            border-radius: var(--radius-sm);
+            padding: 0.7rem 1.25rem;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all var(--transition-speed);
+        }
+
+        .btn-outline-gold:hover { background: rgba(212, 175, 55, 0.12); border-color: var(--gold-primary); }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.85rem;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover { background: #ef4444; color: #fff; }
+
+        /* Controls Bar */
+        .controls-card {
+            background: var(--bg-card);
+            border: 1px solid var(--gold-border);
+            border-radius: var(--radius-md);
+            padding: 1.3rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.2rem;
+            box-shadow: var(--shadow-lux);
+        }
+
+        .search-input-group { position: relative; flex: 1; min-width: 270px; }
+        .search-input-group input {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--gold-border);
+            border-radius: var(--radius-sm); padding: 0.7rem 0.9rem 0.7rem 2.5rem;
+            color: var(--text-main); font-size: 0.9rem; outline: none;
+        }
+        .search-input-group svg { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: var(--gold-primary); }
+
+        .filter-select {
+            background: var(--bg-input); border: 1px solid var(--gold-border);
+            color: var(--text-main); padding: 0.7rem 1rem; border-radius: var(--radius-sm);
+            font-size: 0.88rem; outline: none; cursor: pointer;
+        }
+
+        /* Watch Cards Grid */
+        .watch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(315px, 1fr)); gap: 1.6rem; }
+        .watch-card {
+            background: var(--bg-card); border: 1px solid var(--gold-border);
+            border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lux);
+            display: flex; flex-direction: column; transition: all 0.3s ease;
+        }
+        .watch-card:hover { transform: translateY(-6px); border-color: var(--gold-primary); box-shadow: 0 18px 40px -5px rgba(0,0,0,0.8), var(--gold-glow); }
+
+        .watch-card-header { padding: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; }
+        .watch-brand { font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-primary); font-weight: 800; }
+        .watch-model { font-size: 1.3rem; font-weight: 700; color: var(--text-main); font-family: 'Cinzel', serif; }
+
+        .status-pill { padding: 0.28rem 0.75rem; border-radius: 9999px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; }
+        .status-stock { background: var(--status-stock-bg); color: var(--status-stock); border: 1px solid rgba(16, 185, 129, 0.4); }
+        .status-reserved { background: var(--status-reserved-bg); color: var(--status-reserved); border: 1px solid rgba(245, 158, 11, 0.4); }
+        .status-sold { background: var(--status-sold-bg); color: var(--status-sold); border: 1px solid rgba(239, 68, 68, 0.4); }
+        .status-service { background: var(--status-service-bg); color: var(--status-service); border: 1px solid rgba(168, 85, 247, 0.4); }
+
+        .watch-hero-icon { height: 130px; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .watch-hero-icon img { max-height: 110px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5)); }
+        .watch-hero-icon svg { width: 80px; height: 80px; filter: drop-shadow(0 6px 15px rgba(212, 175, 55, 0.3)); }
+
+        .watch-card-body { padding: 0 1.5rem 1.5rem 1.5rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .watch-specs-list { display: flex; flex-direction: column; gap: 0.45rem; padding: 0.8rem 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-bottom: 1.2rem; font-size: 0.82rem; }
+        .spec-row { display: flex; justify-content: space-between; }
+        .spec-label { color: var(--text-muted); }
+        .spec-value { font-weight: 600; color: var(--text-main); }
+        .watch-card-footer { display: flex; align-items: center; justify-content: space-between; }
+        .watch-price { font-size: 1.4rem; font-weight: 700; color: var(--gold-light); font-family: 'Cinzel', serif; }
+
+        /* ==========================================================================
+           KANBAN TALLER DEL OLIMPO (5 HELENIC STAGES)
+           ========================================================================== */
+        .kanban-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.2rem; overflow-x: auto; padding-bottom: 1rem; }
+        @media (max-width: 1300px) { .kanban-grid { grid-template-columns: repeat(5, minmax(260px, 1fr)); } }
+        
+        .kanban-col { background: var(--bg-card); border: 1px solid var(--gold-border); border-radius: var(--radius-md); padding: 1.1rem; min-height: 520px; display: flex; flex-direction: column; }
+        .kanban-col-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.9rem; margin-bottom: 1rem; border-bottom: 2px solid var(--gold-border); }
+        .kanban-col-title { font-size: 0.85rem; font-weight: 700; font-family: 'Cinzel', serif; }
+
+        .kanban-card { background: var(--bg-card-solid); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem; cursor: grab; transition: all 0.25s; }
+        .kanban-card:hover { border-color: var(--gold-primary); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), var(--gold-glow); transform: translateY(-2px); }
+        .kanban-card-ref { font-size: 0.7rem; color: var(--gold-primary); font-weight: 800; margin-bottom: 0.3rem; }
+        .kanban-card-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; }
+        .kanban-card-meta { font-size: 0.78rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 0.8rem; }
+        .kanban-card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 0.6rem; border-top: 1px dashed var(--border-color); }
+
+        .kanban-nav-btn { background: var(--bg-input); border: 1px solid var(--gold-border); color: var(--gold-primary); width: 28px; height: 28px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 700; }
+        .kanban-nav-btn:hover { background: var(--gold-primary); color: #061024; }
+
+        /* ==========================================================================
+           EMPLOYEE TABLE & MONEY MANAGEMENT (ADMIN EXCLUSIVE)
+           ========================================================================== */
+        .data-table-wrap { width: 100%; overflow-x: auto; }
+        table.data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+        table.data-table th { padding: 0.9rem 1rem; background: var(--bg-input); color: var(--gold-primary); font-family: 'Cinzel', serif; font-size: 0.8rem; border-bottom: 1px solid var(--gold-border); text-transform: uppercase; }
+        table.data-table td { padding: 1rem; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        table.data-table tbody tr:hover { background: rgba(212, 175, 55, 0.04); }
+
+        /* ==========================================================================
+           CERTIFICATE OF AUTHENTICITY FRAME (GOLD WAX SEAL)
+           ========================================================================== */
+        .cert-card-frame {
+            background: linear-gradient(135deg, #0b1d3a 0%, #061024 100%);
+            border: 3px solid var(--gold-primary);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 30px rgba(212, 175, 55, 0.12);
+            position: relative;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .gold-wax-seal {
+            width: 82px; height: 82px;
+            background: radial-gradient(circle at 30% 30%, #fef1c7, #d4af37 60%, #997819 100%);
+            border-radius: 50%;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.6), 0 0 25px rgba(212, 175, 55, 0.5);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #061024; font-weight: 900; font-size: 0.65rem; text-align: center;
+            letter-spacing: 1px; border: 3px solid #ffffff; transform: rotate(-8deg);
+        }
+
+        /* ==========================================================================
+           MODALS & OVERLAYS (SAFE POINTER-EVENTS & Z-INDEX)
+           ========================================================================== */
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-modal-overlay);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center; justify-content: center;
+            z-index: 1000; padding: 1.5rem;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: var(--bg-card-solid);
+            border: 2px solid var(--gold-border);
+            border-radius: var(--radius-lg);
+            width: 100%; max-width: 580px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.95), var(--gold-glow);
+            overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;
+            transform: scale(0.96);
+            transition: transform 0.25s ease;
+        }
+        .modal-backdrop.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 1.4rem 1.8rem; border-bottom: 1px solid var(--gold-border);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .modal-title { font-size: 1.3rem; font-weight: 700; font-family: 'Cinzel', serif; }
+        .modal-close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem; }
+        .modal-close-btn:hover { color: var(--gold-primary); }
+
+        .modal-body { padding: 1.8rem; overflow-y: auto; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .form-group.full-width { grid-column: span 2; }
+
+        .form-label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input, .form-select, .form-textarea {
+            background: var(--bg-input); border: 1px solid var(--gold-border);
+            border-radius: var(--radius-sm); padding: 0.7rem 0.9rem;
+            color: var(--text-main); font-size: 0.9rem; outline: none;
+        }
+        .form-input:focus, .form-select:focus { border-color: var(--gold-primary); box-shadow: 0 0 10px rgba(212, 175, 55, 0.25); }
+
+        .modal-footer { padding: 1.2rem 1.8rem; border-top: 1px solid var(--gold-border); display: flex; justify-content: flex-end; gap: 0.8rem; background: rgba(0,0,0,0.25); }
+
+        /* Toast Container */
+        .toast-wrap { position: fixed; bottom: 25px; right: 25px; z-index: 2000; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .toast-msg {
+            background: var(--bg-sidebar); color: #fff;
+            border-left: 4px solid var(--gold-primary); border: 1px solid var(--gold-border);
+            padding: 1rem 1.4rem; border-radius: var(--radius-md);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.8), var(--gold-glow);
+            display: flex; align-items: center; gap: 0.85rem; font-size: 0.88rem;
+            pointer-events: auto;
+            animation: toastIn 0.3s forwards;
+        }
+        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 900px) {
+            aside.sidebar { transform: translateX(-100%); }
+            body.sidebar-open aside.sidebar { transform: translateX(0); }
+            .main-wrapper { margin-left: 0; }
+            .mobile-menu-btn { display: block; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full-width { grid-column: span 1; }
+            .dash-details-grid { grid-template-columns: 1fr !important; }
         }
     </style>
 </head>
-
 <body>
 
-    <div id="login-screen">
-        <h2>Ingresa la clave secreta 🤨💖</h2>
-        <input type="password" id="password-input" placeholder="Contraseña">
-        <div id="error-msg">Clave incorrecta 💔 Intenta de nuevo.</div>
-        <button id="login-btn" onclick="checkPassword()">Entrar</button>
-    </div>
+    <!-- Sidebar Backdrop Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-    <div id="countdown-container">
-        <div id="countdown-text">Faltan <strong id="days-left" style="color: #4da6ff;"></strong> días para el día 🧛🏻 💖</div>
-    </div>
-
-    <div id="container">
-        <canvas id="heartLine" class="heart"></canvas>
-        <div id="centerHearts">
-            <span class="blue">💙</span>
-            <span class="pink">💗</span>
+    <!-- ==========================================================================
+         SIDEBAR NAVIGATION
+         ========================================================================== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header meander-top-border">
+            <a href="#" class="brand-logo">
+                <div class="brand-emblem">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 4l3 12h14l3-12-6 7-4-5-4 5-6-7z"/><circle cx="12" cy="4" r="1"/></svg>
+                </div>
+                <div>
+                    <span class="brand-title">KronoJules</span>
+                    <span class="brand-subtitle">CEO: JULES ORTIZ</span>
+                </div>
+            </a>
         </div>
-    </div>
 
-    <div id="content-wrapper">
-        <div id="video-container" title="¡Haz clic para jugar!">
-            <img id="secret-gif" data-src="IMG_3850.gif" alt="Nuestro recuerdo" class="gif-media">
+        <ul class="sidebar-menu">
+            <li class="menu-item active" data-view="view-dashboard">
+                <a href="#dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span>Dashboard Crono</span>
+                </a>
+            </li>
+            <li class="menu-item" data-view="view-catalogo">
+                <a href="#catalogo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Catálogo de Relojes</span>
+                </a>
+            </li>
+            <li class="menu-item" data-view="view-servicio">
+                <a href="#servicio">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    <span>Taller Crono</span>
+                </a>
+            </li>
+            <li class="menu-item" data-view="view-finanzas">
+                <a href="#finanzas">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span>Gestión Dinero & Bóveda</span>
+                    <span class="admin-only-badge">ADMIN</span>
+                </a>
+            </li>
+            <li class="menu-item" data-view="view-empleados">
+                <a href="#empleados">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>Plantilla de Empleados</span>
+                    <span class="admin-only-badge">ADMIN</span>
+                </a>
+            </li>
+            <li class="menu-item" data-view="view-certificados">
+                <a href="#certificados">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 11 12 14 22 4"/></svg>
+                    <span>Certificados Helénicos</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <span>KronoJules Haute Horlogerie</span>
+            <div style="color:var(--gold-primary); font-weight:700; margin-top:2px;">Garantía Real • Jules Ortiz</div>
         </div>
-        <button id="toggle-calendar-btn">🌸 Mostrar</button>
-        <div id="calendar-container">
-            <h3>Ciclo 🌸</h3>
-            <!-- CAJA DE CÁLCULO AUTOMÁTICO DE FASE (CON MENSAJES GRACIOSOS) -->
-            <div id="fase-actual" style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #ff6ec7;">
-                Calculando...
+    </aside>
+
+    <!-- ==========================================================================
+         MAIN WRAPPER & HEADER
+         ========================================================================== -->
+    <div class="main-wrapper">
+        <header class="top-header">
+            <div class="header-left">
+                <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleSidebar()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <h1 class="page-title-heading" id="pageTitle">Dashboard Crono</h1>
             </div>
-            <!-- LEYENDA GENERAL DE DÍAS -->
-            <div class="cal-row"><span class="cal-days">Día 1-9:</span> <span class="inf">infértil</span></div>
-            <div class="cal-row"><span class="cal-days">Día 10-12:</span> <span class="fert">fértil</span></div>
-            <div class="cal-row"><span class="cal-days">Día 13-16:</span> <span class="muy-fert">MUY FÉRTIL</span></div>
-            <div class="cal-row"><span class="cal-days">Día 17-18:</span> <span class="fert">fértil</span></div>
-            <div class="cal-row"><span class="cal-days">Día 19-30:</span> <span class="inf">infértil</span></div>
+
+            <div class="header-right">
+                <!-- Currency Selector (USD / MXN) -->
+                <div class="currency-selector">
+                    <button class="currency-btn active" id="btnUSD" onclick="setCurrency('USD')">USD ($)</button>
+                    <button class="currency-btn" id="btnMXN" onclick="setCurrency('MXN')">MXN ($)</button>
+                </div>
+
+                <!-- Theme Switcher -->
+                <button class="header-icon-btn" id="themeBtn" title="Cambiar Tema (Azul Rey / Mármol Helénico)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+                </button>
+
+                <!-- Current Active Role Display & Switcher -->
+                <div class="role-pill user" id="rolePill" onclick="openLoginModal()" title="Hacer clic para cambiar de rol o autenticar como Admin">
+                    <span id="roleLabel">ROL: USUARIO</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+
+                <!-- User Profile Header (CEO Jules Ortiz) -->
+                <div class="user-profile-badge" onclick="openLoginModal()">
+                    <div class="user-avatar-crown">JO</div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span class="user-meta-name">Jules Ortiz</span>
+                        <span class="user-meta-role">CEO & Founder KronoJules</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ==========================================================================
+             CONTENT AREA & VIEWS
+             ========================================================================== -->
+        <main class="content-area">
+
+            <!-- 1. DASHBOARD VIEW -->
+            <section id="view-dashboard" class="view-section active-view">
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-head">
+                            <span class="kpi-title">Valor en Bóveda</span>
+                            <div class="kpi-icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpiVaultValue">$1,850,000</div>
+                        <div class="kpi-subtext"><span style="color:#10b981; font-weight:700;">+18.2%</span> Auditado por Jules Ortiz</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-head">
+                            <span class="kpi-title">Caja Chica / Ventas Mes</span>
+                            <div class="kpi-icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H3v5m18 0v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7m18 0H3m9 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpiCashFlow">$420,000</div>
+                        <div class="kpi-subtext">Ingresos Operativos Recientes</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-head">
+                            <span class="kpi-title">Piezas en Taller</span>
+                            <div class="kpi-icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpiWorkshopCount">4 Piezas</div>
+                        <div class="kpi-subtext">Calibración & Pulido Helénico</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-head">
+                            <span class="kpi-title">Plantilla Empleados</span>
+                            <div class="kpi-icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpiStaffCount">3 Activos</div>
+                        <div class="kpi-subtext">Supervisados por Jules Ortiz</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.6rem;" class="dash-details-grid">
+                    <div style="background:var(--bg-card); border:1px solid var(--gold-border); border-radius:var(--radius-lg); padding:1.6rem; box-shadow:var(--shadow-lux);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3 style="font-size:1.3rem; font-weight:700;">Selección Destacada KronoJules</h3>
+                            <button class="btn-outline-gold" onclick="switchView('view-catalogo')">Ver Catálogo</button>
+                        </div>
+                        <div class="meander-divider"></div>
+                        <div class="watch-grid" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));" id="dashSpotlightGrid"></div>
+                    </div>
+
+                    <div style="background:var(--bg-card); border:1px solid var(--gold-border); border-radius:var(--radius-lg); padding:1.6rem; box-shadow:var(--shadow-lux); display:flex; flex-direction:column; justify-content:space-between;">
+                        <div>
+                            <h3 style="font-size:1.3rem; font-weight:700;">Bitácora Crono</h3>
+                            <div class="meander-divider"></div>
+                            <div style="display:flex; flex-direction:column; gap:1.1rem; font-size:0.85rem;">
+                                <div style="display:flex; gap:0.8rem;">
+                                    <div style="width:10px; height:10px; border-radius:50%; background:var(--gold-primary); margin-top:4px;"></div>
+                                    <div>
+                                        <strong>Jules Ortiz (CEO)</strong> autorizó auditoría de la Bóveda Central.
+                                        <div style="color:var(--text-muted); font-size:0.75rem;">Hace 15 min</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap:0.8rem;">
+                                    <div style="width:10px; height:10px; border-radius:50%; background:var(--status-stock); margin-top:4px;"></div>
+                                    <div>
+                                        Nuevo Patek Philippe Nautilus #5711 ingresado al inventario KronoJules.
+                                        <div style="color:var(--text-muted); font-size:0.75rem;">Hace 1 hora</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn-gold auth-required" style="width:100%; justify-content:center; margin-top:1.5rem;" onclick="openNewWatchModal()">
+                            + Registrar Pieza en Bóveda
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. CATÁLOGO DE RELOJES VIEW -->
+            <section id="view-catalogo" class="view-section">
+                <div class="controls-card">
+                    <div class="search-input-group">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="watchSearch" placeholder="Buscar por Manufactura, Modelo o Referencia..." oninput="filterWatchCatalogue()">
+                    </div>
+
+                    <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+                        <select class="filter-select" id="brandFilter" onchange="filterWatchCatalogue()">
+                            <option value="all">Todas las Manufacturas</option>
+                            <option value="Patek Philippe">Patek Philippe</option>
+                            <option value="Audemars Piguet">Audemars Piguet</option>
+                            <option value="Rolex">Rolex</option>
+                            <option value="Cartier">Cartier Santos</option>
+                            <option value="Vacheron Constantin">Vacheron Constantin</option>
+                        </select>
+
+                        <button class="btn-gold auth-required" onclick="openNewWatchModal()">+ Añadir Pieza</button>
+                    </div>
+                </div>
+
+                <div class="watch-grid" id="catalogoGrid"></div>
+            </section>
+
+            <!-- 3. TALLER CRONO (KANBAN 5 STAGES) VIEW -->
+            <section id="view-servicio" class="view-section">
+                <div class="controls-card">
+                    <div>
+                        <h3 style="font-size:1.3rem; font-weight:700;">Taller Crono & Restauration Service</h3>
+                        <p style="font-size:0.85rem; color:var(--text-muted);">Proceso artesanal de 5 fases supervisado por el equipo técnico KronoJules.</p>
+                    </div>
+                </div>
+
+                <div class="kanban-grid">
+                    <div class="kanban-col" ondragover="allowDrop(event)" ondrop="dropKanban(event, 'Recepcion')">
+                        <div class="kanban-col-header">
+                            <span class="kanban-col-title" style="color:var(--text-muted)">I. Recepción</span>
+                            <span id="count-recepcion">0</span>
+                        </div>
+                        <div id="kanban-recepcion"></div>
+                    </div>
+                    <div class="kanban-col" ondragover="allowDrop(event)" ondrop="dropKanban(event, 'Autenticacion')">
+                        <div class="kanban-col-header">
+                            <span class="kanban-col-title" style="color:var(--status-reserved)">II. Autenticación</span>
+                            <span id="count-autenticacion">0</span>
+                        </div>
+                        <div id="kanban-autenticacion"></div>
+                    </div>
+                    <div class="kanban-col" ondragover="allowDrop(event)" ondrop="dropKanban(event, 'Servicio')">
+                        <div class="kanban-col-header">
+                            <span class="kanban-col-title" style="color:var(--status-service)">III. Servicio & Pulido</span>
+                            <span id="count-servicio">0</span>
+                        </div>
+                        <div id="kanban-servicio"></div>
+                    </div>
+                    <div class="kanban-col" ondragover="allowDrop(event)" ondrop="dropKanban(event, 'Calidad')">
+                        <div class="kanban-col-header">
+                            <span class="kanban-col-title" style="color:var(--gold-primary)">IV. Control Calidad</span>
+                            <span id="count-calidad">0</span>
+                        </div>
+                        <div id="kanban-calidad"></div>
+                    </div>
+                    <div class="kanban-col" ondragover="allowDrop(event)" ondrop="dropKanban(event, 'Entrega')">
+                        <div class="kanban-col-header">
+                            <span class="kanban-col-title" style="color:var(--status-stock)">V. Listo Santuario VIP</span>
+                            <span id="count-entrega">0</span>
+                        </div>
+                        <div id="kanban-entrega"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. GESTIÓN FINANCIERA & DINERO (EXCLUSIVO ADMIN) -->
+            <section id="view-finanzas" class="view-section">
+                <div class="controls-card">
+                    <div>
+                        <h3 style="font-size:1.3rem; font-weight:700;">Control Financiero & Gestión de Bóveda</h3>
+                        <p style="font-size:0.85rem; color:var(--text-muted);">Acceso restringido a Administrador (CEO Jules Ortiz). Edición de caja chica, valor acumulado e ingresos.</p>
+                    </div>
+                    <button class="btn-gold" onclick="openEditMoneyModal()">Modificar Fondos & Bóveda</button>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-head"><span class="kpi-title">Valor Total Bóveda</span></div>
+                        <div class="kpi-value" id="finVaultDisplay">$1,850,000</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-head"><span class="kpi-title">Caja Chica Activa</span></div>
+                        <div class="kpi-value" id="finCashDisplay">$420,000</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-head"><span class="kpi-title">Ingresos Mensuales</span></div>
+                        <div class="kpi-value" id="finIncomeDisplay">$680,000</div>
+                    </div>
+                </div>
+
+                <div style="background:var(--bg-card); border:1px solid var(--gold-border); border-radius:var(--radius-lg); padding:1.6rem; box-shadow:var(--shadow-lux);">
+                    <h3 style="font-size:1.2rem; font-weight:700; margin-bottom:1rem;">Historial de Movimientos Financieros Auditados</h3>
+                    <div class="data-table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Concepto / Transacción</th>
+                                    <th>Monto</th>
+                                    <th>Autorizado Por</th>
+                                </tr>
+                            </thead>
+                            <tbody id="financeHistoryBody">
+                                <tr>
+                                    <td>04 Nov 2026</td>
+                                    <td>Venta Patek Philippe Nautilus Jumbo</td>
+                                    <td style="color:#10b981; font-weight:700;">+$115,000 USD</td>
+                                    <td><strong>Jules Ortiz (CEO)</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>02 Nov 2026</td>
+                                    <td>Mantenimiento de Maquinaria Suiza Taller</td>
+                                    <td style="color:#ef4444; font-weight:700;">-$12,500 USD</td>
+                                    <td><strong>Jules Ortiz (CEO)</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. PLANTILLA DE EMPLEADOS (EXCLUSIVO ADMIN) -->
+            <section id="view-empleados" class="view-section">
+                <div class="controls-card">
+                    <div>
+                        <h3 style="font-size:1.3rem; font-weight:700;">Gestión de Plantilla de Empleados</h3>
+                        <p style="font-size:0.85rem; color:var(--text-muted);">Control exclusivo de personal KronoJules. Agregar o desvincular colaboradores.</p>
+                    </div>
+                    <button class="btn-gold" onclick="openAddEmployeeModal()">+ Contratar / Agregar Empleado</button>
+                </div>
+
+                <div style="background:var(--bg-card); border:1px solid var(--gold-border); border-radius:var(--radius-lg); padding:1.6rem; box-shadow:var(--shadow-lux);">
+                    <div class="data-table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Empleado</th>
+                                    <th>Puesto / Rol</th>
+                                    <th>Turno Operativo</th>
+                                    <th>Contacto</th>
+                                    <th>Acción (Admin)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeeTableBody">
+                                <!-- Dynamic JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. CERTIFICADOS HELÉNICOS VIEW -->
+            <section id="view-certificados" class="view-section">
+                <div class="cert-card-frame">
+                    <div style="text-align:center; margin-bottom:1.5rem;">
+                        <div style="font-size:0.75rem; letter-spacing:3px; color:var(--gold-primary); font-weight:800;">HAUTE HORLOGERIE • KRONOJULES</div>
+                        <h2 style="font-size:2.2rem; font-weight:800; color:var(--gold-light); margin-top:0.3rem;">Certificado Digital Crono</h2>
+                        <p style="font-size:0.85rem; color:var(--text-muted);">Autenticidad Firmada por Jules Ortiz (CEO)</p>
+                    </div>
+
+                    <div class="meander-divider"></div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.3rem; font-size:0.88rem; background:rgba(212,175,55,0.04); padding:1.4rem; border-radius:var(--radius-md); border:1px dashed var(--gold-border);">
+                        <div><span style="color:var(--text-muted); font-size:0.75rem; display:block;">Pieza Auditada</span><strong>Patek Philippe Nautilus Jumbo</strong></div>
+                        <div><span style="color:var(--text-muted); font-size:0.75rem; display:block;">Número de Serie</span><strong style="color:var(--gold-primary);">#PP-5711-9982</strong></div>
+                        <div><span style="color:var(--text-muted); font-size:0.75rem; display:block;">Movimiento / Calibre</span><strong>Calibre 26-330 S C (Automático)</strong></div>
+                        <div><span style="color:var(--text-muted); font-size:0.75rem; display:block;">Certificación</span><strong style="color:var(--status-stock);">Sello Helénico Verificado</strong></div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2rem;">
+                        <div>
+                            <span style="font-size:0.78rem; color:var(--text-muted); display:block;">Firma Autorizada del CEO:</span>
+                            <strong style="font-family:'Cinzel'; font-size:1.4rem; color:var(--gold-primary);">Jules Ortiz</strong>
+                        </div>
+                        <div class="gold-wax-seal">
+                            <span>SELLO</span>
+                            <strong style="font-size:0.85rem;">CRONO</strong>
+                            <span>KRONOJULES</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ==========================================================================
+         MODALS SYSTEM & AUTHENTICATION (TEXTO DE CONTRASEÑA COMPLETAMENTE REMOVIDO)
+         ========================================================================== -->
+    <!-- Modal: Autenticación / Cambio de Rol -->
+    <div class="modal-backdrop" id="modalLogin">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Acceso y Autenticación KronoJules</h3>
+                <button class="modal-close-btn" onclick="closeModal('modalLogin')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="lockoutWarning" style="display: none; color: #ef4444; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); padding: 0.85rem; border-radius: var(--radius-sm); margin-bottom: 1rem; font-size: 0.85rem; font-weight: 700;">
+                    Cuenta bloqueada por seguridad tras 3 intentos fallidos.
+                </div>
+                <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.2rem;">
+                    Selecciona tu rol e ingresa tu clave de acceso (si aplica) para validar y cambiar los permisos:
+                </p>
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label class="form-label">Selecciona Rol</label>
+                    <select id="loginRoleSelect" class="form-select" onchange="togglePasswordInput()">
+                        <option value="user">Usuario (Cliente)</option>
+                        <option value="employee">Empleado KronoJules</option>
+                        <option value="admin">Administrador / CEO</option>
+                    </select>
+                </div>
+                <div class="form-group" id="passwordContainer" style="display: none;">
+                    <label class="form-label">Contraseña de Autenticación</label>
+                    <input type="password" id="loginPasswordInput" class="form-input" placeholder="Ingresa tu contraseña..." autocomplete="current-password">
+                </div>
+                <div style="margin-top: 1rem; text-align: right;">
+                    <a href="#" onclick="openRecoveryModal(); return false;" style="color: var(--gold-primary); font-size: 0.8rem; text-decoration: none; font-weight: 600;">¿Olvidaste tu clave / Recuperar acceso?</a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline-gold" onclick="closeModal('modalLogin')">Cancelar</button>
+                <button class="btn-gold" id="btnLoginSubmit" onclick="processLogin()">Validar e Ingresar</button>
+            </div>
         </div>
     </div>
 
-    <div id="game-modal">
-        <button id="close-game" onclick="closeGame()">X</button>
-        <div id="score-display">Puntos: 0</div>
-        <canvas id="gameCanvas" width="600" height="250"></canvas>
-        <div id="game-instructions">Toca la pantalla o presiona Espacio para saltar</div>
+    <!-- Modal: Recuperar Acceso -->
+    <div class="modal-backdrop" id="modalRecovery">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Recuperar Acceso</h3>
+                <button class="modal-close-btn" onclick="closeModal('modalRecovery')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.2rem;">
+                    Ingresa tu correo electrónico para recibir instrucciones y recuperar el acceso a la plataforma.
+                </p>
+                <div class="form-group">
+                    <label class="form-label">Correo Electrónico</label>
+                    <input type="email" id="recoveryEmailInput" class="form-input" placeholder="ej. usuario@kronojules.com" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline-gold" onclick="closeModal('modalRecovery')">Cancelar</button>
+                <button class="btn-gold" onclick="processRecovery()">Enviar Enlace</button>
+            </div>
+        </div>
     </div>
 
+    <!-- Modal: Modificar Fondos y Bóveda (Admin Exclusivo) -->
+    <div class="modal-backdrop" id="modalEditMoney">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Gestión de Bóveda & Fondos</h3>
+                <button class="modal-close-btn" onclick="closeModal('modalEditMoney')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label class="form-label">Nuevo Valor de Bóveda ($ USD)</label>
+                    <input type="number" id="editVaultInput" class="form-input" value="1850000">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nueva Caja Chica ($ USD)</label>
+                    <input type="number" id="editCashInput" class="form-input" value="420000">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline-gold" onclick="closeModal('modalEditMoney')">Cancelar</button>
+                <button class="btn-gold" onclick="saveMoneyChanges()">Actualizar Dinero</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Agregar Empleado (Admin Exclusivo) -->
+    <div class="modal-backdrop" id="modalAddEmployee">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Contratar Nuevo Empleado</h3>
+                <button class="modal-close-btn" onclick="closeModal('modalAddEmployee')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nombre Completo</label>
+                        <input type="text" id="empNameInput" class="form-input" placeholder="Ej. Mateo Morales" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Puesto / Rol Operativo</label>
+                        <input type="text" id="empRoleInput" class="form-input" placeholder="Ej. Maestro Relojero" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Turno</label>
+                        <select id="empShiftInput" class="form-select">
+                            <option value="Mañana (08:00 - 16:00)">Mañana (08:00 - 16:00)</option>
+                            <option value="Tarde (16:00 - 00:00)">Tarde (16:00 - 00:00)</option>
+                            <option value="Completo (Supervisor)">Completo (Supervisor)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Teléfono Contacto</label>
+                        <input type="text" id="empPhoneInput" class="form-input" placeholder="+56 9 8888 7777" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline-gold" onclick="closeModal('modalAddEmployee')">Cancelar</button>
+                <button class="btn-gold" onclick="saveNewEmployee()">Registrar Empleado</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Detalle Reloj -->
+    <div class="modal-backdrop" id="modalWatchDetail">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalDetailTitle">Ficha Técnica</h3>
+                <button class="modal-close-btn" onclick="closeModal('modalWatchDetail')">&times;</button>
+            </div>
+            <div class="modal-body" id="modalDetailBody"></div>
+            <div class="modal-footer">
+                <button class="btn-outline-gold" onclick="closeModal('modalWatchDetail')">Cerrar</button>
+                <button class="btn-gold" id="btnMarkSold">Marcar como Vendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Registrar Reloj -->
+    <div class="modal-backdrop" id="modalNewWatch">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Registrar Reloj en Bóveda</h3>
+                <button class="modal-close-btn" onclick="closeModal('modalNewWatch')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formWatch">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Manufactura</label>
+                            <select id="newBrand" class="form-select">
+                                <option value="Patek Philippe">Patek Philippe</option>
+                                <option value="Audemars Piguet">Audemars Piguet</option>
+                                <option value="Rolex">Rolex</option>
+                                <option value="Cartier">Cartier Santos</option>
+                                <option value="Vacheron Constantin">Vacheron Constantin</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Modelo</label>
+                            <input type="text" id="newModel" class="form-input" placeholder="Ej. Royal Oak 41mm" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Referencia</label>
+                            <input type="text" id="newRef" class="form-input" placeholder="Ej. 15500ST" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Precio ($ USD)</label>
+                            <input type="number" id="newPrice" class="form-input" placeholder="Ej. 65000" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline-gold" onclick="closeModal('modalNewWatch')">Cancelar</button>
+                <button class="btn-gold" onclick="saveNewWatch()">Ingresar a Bóveda</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-wrap" id="toastContainer"></div>
+
+    <!-- ==========================================================================
+         JAVASCRIPT LOGIC, ROUTING & SECURITY
+         ========================================================================== -->
     <script>
-        /* --- LÓGICA DE LA CONTRASEÑA --- */
-        const passwordInput = document.getElementById("password-input");
-        const errorMsg = document.getElementById("error-msg");
-
-        function checkPassword() {
-            const inputVal = passwordInput.value.trim().toLowerCase();
-            const secretCode = "dani0122"; 
-
-            if (inputVal === secretCode) {
-                const loginScreen = document.getElementById("login-screen");
-                loginScreen.classList.add("unlocked");
-                
-                const secretGif = document.getElementById("secret-gif");
-                secretGif.src = secretGif.getAttribute("data-src");
-                document.getElementById("content-wrapper").style.display = "flex";
-
-                setTimeout(() => {
-                    loginScreen.style.display = "none";
-                }, 1000); 
-            } else {
-                passwordInput.classList.add("error");
-                errorMsg.style.opacity = "1";
-                setTimeout(() => { passwordInput.classList.remove("error"); }, 400);
-            }
-        }
-
-        passwordInput.addEventListener("input", () => errorMsg.style.opacity = "0");
-        passwordInput.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); checkPassword(); } });
-
-        /* --- LÓGICA DEL CONTADOR (HASTA EL DÍA 21) --- */
-        function updateCountdown() {
-            const today = new Date();
-            const currentDay = today.getDate();
-            const countdownText = document.getElementById("countdown-text");
-            const daysLeftElement = document.getElementById("days-left");
-
-            if (currentDay === 21) {
-                countdownText.innerHTML = "¡Feliz día 21, mi amor! 🎉💖";
-            } else {
-                let targetDate = new Date(today.getFullYear(), today.getMonth(), 21);
-                if (currentDay > 21) targetDate.setMonth(targetDate.getMonth() + 1);
-                const diffTime = targetDate - today;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                daysLeftElement.innerText = diffDays;
-            }
-        }
-        updateCountdown();
-
-        /* --- LÓGICA AUTOMÁTICA DEL CICLO (VERSIÓN DIVERTIDA) --- */
-        function updateCyclePhase() {
-            const today = new Date();
-            // Buscar el último día 21
-            let lastPeriod = new Date(today.getFullYear(), today.getMonth(), 21);
-            
-            // Si hoy es antes del 21, su último periodo fue el mes pasado
-            if (today.getDate() < 21) {
-                lastPeriod.setMonth(lastPeriod.getMonth() - 1);
-            }
-
-            const diffTime = today - lastPeriod;
-            // +1 porque el día 21 ya cuenta como el Día 1
-            const cycleDay = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; 
-
-            let phase = "";
-            let colorClass = "";
-            let funnyMsg = "";
-
-            // Mensajes personalizados para cada fase 
-            if (cycleDay >= 1 && cycleDay <= 9) { 
-                phase = "Infértil"; 
-                colorClass = "inf"; 
-                funnyMsg = "Riesgo de bebé: Bajo. ¡Vía libre, poi poi! 😈💖";
-            }
-            else if (cycleDay >= 10 && cycleDay <= 12) { 
-                phase = "Fértil"; 
-                colorClass = "fert"; 
-                funnyMsg = "Mañana es un buen día para quedar embarazada' 👀👶🏻";
-            }
-            else if (cycleDay >= 13 && cycleDay <= 16) { 
-                phase = "MUY FÉRTIL"; 
-                colorClass = "muy-fert"; 
-                funnyMsg = "🚨 ALERTA ROJA 🚨 Excelente día para encargar un mini-tu... ¡Cuidado! 🫣🍼";
-            }
-            else if (cycleDay >= 17 && cycleDay <= 18) { 
-                phase = "Fértil"; 
-                colorClass = "fert"; 
-                funnyMsg = "Aún hay riesgo de mini Ekira . ¡Mucho ojo! 👀";
-            }
-            else { 
-                phase = "Infértil"; 
-                colorClass = "inf"; 
-                funnyMsg = "Óvulo de vacaciones 🏖️. Cero bebés por ahora. 🙌💖";
-            }
-
-            document.getElementById("fase-actual").innerHTML = `
-                Hoy es el <strong>Día ${cycleDay}</strong><br>
-                Fase actual: <strong class="${colorClass}" style="font-size: 16px;">${phase}</strong><br>
-                <span style="display:block; margin-top: 10px; font-size: 13px; font-style: italic; color: #ff9ac7;">${funnyMsg}</span>
-            `;
-        }
-        updateCyclePhase();
-
-        /* --- LÓGICA DEL BOTÓN DEL CALENDARIO --- */
-        document.getElementById("toggle-calendar-btn").addEventListener("click", () => {
-            const cal = document.getElementById("calendar-container");
-
-            if(cal.style.display === "none" || cal.style.display === ""){
-                cal.style.display = "block";
-                document.getElementById("toggle-calendar-btn").innerText = "Ocultar 🌸";
-            } else {
-                cal.style.display = "none";
-                document.getElementById("toggle-calendar-btn").innerText = "Mostrar 🌸";
-            }
-        });
-        
-        /* --- FONDO ESTRELLADO --- */
-        for(let i=0; i<100; i++){
-            let star = document.createElement("div");
-            star.className = "star";
-            star.style.left = Math.random()*100+"vw";
-            star.style.top = Math.random()*100+"vh";
-            document.body.appendChild(star);
-        }
-
-        /* --- DIBUJAR CORAZÓN DE PANTALLA INICIAL --- */
-        let cC = document.getElementById("heartLineE");
-        if (!cC) {
-            cC = document.getElementById("heartLine");
-        }
-        if (!cC) {
-            cC = document.createElement("canvas");
-            cC.id = "heartLine";
-            cC.className = "heart";
-            document.getElementById("container").appendChild(cC);
-        }
-        
-        const containerEl = document.getElementById("container");
-        cC.width = containerEl.offsetWidth;
-        cC.height = containerEl.offsetHeight;
-        const ctC = cC.getContext("2d");
-        
-        const sz = containerEl.offsetWidth / 2;
-        let tim = 0;
-        let animacionCorazonFrame;
-
-        function dr() {
-            ctC.clearRect(0, 0, cC.width, cC.height);
-            ctC.strokeStyle = "#ff6ec7"; 
-            ctC.lineWidth = 3;
-            ctC.beginPath();
-            for (let i = 0; i < tim; i += 0.02) {
-                let x = sz + 16 * Math.pow(Math.sin(i), 3) * (sz / 18);
-                let y = sz - (13 * Math.cos(i) - 5 * Math.cos(2 * i) - 2 * Math.cos(3 * i) - Math.cos(4 * i)) * (sz / 18);
-                if (i === 0) ctC.moveTo(x, y); else ctC.lineTo(x, y);
-            }
-            ctC.stroke();
-            tim += 0.05;
-            if (tim < Math.PI * 2) {
-                animacionCorazonFrame = requestAnimationFrame(dr);
-            } else {
-                for (let i = 0; i < 170; i++) {
-                    let a = Math.PI * 2 * i / 170;
-                    let x = sz + 16 * Math.pow(Math.sin(a), 3) * (sz / 18);
-                    let y = sz - (13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) * (sz / 18);
-                    let s = document.createElement("span"); s.className = "word"; s.innerText = "I love you Dani";
-                    s.style.left = x + "px"; s.style.top = y + "px"; s.style.animationDelay = (i * 0.02) + "s";
-                    containerEl.appendChild(s);
-                }
-            }
-        } dr();
-
-        document.addEventListener("click", function(e){
-            if (e.target.closest('#video-container') || 
-                e.target.closest('#game-modal') ||
-                e.target.id === 'login-screen' || 
-                e.target.tagName.toLowerCase() === 'input' || 
-                e.target.tagName.toLowerCase() === 'button' ||
-                e.target.closest('#calendar-container')) return;
-                
-            let heart = document.createElement("div");
-            heart.className = "floatHeart";
-            heart.innerHTML = "💗";
-            heart.style.left = e.clientX+"px";
-            heart.style.top = e.clientY+"px";
-            document.body.appendChild(heart);
-            setTimeout(()=>heart.remove(), 2000);
-        });
-
-        // ==========================================
-        // LÓGICA DEL MINIJUEGUITO DEL CONEJO 
-        // ==========================================
-
-        document.getElementById("video-container").addEventListener("click", () => {
-            if(animacionCorazonFrame) cancelAnimationFrame(animacionCorazonFrame);
-            document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'paused');
-            document.getElementById('game-modal').style.display = 'flex';
-            reiniciarJuego();
-        });
-
-        function closeGame() {
-            document.getElementById('game-modal').style.display = 'none';
-            juegoActivo = false;
-            juegoTerminado = false;
-            if(typeof musicaFondo !== 'undefined') musicaFondo.pause(); 
-            document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'running');
-            if(tim < Math.PI * 2) dr();
-        }
-
-        const canJ = document.getElementById('gameCanvas');
-        const ctJ = canJ.getContext('2d');
-
-        canJ.width = 600;
-        canJ.height = 250;
-
-        // --- CARGA DE ASSETS ---
-        const imgRun = new Image(); imgRun.src = './bunny.png'; 
-        const imgJump = new Image(); imgJump.src = './bunny.png'; 
-        const imgBanera = new Image(); imgBanera.src = './banera.png';      
-        const imgZanahoria = new Image(); imgZanahoria.src = './carrot.png';  
-        const imgFondoDia = new Image(); imgFondoDia.src = './daybg.png';
-        const imgFondoNoche = new Image(); imgFondoNoche.src = './nightbg.png';
-
-        const sonidoAgua = new Audio('./splash.mp3');
-        const sonidoPuntos = new Audio('./points.mp3');
-        const musicaFondo = new Audio('./soundtrack.mp3');
-        musicaFondo.loop = true; 
-
-        let score = 0;
-        let juegoActivo = false;
-        let juegoTerminado = false;
-        let frames = 0; 
-        let velocidadJuego = 4; 
-        let baneras = [];
-        let zanahorias = [];
-
-        let conejo = { 
-            x: 80, 
-            y: 0, 
-            tamano: 65,
-            hitboxAncho: 45, 
-            hitboxAlto: 45 
+        /* ==========================================
+           INTERNAL AUTHENTICATION CONFIGURATION
+           ========================================== */
+        const PASSWORDS = {
+            EMPLOYEE: "JulesAP",
+            ADMIN: "JulesEkirakrono22"
         };
-        
-        let gravedad = 1.5;      
-        let velocidadY = 0;      
-        let fuerzaSalto = -14;   
-        let enSuelo = true;     
-        let nivelSuelo = canJ.height - 105; 
 
-        function reiniciarJuego() {
-            score = 0;
-            frames = 0;
-            baneras = [];
-            zanahorias = [];
-            conejo.y = nivelSuelo;
-            velocidadY = 0;
-            velocidadJuego = 4;
-            enSuelo = true;
-            juegoTerminado = false;
-            juegoActivo = true;
-            musicaFondo.play().catch(e => console.log("Audio pendiente"));
-        }
+        let currentRole = "user"; // "user", "employee", "admin"
+        let currentCurrency = "USD";
+        const exchangeRateMXN = 20.0;
 
-        window.addEventListener('keydown', e => {
-            if (e.code === 'Space' && document.getElementById('game-modal').style.display === 'flex') {
-                e.preventDefault(); 
-                if (juegoTerminado) {
-                    reiniciarJuego();
-                } else if (enSuelo) {
-                    saltar();
-                }
-            }
+        let failedAttempts = 0;
+        const MAX_ATTEMPTS = 3;
+
+        let vaultTotalUSD = 1850000;
+        let cashFlowUSD = 420000;
+
+        // Dataset using local image files + vector fallback
+        const watchesData = [
+            { id: 1, brand: "Patek Philippe", model: "Nautilus Jumbo", ref: "5711/1A-010", serial: "PP-5711-9982", priceUSD: 115000, status: "En Stock", image: "Nautilus Jumbo.png", imageSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold-primary)" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>` },
+            { id: 2, brand: "Audemars Piguet", model: "Royal Oak Offshore", ref: "26420SO", serial: "AP-ROO-4401", priceUSD: 48500, status: "En Stock", image: "Royal Oak Offshore.png", imageSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold-primary)" stroke-width="1.6"><polygon points="12 2 19 6.5 19 17.5 12 22 5 15 5 6.5 12 2"/><circle cx="12" cy="12" r="4"/></svg>` },
+            { id: 3, brand: "Rolex", model: "Day-Date 40 Olive", ref: "228235", serial: "RLX-DD-18K", priceUSD: 54000, status: "Reservado", image: "Day-Date 40 Olive.png", imageSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold-primary)" stroke-width="1.6"><path d="M2 4l3 12h14l3-12-6 7-4-5-4 5-6-7z"/><circle cx="12" cy="14" r="5"/></svg>` },
+            { id: 4, brand: "Cartier", model: "Santos Skeleton", ref: "WHSA0015", serial: "CT-SAN-77", priceUSD: 31000, status: "En Stock", image: "Santos Skeleton.png", imageSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold-primary)" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="3"/><line x1="12" y1="8" x2="12" y2="12"/></svg>` }
+        ];
+
+        let employeesData = [
+            { id: 1, name: "Jules Ortiz", role: "CEO & Founder KronoJules", shift: "Dirección General", phone: "+56 9 1111 2222" },
+            { id: 2, name: "Jean-Luc Moreau", role: "Maître Horloger del Olimpo", shift: "Mañana (08:00 - 16:00)", phone: "+56 9 8765 4321" },
+            { id: 3, name: "Sofia Araya", role: "Supervisora de Bóveda VIP", shift: "Completo (Supervisor)", phone: "+56 9 5555 6666" }
+        ];
+
+        let serviceKanbanData = [
+            { id: 101, watchRef: "PP-5711-9982", model: "Patek Philippe Nautilus", client: "Don Alejandro Sterling", status: "Autenticacion", tech: "Jean-Luc Moreau" },
+            { id: 102, watchRef: "CT-SAN-77", model: "Cartier Santos Skeleton", client: "Dra. Victoria Cavalcanti", status: "Servicio", tech: "Jean-Luc Moreau" }
+        ];
+
+        /* ==========================================
+           DOM INITIALIZATION
+           ========================================== */
+        document.addEventListener("DOMContentLoaded", () => {
+            initSidebarNav();
+            initThemeToggle();
+            renderAllViews();
         });
 
-        canJ.addEventListener('touchstart', e => {
-            e.preventDefault(); 
-            if (juegoTerminado) {
-                reiniciarJuego();
-            } else if (enSuelo) {
-                saltar();
-            }
-        });
+        /* ==========================================
+           SIDEBAR & NAVIGATION
+           ========================================== */
+        function initSidebarNav() {
+            const menuItems = document.querySelectorAll(".sidebar-menu .menu-item");
+            menuItems.forEach(item => {
+                item.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    const targetViewId = item.getAttribute("data-view");
 
-        function saltar() {
-            velocidadY = fuerzaSalto;
-            enSuelo = false;
+                    // RBAC check for restricted sections
+                    if ((targetViewId === "view-finanzas" || targetViewId === "view-empleados") && currentRole !== "admin") {
+                        triggerToast("Acceso denegado: Requiere permisos de Administrador (CEO)", "danger");
+                        openLoginModal();
+                        return;
+                    }
+
+                    menuItems.forEach(i => i.classList.remove("active"));
+                    item.classList.add("active");
+                    switchView(targetViewId);
+                    closeSidebar();
+                });
+            });
         }
 
-        function manejarObstaculosYPremios() {
-            if (frames % 160 === 0) {
-                baneras.push({ 
-                    x: canJ.width, 
-                    y: nivelSuelo + 15, 
-                    anchoHitbox: 30, altoHitbox: 25,   
-                    anchoVisual: 60, altoVisual: 50     
-                });
-            }
-            if (frames % 100 === 0) {
-                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 5 : nivelSuelo + 25;
-                zanahorias.push({ 
-                    x: canJ.width, 
-                    y: alturaZanahoria, 
-                    anchoHitbox: 25, altoHitbox: 25,
-                    anchoVisual: 45, altoVisual: 45
-                });
-            }
-
-            if (frames % 500 === 0) velocidadJuego += 0.5;
-
-            for (let i = 0; i < baneras.length; i++) {
-                let b = baneras[i];
-                b.x -= velocidadJuego; 
-                
-                if(imgBanera.complete) {
-                    ctJ.drawImage(imgBanera, 0, 0, imgBanera.width, imgBanera.height, b.x, b.y, b.anchoVisual, b.altoVisual); 
-                }
-
-                const cCenterX = conejo.x + (conejo.tamano / 2);
-                const cCenterY = conejo.y + (conejo.tamano / 2);
-                
-                if (cCenterX > b.x + (b.anchoVisual/2 - b.anchoHitbox/2) && 
-                    cCenterX < b.x + (b.anchoVisual/2 + b.anchoHitbox/2) &&
-                    cCenterY > b.y + (b.altoVisual/2 - b.altoHitbox/2) && 
-                    cCenterY < b.y + (b.altoVisual/2 + b.altoHitbox/2)) {
-                    
-                    juegoActivo = false; 
-                    juegoTerminado = true;
-                    sonidoAgua.play().catch(e => {}); 
-                }
-            }
-
-            for (let i = 0; i < zanahorias.length; i++) {
-                let z = zanahorias[i];
-                z.x -= velocidadJuego;
-                
-                if(imgZanahoria.complete) {
-                    ctJ.drawImage(imgZanahoria, 0, 0, imgZanahoria.width, imgZanahoria.height, z.x, z.y, z.anchoVisual, z.altoVisual); 
-                }
-
-                const cCenterX = conejo.x + (conejo.tamano / 2);
-                const cCenterY = conejo.y + (conejo.tamano / 2);
-
-                if (cCenterX > z.x + (z.anchoVisual/2 - z.anchoHitbox/2) && 
-                    cCenterX < z.x + (z.anchoVisual/2 + z.anchoHitbox/2) &&
-                    cCenterY > z.y + (z.altoVisual/2 - z.altoHitbox/2) && 
-                    cCenterY < z.y + (z.altoVisual/2 + z.altoHitbox/2)) {
-                    
-                    score += 100; 
-                    sonidoPuntos.play().catch(e => {}); 
-                    zanahorias.splice(i, 1); 
-                    i--;
-                }
-            }
+        function toggleSidebar() {
+            document.body.classList.toggle("sidebar-open");
         }
 
-        function actualizarFondo() {
-            let etapaFondo = Math.floor(score / 500);
-            let imgFondoActual = (etapaFondo % 2 === 0) ? imgFondoDia : imgFondoNoche;
+        function closeSidebar() {
+            document.body.classList.remove("sidebar-open");
+        }
 
-            if (imgFondoActual.complete) {
-                ctJ.drawImage(imgFondoActual, 0, 0, canJ.width, canJ.height);
+        function switchView(viewId) {
+            document.querySelectorAll(".view-section").forEach(v => v.classList.remove("active-view"));
+            const target = document.getElementById(viewId);
+            if (target) target.classList.add("active-view");
+
+            const titles = {
+                'view-dashboard': 'Dashboard Crono',
+                'view-catalogo': 'Catálogo de Relojes Exclusivos',
+                'view-servicio': 'Taller Crono & Restauration',
+                'view-finanzas': 'Gestión de Dinero & Bóveda (Admin)',
+                'view-empleados': 'Plantilla de Empleados (Admin)',
+                'view-certificados': 'Certificados Helénicos'
+            };
+            document.getElementById("pageTitle").textContent = titles[viewId] || 'KronoJules';
+        }
+
+        /* ==========================================
+           THEME & AUDIO CONTROLLER
+           ========================================== */
+        function initThemeToggle() {
+            document.getElementById("themeBtn").addEventListener("click", () => {
+                const current = document.documentElement.getAttribute("data-theme");
+                const next = current === "dark" ? "light" : "dark";
+                document.documentElement.setAttribute("data-theme", next);
+                triggerToast(`Tema ${next === 'dark' ? 'Azul Rey Crono' : 'Mármol Helénico'} activado`, 'gold');
+            });
+        }
+
+        /* ==========================================
+           CURRENCY & PRICING
+           ========================================== */
+        function setCurrency(curr) {
+            currentCurrency = curr;
+            document.getElementById("btnUSD").classList.toggle("active", curr === 'USD');
+            document.getElementById("btnMXN").classList.toggle("active", curr === 'MXN');
+            renderAllViews();
+            triggerToast(`Precios convertidos a ${curr}`, 'gold');
+        }
+
+        function formatPrice(usdVal) {
+            if (currentCurrency === 'MXN') {
+                return '$' + (usdVal * exchangeRateMXN).toLocaleString('es-MX') + ' MXN';
+            }
+            return '$' + usdVal.toLocaleString('en-US') + ' USD';
+        }
+
+        /* ==========================================
+           ROLE & AUTHENTICATION SYSTEM
+           ========================================== */
+        function togglePasswordInput() {
+            const role = document.getElementById("loginRoleSelect").value;
+            const pwContainer = document.getElementById("passwordContainer");
+            if (role === "user") {
+                pwContainer.style.display = "none";
             } else {
-                ctJ.fillStyle = (etapaFondo % 2 === 0) ? '#70c5eb' : '#181124';
-                ctJ.fillRect(0, 0, canJ.width, canJ.height);
+                pwContainer.style.display = "flex";
             }
-            
-            ctJ.fillStyle = (etapaFondo % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
-            ctJ.fillRect(0, nivelSuelo + conejo.tamano, canJ.width, 4);
         }
 
-        function actualizarJuego() { 
-            requestAnimationFrame(actualizarJuego);
+        function openLoginModal() {
+            if (failedAttempts >= MAX_ATTEMPTS) {
+                document.getElementById("loginPasswordInput").disabled = true;
+                document.getElementById("btnLoginSubmit").disabled = true;
+                document.getElementById("lockoutWarning").style.display = "block";
+            } else {
+                document.getElementById("loginRoleSelect").value = currentRole;
+                document.getElementById("loginPasswordInput").value = "";
+                togglePasswordInput();
+            }
+            document.getElementById("modalLogin").classList.add("active");
+        }
 
-            if (document.getElementById('game-modal').style.display !== 'flex') return;
+        function processLogin() {
+            if (failedAttempts >= MAX_ATTEMPTS) return;
 
-            ctJ.clearRect(0, 0, canJ.width, canJ.height);
+            const roleSelected = document.getElementById("loginRoleSelect").value;
+            const passwordInput = document.getElementById("loginPasswordInput").value.trim();
 
-            if (juegoTerminado) {
-                ctJ.fillStyle = 'rgba(0, 0, 0, 0.75)';
-                ctJ.fillRect(0, 0, canJ.width, canJ.height);
-
-                ctJ.fillStyle = '#ff3b3b';
-                ctJ.font = 'bold 32px Arial';
-                ctJ.textAlign = 'center';
-                ctJ.fillText("¡GAME OVER!", canJ.width / 2, canJ.height / 2 - 15);
-
-                ctJ.fillStyle = 'white';
-                ctJ.font = '20px Arial';
-                ctJ.fillText("Zanahorias recolectadas (aprox.): " + Math.floor(score / 100), canJ.width / 2, canJ.height / 2 + 20); 
-                
-                ctJ.fillStyle = '#ffffff';
-                ctJ.font = '20px Arial';
-                ctJ.fillText("Puntos totales: " + score, canJ.width / 2, canJ.height / 2 - 55);
-
-                ctJ.fillStyle = '#4da6ff';
-                ctJ.font = '16px Arial';
-                ctJ.fillText("Presiona ESPACIO para reiniciar", canJ.width / 2, canJ.height / 2 + 55);
-            } 
-            else if (juegoActivo) {
-                frames++; 
-                score += 1; 
-
-                actualizarFondo();
-                manejarObstaculosYPremios();
-
-                velocidadY += gravedad; 
-                conejo.y += velocidadY; 
-
-                if (conejo.y >= nivelSuelo) {
-                    conejo.y = nivelSuelo; 
-                    velocidadY = 0;        
-                    enSuelo = true;        
+            if (roleSelected === "admin") {
+                if (passwordInput === PASSWORDS.ADMIN) {
+                    handleSuccessfulLogin("admin");
+                    triggerToast("Autenticado como Administrador (CEO Jules Ortiz)", "gold");
                 } else {
-                    enSuelo = false;
+                    handleFailedLogin();
                 }
-
-                if (!enSuelo && imgJump.complete) {
-                    ctJ.drawImage(imgJump, 0, 0, imgJump.width, imgJump.height, conejo.x, conejo.y, conejo.tamano, conejo.tamano);
-                } else if (imgRun.complete) {
-                    ctJ.drawImage(imgRun, 0, 0, imgRun.width, imgRun.height, conejo.x, conejo.y, conejo.tamano, conejo.tamano);
+            } else if (roleSelected === "employee") {
+                if (passwordInput === PASSWORDS.EMPLOYEE) {
+                    handleSuccessfulLogin("employee");
+                    triggerToast("Autenticado como Empleado KronoJules", "gold");
+                } else {
+                    handleFailedLogin();
                 }
+            } else {
+                // Default User (No password required)
+                handleSuccessfulLogin("user");
+                triggerToast("Modo Usuario / Cliente activo", "gold");
             }
-            
-            document.getElementById('score-display').innerText = "Puntos: " + score;
         }
 
-        requestAnimationFrame(actualizarJuego);
+        function handleSuccessfulLogin(role) {
+            currentRole = role;
+            failedAttempts = 0;
+            updateRoleUI();
+            closeModal("modalLogin");
+        }
+
+        function handleFailedLogin() {
+            failedAttempts++;
+            if (failedAttempts >= MAX_ATTEMPTS) {
+                document.getElementById("loginPasswordInput").disabled = true;
+                document.getElementById("btnLoginSubmit").disabled = true;
+                document.getElementById("lockoutWarning").style.display = "block";
+                triggerToast("Cuenta bloqueada por seguridad tras 3 intentos.", "danger");
+            } else {
+                triggerToast(`Contraseña incorrecta. Intentos restantes: ${MAX_ATTEMPTS - failedAttempts}`, "danger");
+            }
+        }
+
+        function openRecoveryModal() {
+            closeModal("modalLogin");
+            document.getElementById("recoveryEmailInput").value = "";
+            document.getElementById("modalRecovery").classList.add("active");
+        }
+
+        function processRecovery() {
+            const email = document.getElementById("recoveryEmailInput").value.trim();
+            if (!email) {
+                triggerToast("Por favor ingresa un correo válido", "danger");
+                return;
+            }
+            
+            // Reset lockout
+            failedAttempts = 0;
+            document.getElementById("loginPasswordInput").disabled = false;
+            document.getElementById("btnLoginSubmit").disabled = false;
+            document.getElementById("lockoutWarning").style.display = "none";
+            
+            closeModal("modalRecovery");
+            triggerToast(`Enlace de recuperación enviado a ${email}`, "gold");
+            setTimeout(openLoginModal, 500);
+        }
+
+        function updateRoleUI() {
+            const rolePill = document.getElementById("rolePill");
+            const roleLabel = document.getElementById("roleLabel");
+
+            if (currentRole === "admin") {
+                rolePill.className = "role-pill admin";
+                rolePill.style.background = "";
+                rolePill.style.color = "";
+                roleLabel.textContent = "ROL: ADMINISTRADOR";
+            } else if (currentRole === "employee") {
+                rolePill.className = "role-pill admin"; // Reuse admin styling base
+                rolePill.style.background = "rgba(16, 185, 129, 0.18)"; // Highlight green
+                rolePill.style.color = "#10b981";
+                roleLabel.textContent = "ROL: EMPLEADO";
+            } else {
+                rolePill.className = "role-pill user";
+                rolePill.style.background = "";
+                rolePill.style.color = "";
+                roleLabel.textContent = "ROL: USUARIO";
+                
+                // Redirect if currently in admin restricted view
+                const activeView = document.querySelector(".view-section.active-view");
+                if (activeView && (activeView.id === "view-finanzas" || activeView.id === "view-empleados")) {
+                    document.querySelector('.sidebar-menu .menu-item[data-view="view-dashboard"]').click();
+                }
+            }
+
+            // Hide or show Auth-Required interface elements based on permissions
+            document.querySelectorAll(".auth-required").forEach(el => {
+                el.style.display = currentRole === 'user' ? 'none' : '';
+            });
+
+            // Re-render kanban to hide/show action arrows
+            renderKanbanBoard();
+        }
+
+        function checkAdminPermission() {
+            if (currentRole !== "admin") {
+                triggerToast("Permiso denegado: Acción reservada para el CEO / Administrador", "danger");
+                openLoginModal();
+                return false;
+            }
+            return true;
+        }
+
+        /* ==========================================
+           RENDER CONTROLLERS
+           ========================================== */
+        function renderWatchImage(watch) {
+            if (watch.image) {
+                return `<img src="${watch.image}" alt="${watch.brand} ${watch.model}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><div style="display:none;">${watch.imageSvg}</div>`;
+            }
+            return watch.imageSvg;
+        }
+
+        function renderAllViews() {
+            document.getElementById("kpiVaultValue").textContent = formatPrice(vaultTotalUSD);
+            document.getElementById("kpiCashFlow").textContent = formatPrice(cashFlowUSD);
+            document.getElementById("finVaultDisplay").textContent = formatPrice(vaultTotalUSD);
+            document.getElementById("finCashDisplay").textContent = formatPrice(cashFlowUSD);
+            document.getElementById("kpiStaffCount").textContent = `${employeesData.length} Activos`;
+
+            renderSpotlight();
+            renderWatchCatalogue();
+            renderKanbanBoard();
+            renderEmployeeTable();
+            
+            // Force roles UI update
+            updateRoleUI();
+        }
+
+        function renderSpotlight() {
+            const grid = document.getElementById("dashSpotlightGrid");
+            grid.innerHTML = "";
+            watchesData.slice(0, 3).forEach(w => {
+                grid.appendChild(createWatchCardElement(w));
+            });
+        }
+
+        function renderWatchCatalogue(data = watchesData) {
+            const grid = document.getElementById("catalogoGrid");
+            grid.innerHTML = "";
+            data.forEach(w => {
+                grid.appendChild(createWatchCardElement(w));
+            });
+        }
+
+        function createWatchCardElement(watch) {
+            const card = document.createElement("div");
+            card.className = "watch-card";
+            card.innerHTML = `
+                <div class="watch-card-header">
+                    <div>
+                        <div class="watch-brand">${watch.brand}</div>
+                        <div class="watch-model">${watch.model}</div>
+                    </div>
+                    <span class="status-pill status-${watch.status === 'En Stock' ? 'stock' : 'reserved'}">${watch.status}</span>
+                </div>
+                <div class="watch-hero-icon">${renderWatchImage(watch)}</div>
+                <div class="watch-card-body">
+                    <div class="watch-specs-list">
+                        <div class="spec-row"><span class="spec-label">Referencia:</span><span class="spec-value">${watch.ref}</span></div>
+                        <div class="spec-row"><span class="spec-label">Serie Auditada:</span><span class="spec-value">${watch.serial}</span></div>
+                    </div>
+                    <div class="watch-card-footer">
+                        <span class="watch-price">${formatPrice(watch.priceUSD)}</span>
+                        <button class="btn-gold" onclick="openWatchModal(${watch.id})">Ver Ficha</button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function filterWatchCatalogue() {
+            const query = document.getElementById("watchSearch").value.toLowerCase();
+            const brand = document.getElementById("brandFilter").value;
+            const filtered = watchesData.filter(w => {
+                const matchesQuery = w.brand.toLowerCase().includes(query) || w.model.toLowerCase().includes(query) || w.ref.toLowerCase().includes(query);
+                const matchesBrand = brand === 'all' || w.brand === brand;
+                return matchesQuery && matchesBrand;
+            });
+            renderWatchCatalogue(filtered);
+        }
+
+        /* ==========================================
+           KANBAN BOARD
+           ========================================== */
+        function renderKanbanBoard() {
+            const cols = {
+                'Recepcion': document.getElementById("kanban-recepcion"),
+                'Autenticacion': document.getElementById("kanban-autenticacion"),
+                'Servicio': document.getElementById("kanban-servicio"),
+                'Calidad': document.getElementById("kanban-calidad"),
+                'Entrega': document.getElementById("kanban-entrega")
+            };
+
+            Object.keys(cols).forEach(k => { if (cols[k]) cols[k].innerHTML = ""; });
+            let counts = { Recepcion: 0, Autenticacion: 0, Servicio: 0, Calidad: 0, Entrega: 0 };
+
+            serviceKanbanData.forEach(item => {
+                if (counts[item.status] !== undefined) counts[item.status]++;
+                
+                let kanbanFooter = '';
+                if (currentRole !== 'user') {
+                    kanbanFooter = `
+                        <div class="kanban-card-footer">
+                            <button class="kanban-nav-btn" onclick="moveKanban(${item.id}, -1)">&larr;</button>
+                            <button class="kanban-nav-btn" onclick="moveKanban(${item.id}, 1)">&rarr;</button>
+                        </div>
+                    `;
+                }
+
+                const card = document.createElement("div");
+                card.className = "kanban-card";
+                card.innerHTML = `
+                    <div class="kanban-card-ref">${item.watchRef}</div>
+                    <div class="kanban-card-name">${item.model}</div>
+                    <div class="kanban-card-meta">
+                        <span>Cliente: <strong>${item.client}</strong></span>
+                        <span>Técnico: ${item.tech}</span>
+                    </div>
+                    ${kanbanFooter}
+                `;
+                if (cols[item.status]) cols[item.status].appendChild(card);
+            });
+
+            document.getElementById("count-recepcion").textContent = counts.Recepcion;
+            document.getElementById("count-autenticacion").textContent = counts.Autenticacion;
+            document.getElementById("count-servicio").textContent = counts.Servicio;
+            document.getElementById("count-calidad").textContent = counts.Calidad;
+            document.getElementById("count-entrega").textContent = counts.Entrega;
+        }
+
+        function moveKanban(id, dir) {
+            const stages = ['Recepcion', 'Autenticacion', 'Servicio', 'Calidad', 'Entrega'];
+            const item = serviceKanbanData.find(i => i.id === id);
+            if (!item) return;
+
+            let idx = stages.indexOf(item.status) + dir;
+            if (idx >= 0 && idx < stages.length) {
+                item.status = stages[idx];
+                renderKanbanBoard();
+                triggerToast(`Fase del Taller actualizada a ${item.status}`, 'gold');
+            }
+        }
+
+        function allowDrop(ev) { ev.preventDefault(); }
+        function dropKanban(ev, targetStatus) { ev.preventDefault(); }
+
+        /* ==========================================
+           EMPLOYEE MANAGEMENT (ADMIN EXCLUSIVE)
+           ========================================== */
+        function renderEmployeeTable() {
+            const tbody = document.getElementById("employeeTableBody");
+            tbody.innerHTML = "";
+
+            employeesData.forEach(emp => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><strong>${emp.name}</strong></td>
+                    <td>${emp.role}</td>
+                    <td>${emp.shift}</td>
+                    <td>${emp.phone}</td>
+                    <td>
+                        ${emp.name.includes("Jules Ortiz") 
+                            ? `<span style="color:var(--gold-primary); font-weight:800; font-size:0.78rem;">CEO (Inamovible)</span>` 
+                            : `<button class="btn-danger" onclick="deleteEmployee(${emp.id})">Eliminar Empleado</button>`}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAddEmployeeModal() {
+            if (!checkAdminPermission()) return;
+            document.getElementById("empNameInput").value = "";
+            document.getElementById("empRoleInput").value = "";
+            document.getElementById("modalAddEmployee").classList.add("active");
+        }
+
+        function saveNewEmployee() {
+            if (!checkAdminPermission()) return;
+
+            const name = document.getElementById("empNameInput").value.trim();
+            const role = document.getElementById("empRoleInput").value.trim();
+            const shift = document.getElementById("empShiftInput").value;
+            const phone = document.getElementById("empPhoneInput").value.trim();
+
+            if (!name || !role) {
+                triggerToast("Por favor ingresa nombre y puesto del empleado", "danger");
+                return;
+            }
+
+            employeesData.push({ id: Date.now(), name, role, shift, phone });
+            renderAllViews();
+            closeModal("modalAddEmployee");
+            triggerToast(`Empleado ${name} registrado en la plantilla`, "gold");
+        }
+
+        function deleteEmployee(empId) {
+            if (!checkAdminPermission()) return;
+
+            const emp = employeesData.find(e => e.id === empId);
+            if (emp) {
+                employeesData = employeesData.filter(e => e.id !== empId);
+                renderAllViews();
+                triggerToast(`Empleado ${emp.name} desvinculado`, "gold");
+            }
+        }
+
+        /* ==========================================
+           MONEY & VAULT MANAGEMENT (ADMIN EXCLUSIVE)
+           ========================================== */
+        function openEditMoneyModal() {
+            if (!checkAdminPermission()) return;
+            document.getElementById("editVaultInput").value = vaultTotalUSD;
+            document.getElementById("editCashInput").value = cashFlowUSD;
+            document.getElementById("modalEditMoney").classList.add("active");
+        }
+
+        function saveMoneyChanges() {
+            if (!checkAdminPermission()) return;
+
+            const newVault = parseFloat(document.getElementById("editVaultInput").value);
+            const newCash = parseFloat(document.getElementById("editCashInput").value);
+
+            if (!isNaN(newVault) && !isNaN(newCash)) {
+                vaultTotalUSD = newVault;
+                cashFlowUSD = newCash;
+                renderAllViews();
+                closeModal("modalEditMoney");
+                triggerToast("Valores de Bóveda y Caja Chica actualizados por Jules Ortiz", "gold");
+            }
+        }
+
+        /* ==========================================
+           WATCH MODALS & ACTIONS
+           ========================================== */
+        function openWatchModal(id) {
+            const watch = watchesData.find(w => w.id === id);
+            if (!watch) return;
+
+            // Generate image HTML and force responsive fitting for modal specifically
+            let imgHtml = renderWatchImage(watch);
+            imgHtml = imgHtml.replace('<img', '<img style="max-height: 140px; width: 100%; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));"');
+            imgHtml = imgHtml.replace('<svg', '<svg style="width:140px; height:140px;"');
+
+            document.getElementById("modalDetailTitle").textContent = `${watch.brand} - ${watch.model}`;
+            document.getElementById("modalDetailBody").innerHTML = `
+                <div style="display:flex; justify-content:center; padding:1.5rem; background:rgba(212,175,55,0.04); border-radius:var(--radius-md); margin-bottom:1.5rem; border:1px solid var(--gold-border); min-height:160px; align-items:center;">
+                    ${imgHtml}
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.1rem; font-size:0.88rem;">
+                    <div><span style="color:var(--text-muted); display:block;">Número de Serie Auditado:</span><strong>${watch.serial}</strong></div>
+                    <div><span style="color:var(--text-muted); display:block;">Referencia:</span><strong>${watch.ref}</strong></div>
+                    <div style="grid-column:span 2; border-top:1px solid var(--gold-border); padding-top:1rem; font-size:1.4rem; color:var(--gold-primary); font-family:'Cinzel'; font-weight:700;">
+                        Precio: <strong>${formatPrice(watch.priceUSD)}</strong>
+                    </div>
+                </div>
+            `;
+
+            const btnMarkSold = document.getElementById("btnMarkSold");
+            if (currentRole === "user") {
+                btnMarkSold.style.display = "none";
+            } else {
+                btnMarkSold.style.display = "inline-flex";
+                btnMarkSold.onclick = () => {
+                    watch.status = 'Vendido';
+                    renderAllViews();
+                    closeModal('modalWatchDetail');
+                    triggerToast(`Pieza ${watch.model} asignada como Vendida`, 'gold');
+                };
+            }
+
+            document.getElementById("modalWatchDetail").classList.add("active");
+        }
+
+        function openNewWatchModal() {
+            document.getElementById("formWatch").reset();
+            document.getElementById("modalNewWatch").classList.add("active");
+        }
+
+        function saveNewWatch() {
+            const brand = document.getElementById("newBrand").value;
+            const model = document.getElementById("newModel").value;
+            const ref = document.getElementById("newRef").value;
+            const price = parseFloat(document.getElementById("newPrice").value);
+
+            if (!model || isNaN(price)) {
+                triggerToast("Ingresa los datos requeridos", "danger");
+                return;
+            }
+
+            const newPiece = {
+                id: Date.now(),
+                brand,
+                model,
+                ref,
+                serial: `KJ-${Math.floor(1000 + Math.random() * 9000)}`,
+                priceUSD: price,
+                status: "En Stock",
+                imageSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold-primary)" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`
+            };
+
+            watchesData.unshift(newPiece);
+            renderAllViews();
+            closeModal("modalNewWatch");
+            triggerToast(`${model} ingresado a la Bóveda KronoJules`, "gold");
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove("active");
+        }
+
+        /* ==========================================
+           TOAST NOTIFICATIONS
+           ========================================== */
+        function triggerToast(msg, type = 'gold') {
+            const container = document.getElementById("toastContainer");
+            const toast = document.createElement("div");
+            toast.className = "toast-msg";
+            if (type === 'danger') toast.style.borderLeftColor = "#ef4444";
+
+            toast.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${type === 'danger' ? '#ef4444' : 'var(--gold-primary)'}" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <span>${msg}</span>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
     </script>
 </body>
 </html>
