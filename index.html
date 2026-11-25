@@ -1,44 +1,786 @@
 <!DOCTYPE html>
-<html lang="nah">
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    
+    <meta property="og:title" content="Para Dani ❤️">
+    <meta property="og:description" content="Sorpresa...">
 
+    <title>Para Dani 💙</title>
+
+    <style>
         body {
-            background-color: #050505;
-            color: #ffffff;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            height: 100vh;
-            width: 100vw;
+            margin: 0;
+            background: black;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-align: center;
-            overflow: hidden;
-            padding: 20px;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+            color: white;
         }
 
-        .frase {
-            font-size: clamp(2rem, 5.5vw, 6.5rem);
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -0.02em;
-            line-height: 1.1;
-            margin: 12px 0;
-            text-shadow: 0 0 25px rgba(0, 119, 255, 0.6);
+        /* --- PANTALLA DE BLOQUEO --- */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ff9ac7;
+            transition: all 1s ease;
+        }
+
+        .unlocked {
+            transform: scale(1.5);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #login-screen h2 {
+            text-shadow: 0 0 15px #ff6ec7;
+            margin-bottom: 20px;
+            font-size: clamp(20px, 5vw, 30px);
+            text-align: center;
+        }
+
+        #password-input {
+            padding: 12px;
+            font-size: 18px;
+            border: 2px solid #ff6ec7;
+            border-radius: 10px;
+            background: transparent;
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            outline: none;
+            box-shadow: 0 0 10px #ff6ec7;
+            transition: 0.3s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .error {
+            animation: shake 0.4s ease-in-out;
+            border-color: #ff3b3b !important;
+            box-shadow: 0 0 15px #ff3b3b !important;
+        }
+
+        #error-msg {
+            color: #ff3b3b;
+            font-size: 14px;
+            min-height: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px #ff3b3b;
+        }
+
+        #login-btn {
+            padding: 10px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background: #ff6ec7;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 15px #ff6ec7;
+            transition: 0.3s;
+        }
+
+        #login-btn:hover {
+            background: #ff9ac7;
+            transform: scale(1.05);
+        }
+
+        /* estrellas */
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            opacity: 0.8;
+            animation: twinkle 2s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            from { opacity: 0.2; }
+            to { opacity: 1; }
+        }
+
+        /* contenedor del corazón */
+        #container {
+            position: absolute;
+            top: 20%;
+            width: min(50vw, 280px);
+            height: min(50vw, 280px);
+            animation: beat 1.3s infinite;
+            z-index: 5;
+        }
+
+        @keyframes beat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.07); }
+            100% { transform: scale(1); }
+        }
+
+        canvas.heart { position: absolute; top: 0; left: 0; }
+
+        /* palabras */
+        .word {
+            position: absolute;
+            color: #ff9ac7;
+            font-size: clamp(8px, 1.5vw, 12px); 
+            white-space: nowrap;
+            text-shadow: 0 0 10px white, 0 0 20px #ff6ec7;
+            opacity: 0;
+            animation: fade 1s forwards;
+        }
+
+        @keyframes fade { to { opacity: 1; } }
+
+        /* corazones centro */
+        #centerHearts {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(20px, 4vw, 40px); 
+            animation: spin 6s linear infinite;
+        }
+
+        .blue { color: #4da6ff; text-shadow: 0 0 20px #4da6ff; }
+        .pink { color: #ff6ec7; text-shadow: 0 0 20px #ff6ec7; }
+
+        @keyframes spin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* corazones flotantes */
+        .floatHeart {
+            position: absolute; font-size: 20px;
+            animation: floatUp 2s ease-out forwards;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        /* CONTADOR */
+        #countdown-container {
+            position: absolute; top: 3%; color: white; text-align: center;
+            font-size: clamp(16px, 4vw, 22px); text-shadow: 0 0 15px #ff6ec7; z-index: 10;
+        }
+
+        /* CONTENEDOR DEL GIF Y CALENDARIO */
+        #content-wrapper {
+            position: absolute;
+            bottom: 3%;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: flex-end;
+            z-index: 10;
+            display: none; /* Oculto al inicio */
+        }
+
+        #video-container {
+            border: 2px solid #ff6ec7; border-radius: 12px;
+            overflow: hidden; box-shadow: 0 0 15px #ff6ec7; width: 180px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #video-container:hover {
+            transform: scale(1.05);
+        }
+
+        img.gif-media { display: block; width: 100%; height: auto; }
+
+        /* CALENDARIO */
+        #calendar-container {
+            background: rgba(20, 0, 10, 0.7);
+            border: 2px solid #4da6ff;
+            border-radius: 12px;
+            padding: 10px 15px;
+            box-shadow: 0 0 15px #4da6ff;
+            font-size: clamp(12px, 2.5vw, 14px);
+            max-width: 250px;
+        }
+
+        #calendar-container h3 {
+            margin: 0 0 10px 0;
+            text-align: center;
+            color: #ff9ac7;
+            text-shadow: 0 0 5px #ff9ac7;
+            font-size: 16px;
+        }
+        #toggle-calendar-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 10px;
+            background: #4da6ff;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 10px #4da6ff;
+        }
+
+        #calendar-container {
+            display: none;
+        }
+        .cal-row { display: flex; justify-content: space-between; margin-bottom: 5px; gap: 15px; }
+        .cal-days { font-weight: bold; }
+        .inf { color: #4da6ff; }
+        .fert { color: #ff9ac7; }
+        .muy-fert { color: #ff3b3b; font-weight: bold; text-shadow: 0 0 5px rgba(255,59,59,0.5); }
+
+        /* --- MODAL DEL JUEGO --- */
+        #game-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 300;
+            display: none; /* Oculto por defecto */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #gameCanvas {
+            background: #111;
+            border: 2px solid #ff6ec7;
+            border-radius: 8px;
+            box-shadow: 0 0 20px #ff6ec7;
+        }
+
+        #score-display {
+            color: #ff9ac7;
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff9ac7;
+        }
+
+        #close-game {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: #ff3b3b;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px; height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 0 10px #ff3b3b;
+        }
+
+        #game-instructions {
+            margin-top: 15px;
+            color: #4da6ff;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            #content-wrapper {
+                flex-direction: column;
+                align-items: center;
+                bottom: 2%;
+            }
+            #video-container { width: 150px; }
         }
     </style>
 </head>
+
 <body>
 
-    <div class="frase">In Progress</div>
+    <div id="login-screen">
+        <h2>Ingresa la clave secreta 🤨💖</h2>
+        <input type="password" id="password-input" placeholder="Contraseña">
+        <div id="error-msg">Clave incorrecta 💔 Intenta de nuevo.</div>
+        <button id="login-btn" onclick="checkPassword()">Entrar</button>
+    </div>
 
+    <div id="countdown-container">
+        <div id="countdown-text">Faltan <strong id="days-left" style="color: #4da6ff;"></strong> días para el día 🧛🏻 💖</div>
+    </div>
+
+    <div id="container">
+        <canvas id="heartLine" class="heart"></canvas>
+        <div id="centerHearts">
+            <span class="blue">💙</span>
+            <span class="pink">💗</span>
+        </div>
+    </div>
+
+    <div id="content-wrapper">
+        <div id="video-container" title="¡Haz clic para jugar!">
+            <img id="secret-gif" data-src="IMG_3850.gif" alt="Nuestro recuerdo" class="gif-media">
+        </div>
+        <button id="toggle-calendar-btn">🌸 Mostrar</button>
+        <div id="calendar-container">
+            <h3>Ciclo 🌸</h3>
+            <!-- CAJA DE CÁLCULO AUTOMÁTICO DE FASE (CON MENSAJES GRACIOSOS) -->
+            <div id="fase-actual" style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #ff6ec7;">
+                Calculando...
+            </div>
+            <!-- LEYENDA GENERAL DE DÍAS -->
+            <div class="cal-row"><span class="cal-days">Día 1-9:</span> <span class="inf">infértil</span></div>
+            <div class="cal-row"><span class="cal-days">Día 10-12:</span> <span class="fert">fértil</span></div>
+            <div class="cal-row"><span class="cal-days">Día 13-16:</span> <span class="muy-fert">MUY FÉRTIL</span></div>
+            <div class="cal-row"><span class="cal-days">Día 17-18:</span> <span class="fert">fértil</span></div>
+            <div class="cal-row"><span class="cal-days">Día 19-30:</span> <span class="inf">infértil</span></div>
+        </div>
+    </div>
+
+    <div id="game-modal">
+        <button id="close-game" onclick="closeGame()">X</button>
+        <div id="score-display">Puntos: 0</div>
+        <canvas id="gameCanvas" width="600" height="250"></canvas>
+        <div id="game-instructions">Toca la pantalla o presiona Espacio para saltar</div>
+    </div>
+
+    <script>
+        /* --- LÓGICA DE LA CONTRASEÑA --- */
+        const passwordInput = document.getElementById("password-input");
+        const errorMsg = document.getElementById("error-msg");
+
+        function checkPassword() {
+            const inputVal = passwordInput.value.trim().toLowerCase();
+            const secretCode = "dani0122"; 
+
+            if (inputVal === secretCode) {
+                const loginScreen = document.getElementById("login-screen");
+                loginScreen.classList.add("unlocked");
+                
+                const secretGif = document.getElementById("secret-gif");
+                secretGif.src = secretGif.getAttribute("data-src");
+                document.getElementById("content-wrapper").style.display = "flex";
+
+                setTimeout(() => {
+                    loginScreen.style.display = "none";
+                }, 1000); 
+            } else {
+                passwordInput.classList.add("error");
+                errorMsg.style.opacity = "1";
+                setTimeout(() => { passwordInput.classList.remove("error"); }, 400);
+            }
+        }
+
+        passwordInput.addEventListener("input", () => errorMsg.style.opacity = "0");
+        passwordInput.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); checkPassword(); } });
+
+        /* --- LÓGICA DEL CONTADOR (HASTA EL DÍA 21) --- */
+        function updateCountdown() {
+            const today = new Date();
+            const currentDay = today.getDate();
+            const countdownText = document.getElementById("countdown-text");
+            const daysLeftElement = document.getElementById("days-left");
+
+            if (currentDay === 21) {
+                countdownText.innerHTML = "¡Feliz día 21, mi amor! 🎉💖";
+            } else {
+                let targetDate = new Date(today.getFullYear(), today.getMonth(), 21);
+                if (currentDay > 21) targetDate.setMonth(targetDate.getMonth() + 1);
+                const diffTime = targetDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                daysLeftElement.innerText = diffDays;
+            }
+        }
+        updateCountdown();
+
+        /* --- LÓGICA AUTOMÁTICA DEL CICLO (VERSIÓN DIVERTIDA) --- */
+        function updateCyclePhase() {
+            const today = new Date();
+            // Buscar el último día 21
+            let lastPeriod = new Date(today.getFullYear(), today.getMonth(), 21);
+            
+            // Si hoy es antes del 21, su último periodo fue el mes pasado
+            if (today.getDate() < 21) {
+                lastPeriod.setMonth(lastPeriod.getMonth() - 1);
+            }
+
+            const diffTime = today - lastPeriod;
+            // +1 porque el día 21 ya cuenta como el Día 1
+            const cycleDay = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; 
+
+            let phase = "";
+            let colorClass = "";
+            let funnyMsg = "";
+
+            // Mensajes personalizados para cada fase 😂
+            if (cycleDay >= 1 && cycleDay <= 9) { 
+                phase = "Infértil"; 
+                colorClass = "inf"; 
+                funnyMsg = "Riesgo de bebé: Bajo. ¡Vía libre para travesuras! 😈💖";
+            }
+            else if (cycleDay >= 10 && cycleDay <= 12) { 
+                phase = "Fértil"; 
+                colorClass = "fert"; 
+                funnyMsg = "Como pediste: 'Mañana es un buen día para quedar embarazada' 👀👶🏻😂";
+            }
+            else if (cycleDay >= 13 && cycleDay <= 16) { 
+                phase = "MUY FÉRTIL"; 
+                colorClass = "muy-fert"; 
+                funnyMsg = "🚨 ALERTA ROJA 🚨 Excelente día para encargar un mini-nosotros... ¡Cuidado! 🫣🍼";
+            }
+            else if (cycleDay >= 17 && cycleDay <= 18) { 
+                phase = "Fértil"; 
+                colorClass = "fert"; 
+                funnyMsg = "Aún hay riesgo de cigüeña volando cerca 🦢. ¡Mucho ojo! 👀";
+            }
+            else { 
+                phase = "Infértil"; 
+                colorClass = "inf"; 
+                funnyMsg = "Óvulo de vacaciones 🏖️. Cero bebés a la vista por ahora. 🙌💖";
+            }
+
+            document.getElementById("fase-actual").innerHTML = `
+                Hoy es el <strong>Día ${cycleDay}</strong><br>
+                Fase actual: <strong class="${colorClass}" style="font-size: 16px;">${phase}</strong><br>
+                <span style="display:block; margin-top: 10px; font-size: 13px; font-style: italic; color: #ff9ac7;">${funnyMsg}</span>
+            `;
+        }
+        updateCyclePhase();
+
+        /* --- LÓGICA DEL BOTÓN DEL CALENDARIO --- */
+        document.getElementById("toggle-calendar-btn").addEventListener("click", () => {
+            const cal = document.getElementById("calendar-container");
+
+            if(cal.style.display === "none" || cal.style.display === ""){
+                cal.style.display = "block";
+                document.getElementById("toggle-calendar-btn").innerText = "Ocultar 🌸";
+            } else {
+                cal.style.display = "none";
+                document.getElementById("toggle-calendar-btn").innerText = "Mostrar 🌸";
+            }
+        });
+        
+        /* --- FONDO ESTRELLADO --- */
+        for(let i=0; i<100; i++){
+            let star = document.createElement("div");
+            star.className = "star";
+            star.style.left = Math.random()*100+"vw";
+            star.style.top = Math.random()*100+"vh";
+            document.body.appendChild(star);
+        }
+
+        /* --- DIBUJAR CORAZÓN DE PANTALLA INICIAL --- */
+        let cC = document.getElementById("heartLineE");
+        if (!cC) {
+            cC = document.getElementById("heartLine");
+        }
+        if (!cC) {
+            cC = document.createElement("canvas");
+            cC.id = "heartLine";
+            cC.className = "heart";
+            document.getElementById("container").appendChild(cC);
+        }
+        
+        const containerEl = document.getElementById("container");
+        cC.width = containerEl.offsetWidth;
+        cC.height = containerEl.offsetHeight;
+        const ctC = cC.getContext("2d");
+        
+        const sz = containerEl.offsetWidth / 2;
+        let tim = 0;
+        let animacionCorazonFrame;
+
+        function dr() {
+            ctC.clearRect(0, 0, cC.width, cC.height);
+            ctC.strokeStyle = "#ff6ec7"; 
+            ctC.lineWidth = 3;
+            ctC.beginPath();
+            for (let i = 0; i < tim; i += 0.02) {
+                let x = sz + 16 * Math.pow(Math.sin(i), 3) * (sz / 18);
+                let y = sz - (13 * Math.cos(i) - 5 * Math.cos(2 * i) - 2 * Math.cos(3 * i) - Math.cos(4 * i)) * (sz / 18);
+                if (i === 0) ctC.moveTo(x, y); else ctC.lineTo(x, y);
+            }
+            ctC.stroke();
+            tim += 0.05;
+            if (tim < Math.PI * 2) {
+                animacionCorazonFrame = requestAnimationFrame(dr);
+            } else {
+                for (let i = 0; i < 170; i++) {
+                    let a = Math.PI * 2 * i / 170;
+                    let x = sz + 16 * Math.pow(Math.sin(a), 3) * (sz / 18);
+                    let y = sz - (13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) * (sz / 18);
+                    let s = document.createElement("span"); s.className = "word"; s.innerText = "I love you Dani";
+                    s.style.left = x + "px"; s.style.top = y + "px"; s.style.animationDelay = (i * 0.02) + "s";
+                    containerEl.appendChild(s);
+                }
+            }
+        } dr();
+
+        document.addEventListener("click", function(e){
+            if (e.target.closest('#video-container') || 
+                e.target.closest('#game-modal') ||
+                e.target.id === 'login-screen' || 
+                e.target.tagName.toLowerCase() === 'input' || 
+                e.target.tagName.toLowerCase() === 'button' ||
+                e.target.closest('#calendar-container')) return;
+                
+            let heart = document.createElement("div");
+            heart.className = "floatHeart";
+            heart.innerHTML = "💗";
+            heart.style.left = e.clientX+"px";
+            heart.style.top = e.clientY+"px";
+            document.body.appendChild(heart);
+            setTimeout(()=>heart.remove(), 2000);
+        });
+
+        // ==========================================
+        // LÓGICA DEL MINIJUEGUITO DEL CONEJO 
+        // ==========================================
+
+        document.getElementById("video-container").addEventListener("click", () => {
+            if(animacionCorazonFrame) cancelAnimationFrame(animacionCorazonFrame);
+            document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'paused');
+            document.getElementById('game-modal').style.display = 'flex';
+            reiniciarJuego();
+        });
+
+        function closeGame() {
+            document.getElementById('game-modal').style.display = 'none';
+            juegoActivo = false;
+            juegoTerminado = false;
+            if(typeof musicaFondo !== 'undefined') musicaFondo.pause(); 
+            document.querySelectorAll('.word').forEach(w => w.style.animationPlayState = 'running');
+            if(tim < Math.PI * 2) dr();
+        }
+
+        const canJ = document.getElementById('gameCanvas');
+        const ctJ = canJ.getContext('2d');
+
+        canJ.width = 600;
+        canJ.height = 250;
+
+        // --- CARGA DE ASSETS ---
+        const imgRun = new Image(); imgRun.src = './bunny.png'; 
+        const imgJump = new Image(); imgJump.src = './bunny.png'; 
+        const imgBanera = new Image(); imgBanera.src = './banera.png';      
+        const imgZanahoria = new Image(); imgZanahoria.src = './carrot.png';  
+        const imgFondoDia = new Image(); imgFondoDia.src = './daybg.png';
+        const imgFondoNoche = new Image(); imgFondoNoche.src = './nightbg.png';
+
+        const sonidoAgua = new Audio('./splash.mp3');
+        const sonidoPuntos = new Audio('./points.mp3');
+        const musicaFondo = new Audio('./soundtrack.mp3');
+        musicaFondo.loop = true; 
+
+        let score = 0;
+        let juegoActivo = false;
+        let juegoTerminado = false;
+        let frames = 0; 
+        let velocidadJuego = 4; 
+        let baneras = [];
+        let zanahorias = [];
+
+        let conejo = { 
+            x: 80, 
+            y: 0, 
+            tamano: 65,
+            hitboxAncho: 45, 
+            hitboxAlto: 45 
+        };
+        
+        let gravedad = 1.5;      
+        let velocidadY = 0;      
+        let fuerzaSalto = -14;   
+        let enSuelo = true;     
+        let nivelSuelo = canJ.height - 105; 
+
+        function reiniciarJuego() {
+            score = 0;
+            frames = 0;
+            baneras = [];
+            zanahorias = [];
+            conejo.y = nivelSuelo;
+            velocidadY = 0;
+            velocidadJuego = 4;
+            enSuelo = true;
+            juegoTerminado = false;
+            juegoActivo = true;
+            musicaFondo.play().catch(e => console.log("Audio pendiente"));
+        }
+
+        window.addEventListener('keydown', e => {
+            if (e.code === 'Space' && document.getElementById('game-modal').style.display === 'flex') {
+                e.preventDefault(); 
+                if (juegoTerminado) {
+                    reiniciarJuego();
+                } else if (enSuelo) {
+                    saltar();
+                }
+            }
+        });
+
+        canJ.addEventListener('touchstart', e => {
+            e.preventDefault(); 
+            if (juegoTerminado) {
+                reiniciarJuego();
+            } else if (enSuelo) {
+                saltar();
+            }
+        });
+
+        function saltar() {
+            velocidadY = fuerzaSalto;
+            enSuelo = false;
+        }
+
+        function manejarObstaculosYPremios() {
+            if (frames % 160 === 0) {
+                baneras.push({ 
+                    x: canJ.width, 
+                    y: nivelSuelo + 15, 
+                    anchoHitbox: 30, altoHitbox: 25,   
+                    anchoVisual: 60, altoVisual: 50     
+                });
+            }
+            if (frames % 100 === 0) {
+                let alturaZanahoria = Math.random() > 0.5 ? nivelSuelo - 5 : nivelSuelo + 25;
+                zanahorias.push({ 
+                    x: canJ.width, 
+                    y: alturaZanahoria, 
+                    anchoHitbox: 25, altoHitbox: 25,
+                    anchoVisual: 45, altoVisual: 45
+                });
+            }
+
+            if (frames % 500 === 0) velocidadJuego += 0.5;
+
+            for (let i = 0; i < baneras.length; i++) {
+                let b = baneras[i];
+                b.x -= velocidadJuego; 
+                
+                if(imgBanera.complete) {
+                    ctJ.drawImage(imgBanera, 0, 0, imgBanera.width, imgBanera.height, b.x, b.y, b.anchoVisual, b.altoVisual); 
+                }
+
+                const cCenterX = conejo.x + (conejo.tamano / 2);
+                const cCenterY = conejo.y + (conejo.tamano / 2);
+                
+                if (cCenterX > b.x + (b.anchoVisual/2 - b.anchoHitbox/2) && 
+                    cCenterX < b.x + (b.anchoVisual/2 + b.anchoHitbox/2) &&
+                    cCenterY > b.y + (b.altoVisual/2 - b.altoHitbox/2) && 
+                    cCenterY < b.y + (b.altoVisual/2 + b.altoHitbox/2)) {
+                    
+                    juegoActivo = false; 
+                    juegoTerminado = true;
+                    sonidoAgua.play().catch(e => {}); 
+                }
+            }
+
+            for (let i = 0; i < zanahorias.length; i++) {
+                let z = zanahorias[i];
+                z.x -= velocidadJuego;
+                
+                if(imgZanahoria.complete) {
+                    ctJ.drawImage(imgZanahoria, 0, 0, imgZanahoria.width, imgZanahoria.height, z.x, z.y, z.anchoVisual, z.altoVisual); 
+                }
+
+                const cCenterX = conejo.x + (conejo.tamano / 2);
+                const cCenterY = conejo.y + (conejo.tamano / 2);
+
+                if (cCenterX > z.x + (z.anchoVisual/2 - z.anchoHitbox/2) && 
+                    cCenterX < z.x + (z.anchoVisual/2 + z.anchoHitbox/2) &&
+                    cCenterY > z.y + (z.altoVisual/2 - z.altoHitbox/2) && 
+                    cCenterY < z.y + (z.altoVisual/2 + z.altoHitbox/2)) {
+                    
+                    score += 100; 
+                    sonidoPuntos.play().catch(e => {}); 
+                    zanahorias.splice(i, 1); 
+                    i--;
+                }
+            }
+        }
+
+        function actualizarFondo() {
+            let etapaFondo = Math.floor(score / 500);
+            let imgFondoActual = (etapaFondo % 2 === 0) ? imgFondoDia : imgFondoNoche;
+
+            if (imgFondoActual.complete) {
+                ctJ.drawImage(imgFondoActual, 0, 0, canJ.width, canJ.height);
+            } else {
+                ctJ.fillStyle = (etapaFondo % 2 === 0) ? '#70c5eb' : '#181124';
+                ctJ.fillRect(0, 0, canJ.width, canJ.height);
+            }
+            
+            ctJ.fillStyle = (etapaFondo % 2 === 0) ? '#ff6ec7' : '#bd7ffc'; 
+            ctJ.fillRect(0, nivelSuelo + conejo.tamano, canJ.width, 4);
+        }
+
+        function actualizarJuego() { 
+            requestAnimationFrame(actualizarJuego);
+
+            if (document.getElementById('game-modal').style.display !== 'flex') return;
+
+            ctJ.clearRect(0, 0, canJ.width, canJ.height);
+
+            if (juegoTerminado) {
+                ctJ.fillStyle = 'rgba(0, 0, 0, 0.75)';
+                ctJ.fillRect(0, 0, canJ.width, canJ.height);
+
+                ctJ.fillStyle = '#ff3b3b';
+                ctJ.font = 'bold 32px Arial';
+                ctJ.textAlign = 'center';
+                ctJ.fillText("¡GAME OVER!", canJ.width / 2, canJ.height / 2 - 15);
+
+                ctJ.fillStyle = 'white';
+                ctJ.font = '20px Arial';
+                ctJ.fillText("Zanahorias recolectadas (aprox.): " + Math.floor(score / 100), canJ.width / 2, canJ.height / 2 + 20); 
+                
+                ctJ.fillStyle = '#ffffff';
+                ctJ.font = '20px Arial';
+                ctJ.fillText("Puntos totales: " + score, canJ.width / 2, canJ.height / 2 - 55);
+
+                ctJ.fillStyle = '#4da6ff';
+                ctJ.font = '16px Arial';
+                ctJ.fillText("Presiona ESPACIO para reiniciar", canJ.width / 2, canJ.height / 2 + 55);
+            } 
+            else if (juegoActivo) {
+                frames++; 
+                score += 1; 
+
+                actualizarFondo();
+                manejarObstaculosYPremios();
+
+                velocidadY += gravedad; 
+                conejo.y += velocidadY; 
+
+                if (conejo.y >= nivelSuelo) {
+                    conejo.y = nivelSuelo; 
+                    velocidadY = 0;        
+                    enSuelo = true;        
+                } else {
+                    enSuelo = false;
+                }
+
+                if (!enSuelo && imgJump.complete) {
+                    ctJ.drawImage(imgJump, 0, 0, imgJump.width, imgJump.height, conejo.x, conejo.y, conejo.tamano, conejo.tamano);
+                } else if (imgRun.complete) {
+                    ctJ.drawImage(imgRun, 0, 0, imgRun.width, imgRun.height, conejo.x, conejo.y, conejo.tamano, conejo.tamano);
+                }
+            }
+            
+            document.getElementById('score-display').innerText = "Puntos: " + score;
+        }
+
+        requestAnimationFrame(actualizarJuego);
+    </script>
 </body>
 </html>
